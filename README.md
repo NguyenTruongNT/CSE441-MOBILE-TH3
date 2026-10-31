@@ -4,9 +4,11 @@
 >
 > Lớp **65KTPM** · Nhóm **12** · Flutter · Android & Web
 
-> 
 > **Hạn nộp: trước 22h00 ngày 03/11/2026 — giờ Việt Nam (UTC+7).**
 
+> **Trạng thái hiện tại:** Đã có khung ứng dụng và hợp đồng module; chưa tích hợp CSDL, phát âm AI và nhắc học thực tế. Phân công đã được người dùng duyệt; xác nhận nhận việc của từng thành viên được thực hiện trong nhóm.
+
+[Công việc của Trường & hướng dẫn CMD](docs/coordination/truong-tasks.md) · [Hợp đồng module v1](docs/coordination/contracts.md) · [Hướng dẫn tích hợp](docs/coordination/integration-guide.md) · [Kết quả kiểm tra](docs/coordination/verification.md)
 
 **Điều hướng nhanh**
 
@@ -33,7 +35,7 @@
 
 | Thành viên | Công việc phụ trách | Sản phẩm bàn giao | Nhánh Git | Trạng thái |
 | :--- | :--- | :--- | :--- | :---: |
-| **Nguyễn Văn Trường**<br>Nhóm trưởng | Phân chia, điều phối; hợp đồng chung; khung ứng dụng; review, merge và tích hợp | Điều hướng, giao diện chung, cấu hình, bản build, kiểm thử tổng thể, README và hồ sơ nộp | `truong-chore/project-integration` | ⬜ Chưa bắt đầu |
+| **Nguyễn Văn Trường**<br>Nhóm trưởng | Phân chia, điều phối; hợp đồng chung; khung ứng dụng; review, merge và tích hợp | Đã có hợp đồng v1, khung thích ứng, 14 test đạt và tài liệu bàn giao. [Chi tiết & việc chờ](docs/coordination/truong-tasks.md). Chờ ghép module thật, kiểm thử toàn bộ và hồ sơ nộp. | `truong-chore/project-integration` | 🟡 Đang làm |
 | **Vũ Tuấn Khanh** | CSDL, lưu trữ, hồ sơ người dùng và lịch sử | Schema/migration, repository, màn hình hồ sơ/lịch sử, kiểm thử dữ liệu | `khanh-feature/user-data` | ⬜ Chưa bắt đầu |
 | **Vũ Hải Đăng** | Thu âm, API nhận dạng, phân tích âm vị, chấm điểm và phản hồi | Luồng luyện phát âm, điểm/âm vị sai, bài tập cải thiện, đánh giá nhiều giọng | `dang-feature/pronunciation-ai` | ⬜ Chưa bắt đầu |
 | **Lý Đình Sơn** | Mục tiêu, streak, thống kê và nhắc học | Dashboard, cài đặt mục tiêu/nhắc học, kiểm thử quy tắc ngày học | `son-feature/discipline-progress` | ⬜ Chưa bắt đầu |
@@ -50,7 +52,7 @@ Mỗi người phụ trách cả giao diện, xử lý và kiểm thử trong mo
 
 ## 3. Thư mục thực hiện của từng thành viên
 
-Các thư mục sau **sẽ được tạo sau khi duyệt**, chưa được tạo trong lần soạn tài liệu này. Mỗi người tự tạo đúng thư mục được giao:
+Đã có `lib/app/`, `lib/core/contracts/`, `test/integration/` và `docs/coordination/` của Trường. Các thư mục module còn lại do thành viên tự tạo theo phân công sau đây:
 
 ```text
 lib/
@@ -127,7 +129,7 @@ backend/
 
 ## 4. Hợp đồng để các module làm độc lập
 
-Trường chốt các chữ ký và ví dụ trong `docs/coordination/contracts.md`. Các tên dưới đây là đề xuất, chưa phải API có sẵn:
+Hợp đồng v1 đã có tại [`lib/core/contracts/contracts.dart`](lib/core/contracts/contracts.dart); chữ ký và quy ước ở [`docs/coordination/contracts.md`](docs/coordination/contracts.md). Các thành viên triển khai interface bên dưới; adapter nghiệp vụ chưa được bàn giao:
 
 | Thành phần | Nội dung tối thiểu | Phụ trách |
 | --- | --- | --- |
@@ -192,7 +194,7 @@ Yêu cầu chung: giao diện không tràn ở mobile/desktop, điều hướng 
 
 ## 7. Quản lý dự án và Git
 
-**Hiện tại chưa thực hiện commit/push/merge; chờ duyệt tài liệu.** Quy trình sau áp dụng khi bắt đầu triển khai và đã có remote:
+Repository: [NguyenTruongNT/CSE441-MOBILE-TH3](https://github.com/NguyenTruongNT/CSE441-MOBILE-TH3). Các task nền của Trường được commit riêng trên `truong-chore/project-integration`; lịch sử và hướng dẫn push/PR ở [tài liệu bàn giao](docs/coordination/truong-tasks.md). Quy trình làm việc:
 
 1. Trường tạo issue với người sở hữu, phạm vi thư mục, sản phẩm, điều kiện nghiệm thu và hạn bàn giao; công bố nhánh nền.
 2. Mỗi thành viên làm trên nhánh riêng đã ghi trong bảng phân công tại mục 2.
@@ -206,15 +208,15 @@ Ví dụ sau khi remote đã được thiết lập, dành cho Khanh; các thàn
 ```bash
 git switch main
 git pull --ff-only origin main
-git switch -c feature/user-data
+git switch -c khanh-feature/user-data
 # Thực hiện và kiểm tra công việc.
 git status
 git add lib/features/user_data test/user_data docs/user_data
 git commit -m "feat(user-data): add user profiles and history"
-git push -u origin feature/user-data
+git push -u origin khanh-feature/user-data
 ```
 
-Chỉ tạo nhánh lần đầu; các lần sau chuyển về nhánh đã có. Trường bổ sung địa chỉ repository khi chốt, không tự đoán remote.
+Chỉ tạo nhánh lần đầu; các lần sau chuyển về nhánh đã có. Kiểm tra `git remote -v` trước khi push để bảo đảm đúng repository.
 
 ### Thông báo bắt buộc trong nhóm
 
@@ -254,7 +256,9 @@ Chạy Android với ID lấy từ `flutter devices`:
 flutter run -d <device-id>
 ```
 
-**Hiện các lệnh này chạy Flutter mẫu, chưa có màn hình học tiếng Anh.** Chưa có backend/API hoặc CSDL nghiệp vụ để cấu hình. Sau tích hợp, Trường cập nhật lệnh và cấu hình đã kiểm chứng, không giữ hướng dẫn dự kiến như thể đã chạy được.
+**Hiện các lệnh này chạy khung English AI**, gồm Tiến độ, Luyện phát âm, Lịch sử và Hồ sơ. Dưới 800px có điều hướng dưới; từ 800px có thanh bên. Mỗi trang ghi rõ đang chờ tích hợp, chưa thu âm/chấm điểm/lưu dữ liệu/nhắc học. Bản khung không cần khóa API hay backend.
+
+Đã phân tích mã và chạy **14/14 test đạt**. Xem phạm vi kiểm tra và kết quả build tại [verification.md](docs/coordination/verification.md); chưa nghiệm thu thiết bị thật hoặc luồng nghiệp vụ.
 
 ### Cấu hình bản hoàn chỉnh
 
@@ -286,7 +290,7 @@ Kiểm thử cần thiết bị/backend có hướng dẫn riêng do Trường b
 6. Xem Lịch sử và Tiến độ để theo dõi kết quả, thời gian, mục tiêu và streak.
 7. Chuyển hồ sơ và mở lại ứng dụng để kiểm tra dữ liệu riêng, lưu trữ bền vững.
 
-Đây là luồng nghiệm thu dự kiến, chưa sử dụng được trên Flutter mẫu hiện tại.
+Đây là luồng nghiệm thu sau tích hợp, chưa sử dụng được trên bản khung hiện tại. Hiện có thể mở ứng dụng, chuyển bốn mục và kiểm tra bố cục mobile/desktop.
 
 <a id="kiem-thu"></a>
 
@@ -308,7 +312,8 @@ Kiểm thử cần thiết bị/backend có hướng dẫn riêng do Trường b
 
 ## 11. Điều kiện chốt bài nộp
 
-- [ ] Người dùng duyệt phân công; từng thành viên xác nhận nhận việc trong nhóm.
+- [x] Người dùng đã duyệt phân công.
+- [ ] Từng thành viên xác nhận nhận việc trong nhóm.
 - [ ] Chốt hợp đồng, API, dependency; từng module chạy/test được bằng fake riêng.
 - [ ] Đủ 7 mục checklist với minh chứng thực tế.
 - [ ] Thành viên đã thông báo bàn giao; Trường review và merge.
