@@ -8,8 +8,6 @@
 
 > **Trạng thái hiện tại:** Đã có khung ứng dụng và hợp đồng module; chưa tích hợp CSDL, phát âm AI và nhắc học thực tế. Phân công đã được người dùng duyệt; xác nhận nhận việc của từng thành viên được thực hiện trong nhóm.
 
-[Công việc của Trường & hướng dẫn CMD](docs/coordination/truong-tasks.md) · [Hợp đồng module v1](docs/coordination/contracts.md) · [Hướng dẫn tích hợp](docs/coordination/integration-guide.md) · [Kết quả kiểm tra](docs/coordination/verification.md)
-
 **Điều hướng nhanh**
 
 [Giới thiệu](#gioi-thieu) · [Phân công & trạng thái](#phan-cong) · [Thư mục & nhiệm vụ](#nhiem-vu) · [Hợp đồng module](#hop-dong) · [CSDL](#csdl) · [Checklist](#checklist) · [Git & bàn giao](#git) · [Cài đặt](#cai-dat) · [Sử dụng](#su-dung) · [Kiểm thử](#kiem-thu) · [Chốt bài nộp](#nop-bai)
