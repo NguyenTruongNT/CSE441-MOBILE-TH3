@@ -1,12 +1,12 @@
 {
-    "name": "th3_english_ai",
-    "short_name": "th3_english_ai",
+    "name": "English AI - Nhom 12",
+    "short_name": "English AI",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F5F8F7",
+    "theme_color": "#12796F",
+    "description": "CSE441 - Daily English learning and pronunciation practice.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
