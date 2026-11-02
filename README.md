@@ -1,5 +1,7 @@
 ﻿# TH3: Ứng dụng học tiếng Anh với phân tích phát âm AI
 
+> Cập nhật nhánh tích hợp 02/11/2026: nhóm dùng thêm dữ liệu giả lập. Trang Tiến độ chạy demo mặc định, nhắc học được mô phỏng. Xem [cấu hình dùng chung cho Trường và Sơn](docs/coordination/demo-setup.md). Các trạng thái/checklist dưới đây chưa được nâng thành hoàn tất; nhắc Android thật còn đang triển khai.
+
 > **CSE441 · Phát triển ứng dụng cho các thiết bị di động**
 >
 > Lớp **65KTPM** · Nhóm **12** · Flutter · Android & Web
