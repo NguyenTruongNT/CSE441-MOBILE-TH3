@@ -1,0 +1,90 @@
+[
+  {
+    "id": "ex-01-dental-fricative-unvoiced",
+    "category": "Cặp âm dễ nhầm",
+    "difficulty": "Trung bình",
+    "referenceText": "I think this method is great",
+    "referenceIpa": "/aɪ θɪŋk ðɪs ˈmeθəd ɪz ɡreɪt/",
+    "targetPhonemes": ["θ", "ð", "ŋk", "θ"],
+    "description": "Luyện âm /θ/ vô thanh (think, method) và /ð/ hữu thanh (this).",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-01.wav",
+    "vietnameseTip": "Để đầu lưỡi giữa hai hàm răng, đẩy luồng hơi nhẹ qua kẽ răng. Không thụt lưỡi vào trong để tránh nhầm thành /s/ hay /t/."
+  },
+  {
+    "id": "ex-02-dental-fricative-voiced",
+    "category": "Phụ âm khó",
+    "difficulty": "Trung bình",
+    "referenceText": "They breathe together in the weather",
+    "referenceIpa": "/ðeɪ briːð təˈɡeðər ɪn ðə ˈweðər/",
+    "targetPhonemes": ["ð", "ð", "ð", "ð", "ð"],
+    "description": "Luyện âm /ð/ hữu thanh trong chuỗi câu liên tục.",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-02.wav",
+    "vietnameseTip": "Đầu lưỡi chạm nhẹ mép răng cửa trên, rung dây thanh quản khi phát âm /ð/."
+  },
+  {
+    "id": "ex-03-s-vs-sh",
+    "category": "Cặp âm dễ nhầm",
+    "difficulty": "Cơ bản",
+    "referenceText": "She sells sea shells on the seashore",
+    "referenceIpa": "/ʃiː selz siː ʃelz ɒn ðə ˈsiːʃɔːr/",
+    "targetPhonemes": ["ʃ", "s", "s", "ʃ", "s", "ʃ"],
+    "description": "Phân biệt phụ âm /s/ (răng khép) và /ʃ/ (chu môi cong lưỡi).",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-03.wav",
+    "vietnameseTip": "Với /ʃ/ chu môi nhẹ và đưa lưỡi lùi sau vòm miệng; với /s/ khóe môi mở nhẹ, đẩy hơi qua khe hẹp răng cửa."
+  },
+  {
+    "id": "ex-04-ch-vs-j",
+    "category": "Phụ âm tắc xát",
+    "difficulty": "Nâng cao",
+    "referenceText": "Charles chooses a cheap watch",
+    "referenceIpa": "/tʃɑːrlz ˈtʃuːzɪz ə tʃiːp wɒtʃ/",
+    "targetPhonemes": ["tʃ", "tʃ", "tʃ", "tʃ"],
+    "description": "Luyện âm /tʃ/ vô thanh ở đầu từ và cuối từ.",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-04.wav",
+    "vietnameseTip": "Chặn hơi bằng đầu lưỡi tại chân răng cửa trên, rồi bật mạnh ra đồng thời chu môi. Không nhầm thành /tr/ của tiếng Việt."
+  },
+  {
+    "id": "ex-05-vowel-ship-vs-sheep",
+    "category": "Nguyên âm ngắn và dài",
+    "difficulty": "Cơ bản",
+    "referenceText": "The sheep on the ship looks big",
+    "referenceIpa": "/ðə ʃiːp ɒn ðə ʃɪp lʊks bɪɡ/",
+    "targetPhonemes": ["iː", "ɪ", "ʊ", "ɪ"],
+    "description": "Phân biệt nguyên âm dài /iː/ (cười mở mép) và ngắn /ɪ/ (thả lỏng cơ môi).",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-05.wav",
+    "vietnameseTip": "Âm /iː/ căng khóe môi sang hai bên; âm /ɪ/ thả lỏng hàm và phát âm nhanh, dứt khoát."
+  },
+  {
+    "id": "ex-06-ending-clusters",
+    "category": "Cụm phụ âm đuôi",
+    "difficulty": "Nâng cao",
+    "referenceText": "He asked six questions in the test",
+    "referenceIpa": "/hiː æskt sɪks ˈkwestʃənz ɪn ðə test/",
+    "targetPhonemes": ["skt", "ks", "stʃ", "st"],
+    "description": "Luyện nhả đủ các âm đuôi phức /skt/, /ks/, /st/ mà người Việt hay bỏ quên.",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-06.wav",
+    "vietnameseTip": "Không bỏ âm cuối. Trong 'asked' bật rõ /s/ rồi /t/; trong 'six' bật /k/ rồi xì /s/."
+  },
+  {
+    "id": "ex-07-r-vs-l",
+    "category": "Cặp âm dễ nhầm",
+    "difficulty": "Trung bình",
+    "referenceText": "The red light turns right very quickly",
+    "referenceIpa": "/ðə red laɪt tɜːrnz raɪt ˈveri ˈkwɪkli/",
+    "targetPhonemes": ["r", "l", "r", "r", "r", "l"],
+    "description": "Phân biệt âm cuộn lưỡi /r/ và âm nâng đầu lưỡi /l/.",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-07.wav",
+    "vietnameseTip": "Với /l/ đầu lưỡi chạm vào nướu răng cửa trên; với /r/ lưỡi cong lùi vào sâu khoang miệng và không chạm vòm trên."
+  },
+  {
+    "id": "ex-08-diphthong-vowels",
+    "category": "Nguyên âm đôi",
+    "difficulty": "Trung bình",
+    "referenceText": "They go home slowly in the cold snow",
+    "referenceIpa": "/ðeɪ ɡəʊ həʊm ˈsləʊli ɪn ðə kəʊld snəʊ/",
+    "targetPhonemes": ["eɪ", "əʊ", "əʊ", "əʊ", "əʊ", "snəʊ"],
+    "description": "Luyện nguyên âm đôi /əʊ/ và /eɪ/ với độ lướt âm mượt mà.",
+    "sampleAudioUri": "https://cdn.example.com/audio/samples/ex-08.wav",
+    "vietnameseTip": "Khởi đầu từ âm /ə/ lướt nhẹ sang /ʊ/, môi từ từ thu tròn lại ở cuối âm."
+  }
+]
