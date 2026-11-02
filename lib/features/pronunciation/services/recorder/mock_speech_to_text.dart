@@ -55,3 +55,4 @@ class MockSpeechRecognizer implements SpeechRecognizerController {
 }
 
 SpeechRecognizerController createPlatformSpeechRecognizer() => MockSpeechRecognizer();
+

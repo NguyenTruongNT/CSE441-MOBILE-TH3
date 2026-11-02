@@ -29,6 +29,7 @@ class RemotePronunciationService implements PronunciationService {
   final Duration timeout;
   final bool enableLocalFallbackWhenUnreachable;
   final PhonemeScoringEngine _fallbackEngine;
+  String? clientTranscript;
 
   @override
   Future<PronunciationResult> analyze({
@@ -48,6 +49,7 @@ class RemotePronunciationService implements PronunciationService {
       'targetPhonemes': exercise.targetPhonemes,
       'audioBase64': base64Encode(audio.bytes),
       'mimeType': audio.mimeType,
+      'clientTranscript': clientTranscript ?? '',
     };
 
     final headers = <String, String>{
@@ -86,6 +88,7 @@ class RemotePronunciationService implements PronunciationService {
           sessionId: sessionId,
           audio: audio,
           exercise: exercise,
+          recognizedTranscriptOverride: clientTranscript,
         );
       }
       throw AppFailure(

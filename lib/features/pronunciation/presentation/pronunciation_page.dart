@@ -11,10 +11,10 @@ import '../domain/pronunciation_logger.dart';
 import '../domain/speech_recognizer.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/fake_pronunciation_service.dart';
+import '../services/remote_pronunciation_service.dart';
 import '../services/recorder/audio_recorder_factory.dart';
 import '../services/recorder/speech_to_text_factory.dart';
 import 'widgets/audio_sample_player.dart';
-import 'widgets/diagnostic_log_view.dart';
 import 'widgets/exercise_card.dart';
 import 'widgets/improvement_exercise_card.dart';
 import 'widgets/overall_score_badge.dart';
@@ -50,8 +50,8 @@ class PronunciationPage extends StatefulWidget {
 class _PronunciationPageState extends State<PronunciationPage> {
   late final UserRepository _userRepo;
   late final LearningRepository _learningRepo;
-  late final PronunciationService _pronunciationService;
-  late final AudioRecorderController _recorder;
+  late PronunciationService _pronunciationService;
+  late AudioRecorderController _recorder;
   late final List<ExerciseDetail> _catalog;
 
   UserProfile? _currentProfile;
@@ -84,7 +84,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
     _userRepo = widget.userRepository ?? FakeInternalUserRepository();
     _learningRepo = widget.learningRepository ?? FakeInternalLearningRepository();
     _pronunciationService =
-        widget.pronunciationService ?? FakePronunciationService();
+        widget.pronunciationService ?? RemotePronunciationService();
     _catalog = widget.exercises ?? DefaultExercises.catalog;
 
     _realRecorder = widget.audioRecorder ?? getPlatformAudioRecorder();
@@ -111,6 +111,9 @@ class _PronunciationPageState extends State<PronunciationPage> {
     setState(() {
       _useSimulation = simulation;
       _recorder = simulation ? _simulatedRecorder : _realRecorder;
+      _pronunciationService = simulation
+          ? FakePronunciationService(mode: FakePronunciationMode.realistic)
+          : (widget.pronunciationService ?? RemotePronunciationService());
       _currentError = null;
       _liveTranscript = '';
     });
@@ -231,7 +234,10 @@ class _PronunciationPageState extends State<PronunciationPage> {
 
     try {
       final service = _pronunciationService;
-      if (service is FakePronunciationService) {
+      if (service is RemotePronunciationService) {
+        service.clientTranscript =
+            finalTranscript.isNotEmpty ? finalTranscript : null;
+      } else if (service is FakePronunciationService) {
         service.latestTranscript =
             finalTranscript.isNotEmpty ? finalTranscript : null;
       }
@@ -795,10 +801,6 @@ class _PronunciationPageState extends State<PronunciationPage> {
               ),
           ],
         ],
-
-        // Live Diagnostic Log Console
-        const SizedBox(height: 16),
-        const DiagnosticLogView(),
       ],
     );
   }

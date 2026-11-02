@@ -118,7 +118,7 @@ void main() {
     expect(find.text('/ðeɪ briːð təˈɡeðər ɪn ðə ˈweðər/'), findsWidgets);
   });
 
-  testWidgets('DiagnosticLogView and SpeechTranscriptView render and expand', (tester) async {
+  testWidgets('DiagnosticLogView is removed from page UI and kept in terminal only', (tester) async {
     tester.view.physicalSize = const Size(1280, 960);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -126,15 +126,7 @@ void main() {
     await tester.pumpWidget(buildTestableWidget());
     await tester.pumpAndSettle();
 
-    // Verify diagnostic log header is present
-    final logHeader = find.textContaining('Nhật ký hệ thống & Chẩn đoán lỗi');
-    expect(logHeader, findsOneWidget);
-
-    await tester.ensureVisible(logHeader);
-    await tester.tap(logHeader);
-    await tester.pumpAndSettle();
-
-    // Verify log entries are shown
-    expect(find.byType(ListView), findsWidgets);
+    // Verify diagnostic log is not cluttering the user interface
+    expect(find.textContaining('Nhật ký hệ thống & Chẩn đoán lỗi'), findsNothing);
   });
 }

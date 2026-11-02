@@ -5,3 +5,4 @@ import 'speech_to_text_stub.dart'
 
 SpeechRecognizerController getPlatformSpeechRecognizer() =>
     createPlatformSpeechRecognizer();
+

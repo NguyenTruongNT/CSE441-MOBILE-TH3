@@ -10,3 +10,4 @@ abstract interface class SpeechRecognizerController {
   void cancel();
   void dispose();
 }
+

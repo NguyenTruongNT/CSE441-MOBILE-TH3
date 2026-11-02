@@ -234,6 +234,19 @@ class PhonemeScoringEngine {
 
     // 3. Process recognized transcript from Speech-to-Text
     final actualTranscript = (recognizedTranscriptOverride ?? '').trim();
+
+    // Reject empty transcript when STT was run and detected no speech
+    if (recognizedTranscriptOverride != null && actualTranscript.isEmpty) {
+      PronunciationLogger.warn(
+        'SCORING',
+        'Không nhận diện được giọng nói tiếng Anh trong bản ghi âm (STT rỗng).',
+      );
+      throw const AppFailure(
+        AppFailureCode.insufficientEvidence,
+        'Không nhận diện được giọng nói tiếng Anh trong bản ghi âm. Vui lòng nói to, rõ ràng và phát âm theo câu mẫu.',
+      );
+    }
+
     final userSpokenWords = actualTranscript
         .split(RegExp(r'\s+'))
         .where((w) => w.isNotEmpty)
@@ -314,8 +327,8 @@ class PhonemeScoringEngine {
             gopScore = (gopScore * 0.4 + 48.0 * 0.6).clamp(30.0, 72.0);
           }
         } else if (actualTranscript.isNotEmpty) {
-          // Missing word
-          gopScore = math.min(gopScore, 40.0);
+          // Missing word - user did not speak this word
+          gopScore = 20.0;
           recognizedSymbol = '[omitted]';
         }
 
@@ -324,9 +337,15 @@ class PhonemeScoringEngine {
             : PhonemeStatus.needsPractice;
 
         final feature = _phonemeDb[symbol];
-        final suggestion = feature != null
+        var suggestion = feature != null
             ? feature.vietnameseGuidance
             : 'Luyện tập phát âm chuẩn xác âm /$symbol/ theo mẫu.';
+
+        if (userWord == null && actualTranscript.isNotEmpty) {
+          suggestion = 'Không phát hiện từ "$cleanRefWord" trong bản ghi âm (bị bỏ sót hoặc nói quá nhỏ).';
+        } else if (userWord != null && !isWordExactMatch) {
+          suggestion = 'Bạn phát âm từ "$cleanRefWord" thành "$userWord". Hãy chú ý khẩu hình để tạo âm /$symbol/ thay vì /$recognizedSymbol/.';
+        }
 
         recognizedSymbol ??= (status == PhonemeStatus.correct)
             ? symbol
