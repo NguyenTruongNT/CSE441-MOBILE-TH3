@@ -45,16 +45,22 @@ Toàn bộ logic tính toán được đóng gói độc lập trong class `Disc
 
 ---
 
-## 3. Thiết kế Giao diện Thích ứng (Responsive Design)
+## 3. Thiết kế Giao diện Thích ứng & Chi tiết Trực quan (UI/UX)
 
-Giao diện `ProgressPage` được thiết kế theo phong cách **Modern EdTech Cards**:
-* Bo góc mềm mại 20px, bóng đổ nhẹ (`elevation: 2`, `shadowColor: black 8%`), nền thẻ trắng tinh khôi trên nền app sáng `#F5F8F7`.
-* Sử dụng `LayoutBuilder` để tự động tối ưu bố cục theo kích thước màn hình:
+Giao diện `ProgressPage` được thiết kế theo phong cách **Modern EdTech Cards**, kết hợp đồng bộ với `AppTheme` (màu chủ đạo Teal `#12796F`, nền `#F5F8F7`):
+* **Header Chào mừng (`ProgressHeaderCard`):** Lời chào ngữ cảnh theo buổi sáng/chiều/tối, avatar chữ cái có viền phát sáng, ngày tháng tiếng Việt và huy hiệu cấp độ kỷ luật (*Tân Binh 🌱, Đồng 🥉, Bạc 🥈, Vàng 🌟, Bậc Thầy 👑*).
+* **Thẻ Chuỗi ngày Gamification (`StreakHeroCard`):** Huy hiệu ngọn lửa rực rỡ 🔥, thanh mốc thành tích mở khóa danh hiệu theo số ngày và dải 7 chấm tròn/ngọn lửa mini hiển thị tính liên tục của tuần học.
+* **Thẻ Tiến độ hôm nay (`DailyGoalRing`):** Vòng tiến độ tròn dày dặn bo góc mượt mà, phân loại nhịp độ (*Khởi động 🌱, Tăng tốc ⚡, Về đích 🎯, Vượt chỉ tiêu 🎉*) và 3 thông số phụ: *Đã luyện*, *Còn lại*, *Vượt mốc*.
+* **Biểu đồ cột Gradient & Tương tác thông minh (`WeeklyBarChart`):** Cột gradient chuyển màu theo trạng thái đạt mục tiêu, đường mốc mục tiêu nét đứt, chạm vào từng cột để xem chi tiết ngày đó, bổ sung 2 chỉ số *Trung bình/ngày* và *Ngày chăm chỉ nhất tuần*.
+* **Cài đặt mục tiêu & Nhắc học (`SettingsReminderCard`):** Preset chips có icon gợi ý định hướng, khung giờ đồng hồ điện tử lớn (*Digital Clock Tile*), khung xem trước thông báo trên màn hình khóa (*Notification Preview Mockup*) và callout lưu ý nền tảng Web/Android.
+* **Công cụ nghiệm thu (`DemoSimulationBar`):** Thẻ Developer Toolkit tinh gọn hỗ trợ người chấm điểm mô phỏng nhanh dữ liệu.
+
+Sử dụng `LayoutBuilder` để tự động tối ưu bố cục theo kích thước màn hình:
 
 | Viewport | Bố cục hiển thị | Chi tiết |
 | :--- | :--- | :--- |
-| **Mobile (< 800px)** | **1 cột cuộn dọc (Single Column)** | Thẻ Streak 🔥 $\rightarrow$ Vòng tiến độ $\rightarrow$ Biểu đồ tuần $\rightarrow$ Cài đặt & Nhắc học $\rightarrow$ Thanh Demo. |
-| **Desktop / Web ($\ge$ 800px)** | **2 cột cân đối (Two-Column Grid)** | • **Cột chính (Trái, flex: 3):** Thẻ Streak, Vòng tiến độ, Biểu đồ 7 ngày.<br>• **Cột phụ (Phải, flex: 2):** Cài đặt mục tiêu, Switch & Giờ nhắc học, Thanh Demo nghiệm thu. |
+| **Mobile (< 800px)** | **1 cột cuộn dọc (Single Column)** | Header $\rightarrow$ Thẻ Streak 🔥 $\rightarrow$ Vòng tiến độ $\rightarrow$ Biểu đồ tuần $\rightarrow$ Cài đặt & Nhắc học $\rightarrow$ Thanh Demo. |
+| **Desktop / Web ($\ge$ 800px)** | **2 cột cân đối (Two-Column Grid)** | Header full-width phía trên.<br>• **Cột chính (Trái, flex: 3):** Thẻ Streak, Vòng tiến độ, Biểu đồ 7 ngày.<br>• **Cột phụ (Phải, flex: 2):** Cài đặt mục tiêu, Giờ nhắc học & Mockup thông báo, Thanh Demo nghiệm thu. |
 
 ---
 

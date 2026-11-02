@@ -6,6 +6,7 @@ import 'package:th3_english_ai/features/discipline/data/fake_discipline_data.dar
 import 'package:th3_english_ai/features/discipline/presentation/progress_page.dart';
 import 'package:th3_english_ai/features/discipline/presentation/widgets/daily_goal_ring.dart';
 import 'package:th3_english_ai/features/discipline/presentation/widgets/demo_simulation_bar.dart';
+import 'package:th3_english_ai/features/discipline/presentation/widgets/progress_header_card.dart';
 import 'package:th3_english_ai/features/discipline/presentation/widgets/settings_reminder_card.dart';
 import 'package:th3_english_ai/features/discipline/presentation/widgets/streak_hero_card.dart';
 import 'package:th3_english_ai/features/discipline/presentation/widgets/weekly_bar_chart.dart';
@@ -69,6 +70,7 @@ void main() {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
+        expect(find.byType(ProgressHeaderCard), findsOneWidget);
         expect(find.byType(StreakHeroCard), findsOneWidget);
         expect(find.byType(DailyGoalRing), findsOneWidget);
         expect(find.byType(WeeklyBarChart), findsOneWidget);
