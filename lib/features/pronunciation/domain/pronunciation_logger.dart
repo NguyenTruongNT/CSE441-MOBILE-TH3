@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 
 enum LogLevel { info, warning, error, debug }
 
@@ -51,9 +50,6 @@ class PronunciationLogger {
   static void error(String tag, String message, [Object? error, StackTrace? stack]) {
     final errStr = error?.toString();
     _log(LogLevel.error, tag, '❌ $message', errStr);
-    if (stack != null && kDebugMode) {
-      debugPrint('[PronunciationAI:Stack] $stack');
-    }
   }
 
   static void stt(String message, [String? details]) {
@@ -83,10 +79,7 @@ class PronunciationLogger {
     }
 
     _logStreamController.add(entry);
-    // Only output to terminal when an error occurs
-    if (level == LogLevel.error) {
-      debugPrint('[PronunciationAI:ERROR] ${entry.toString()}');
-    }
+    // Terminal logging completely disabled as requested
   }
 
   static void clear() {

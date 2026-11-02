@@ -140,7 +140,7 @@ Future<void> _handleAnalyze(
         final code = sttRes['code'] as String? ?? 'insufficientEvidence';
         final errorMsg = sttRes['error'] as String? ??
             'Không nhận diện được giọng nói tiếng Anh trong bản ghi âm. Vui lòng nói to và rõ ràng hơn.';
-        stderr.writeln('[$sessionId] STT failed: $code - $errorMsg');
+        // stderr.writeln('[$sessionId] STT failed: $code - $errorMsg');
         _sendJsonError(
           request.response,
           HttpStatus.badRequest,
