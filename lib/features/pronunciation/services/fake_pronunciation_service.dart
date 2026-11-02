@@ -17,11 +17,13 @@ class FakePronunciationService implements PronunciationService {
   FakePronunciationService({
     this.mode = FakePronunciationMode.realistic,
     this.simulatedLatency = const Duration(milliseconds: 600),
+    this.latestTranscript,
     PhonemeScoringEngine? engine,
   }) : _engine = engine ?? const PhonemeScoringEngine();
 
   FakePronunciationMode mode;
   Duration simulatedLatency;
+  String? latestTranscript;
   final PhonemeScoringEngine _engine;
 
   @override
@@ -68,6 +70,7 @@ class FakePronunciationService implements PronunciationService {
           audio: audio,
           exercise: exercise,
           acousticScoreBias: -22.0,
+          recognizedTranscriptOverride: latestTranscript,
         );
 
       case FakePronunciationMode.realistic:
@@ -75,6 +78,7 @@ class FakePronunciationService implements PronunciationService {
           sessionId: sessionId,
           audio: audio,
           exercise: exercise,
+          recognizedTranscriptOverride: latestTranscript,
         );
     }
   }

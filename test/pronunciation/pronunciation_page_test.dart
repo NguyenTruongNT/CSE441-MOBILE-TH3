@@ -117,4 +117,24 @@ void main() {
 
     expect(find.text('/ðeɪ briːð təˈɡeðər ɪn ðə ˈweðər/'), findsWidgets);
   });
+
+  testWidgets('DiagnosticLogView and SpeechTranscriptView render and expand', (tester) async {
+    tester.view.physicalSize = const Size(1280, 960);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(buildTestableWidget());
+    await tester.pumpAndSettle();
+
+    // Verify diagnostic log header is present
+    final logHeader = find.textContaining('Nhật ký hệ thống & Chẩn đoán lỗi');
+    expect(logHeader, findsOneWidget);
+
+    await tester.ensureVisible(logHeader);
+    await tester.tap(logHeader);
+    await tester.pumpAndSettle();
+
+    // Verify log entries are shown
+    expect(find.byType(ListView), findsWidgets);
+  });
 }

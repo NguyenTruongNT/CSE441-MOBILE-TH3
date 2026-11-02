@@ -7,15 +7,20 @@ import '../data/default_exercises.dart';
 import '../data/fake_pronunciation_repository.dart';
 import '../domain/audio_recorder.dart';
 import '../domain/exercise_models.dart';
+import '../domain/pronunciation_logger.dart';
+import '../domain/speech_recognizer.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/fake_pronunciation_service.dart';
 import '../services/recorder/audio_recorder_factory.dart';
+import '../services/recorder/speech_to_text_factory.dart';
 import 'widgets/audio_sample_player.dart';
+import 'widgets/diagnostic_log_view.dart';
 import 'widgets/exercise_card.dart';
 import 'widgets/improvement_exercise_card.dart';
 import 'widgets/overall_score_badge.dart';
 import 'widgets/phoneme_feedback_table.dart';
 import 'widgets/recording_control_bar.dart';
+import 'widgets/speech_transcript_view.dart';
 import 'widgets/waveform_visualizer.dart';
 
 /// Pronunciation practice studio and AI analysis page.
@@ -69,6 +74,9 @@ class _PronunciationPageState extends State<PronunciationPage> {
   bool _useSimulation = false;
   late final AudioRecorderController _realRecorder;
   late final AudioRecorderController _simulatedRecorder;
+  late final SpeechRecognizerController _speechRecognizer;
+  String _liveTranscript = '';
+  StreamSubscription<String>? _sttSub;
 
   @override
   void initState() {
@@ -83,6 +91,13 @@ class _PronunciationPageState extends State<PronunciationPage> {
     _simulatedRecorder = SimulatedAudioRecorder();
     _recorder = _useSimulation ? _simulatedRecorder : _realRecorder;
 
+    _speechRecognizer = getPlatformSpeechRecognizer();
+    _sttSub = _speechRecognizer.transcriptStream.listen((text) {
+      if (mounted) {
+        setState(() => _liveTranscript = text);
+      }
+    });
+
     _selectedExercise = _catalog.first;
 
     _initializeAsync();
@@ -91,17 +106,27 @@ class _PronunciationPageState extends State<PronunciationPage> {
   void _toggleRecorder(bool simulation) {
     if (_recorder.isRecording) {
       _recorder.cancelRecording();
+      _speechRecognizer.cancel();
     }
     setState(() {
       _useSimulation = simulation;
       _recorder = simulation ? _simulatedRecorder : _realRecorder;
       _currentError = null;
+      _liveTranscript = '';
     });
+    PronunciationLogger.info(
+      'UI',
+      'Đã đổi chế độ thu âm sang: ${simulation ? "Mô phỏng mẫu" : "Micro thật"}',
+    );
   }
 
   Future<void> _initializeAsync() async {
     _hasMicPermission = await _recorder.hasPermission();
     _currentProfile = await _userRepo.getSelectedProfile();
+    PronunciationLogger.info(
+      'INIT',
+      'Khởi tạo Phòng luyện phát âm (Hồ sơ: ${_currentProfile?.displayName ?? "Khách"}, Quyền micro: $_hasMicPermission)',
+    );
     if (mounted) setState(() {});
   }
 
@@ -109,6 +134,8 @@ class _PronunciationPageState extends State<PronunciationPage> {
   void dispose() {
     _recordingTimer?.cancel();
     _ampSub?.cancel();
+    _sttSub?.cancel();
+    _speechRecognizer.dispose();
     if (_recorder.isRecording) {
       _recorder.cancelRecording();
     }
@@ -116,23 +143,34 @@ class _PronunciationPageState extends State<PronunciationPage> {
   }
 
   Future<void> _requestPermission() async {
+    PronunciationLogger.info('MIC', 'Yêu cầu người dùng cấp quyền truy cập micro...');
     final granted = await _recorder.requestPermission();
+    PronunciationLogger.info('MIC', 'Kết quả cấp quyền micro: $granted');
     if (mounted) {
       setState(() => _hasMicPermission = granted);
     }
   }
 
   Future<void> _startRecording() async {
+    PronunciationLogger.info(
+      'UI',
+      'Bắt đầu thu âm bài: "${_selectedExercise.referenceText}" (Chế độ: ${_useSimulation ? "Mô phỏng" : "Micro thật"})',
+    );
     setState(() {
       _currentError = null;
       _latestResult = null;
       _isSaved = false;
       _elapsedMilliseconds = 0;
+      _liveTranscript = '';
     });
 
     try {
       await _recorder.startRecording();
       _recordingStartTime = DateTime.now().toUtc();
+
+      if (!_useSimulation) {
+        _speechRecognizer.start(lang: 'en-US');
+      }
 
       _recordingTimer?.cancel();
       _recordingTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
@@ -144,8 +182,10 @@ class _PronunciationPageState extends State<PronunciationPage> {
 
       setState(() {});
     } on AppFailure catch (e) {
+      PronunciationLogger.error('MIC', 'Lỗi cấp quyền hoặc khởi tạo thu âm: ${e.message}', e);
       setState(() => _currentError = e);
-    } catch (e) {
+    } catch (e, stack) {
+      PronunciationLogger.error('MIC', 'Lỗi không xác định khi bắt đầu thu âm: $e', e, stack);
       setState(() {
         _currentError = AppFailure(AppFailureCode.unknown, e.toString());
       });
@@ -157,17 +197,31 @@ class _PronunciationPageState extends State<PronunciationPage> {
     final endTime = DateTime.now().toUtc();
     final startTime = _recordingStartTime ?? endTime.subtract(const Duration(seconds: 2));
 
+    var finalTranscript = _liveTranscript;
+    if (!_useSimulation) {
+      try {
+        final sttResult = await _speechRecognizer.stop();
+        if (sttResult.isNotEmpty) finalTranscript = sttResult;
+      } catch (e) {
+        PronunciationLogger.warn('STT', 'Không thể hoàn tất Speech Recognition: $e');
+      }
+    }
+
     AudioSample audio;
     try {
       audio = await _recorder.stopRecording();
+      PronunciationLogger.audio(
+        'Đã thu được âm thanh: ${audio.bytes.length} bytes, format: ${audio.mimeType}',
+      );
     } on AppFailure catch (e) {
+      PronunciationLogger.error('AUDIO', 'Lỗi khi dừng thu âm: ${e.message}', e);
       setState(() => _currentError = e);
       return;
     }
 
     setState(() {
       _isAnalyzing = true;
-      _analysisStatusMessage = 'Đang phân tích âm vị và so sánh với phiên âm chuẩn…';
+      _analysisStatusMessage = 'Đang phân tích âm vị từ giọng thật và phiên âm Speech-to-Text…';
       _currentError = null;
     });
 
@@ -176,10 +230,24 @@ class _PronunciationPageState extends State<PronunciationPage> {
     final sessionId = 'sess-${DateTime.now().millisecondsSinceEpoch}';
 
     try {
+      final service = _pronunciationService;
+      if (service is FakePronunciationService) {
+        service.latestTranscript =
+            finalTranscript.isNotEmpty ? finalTranscript : null;
+      }
+
+      PronunciationLogger.scoring(
+        'Bắt đầu gửi phân tích: Session $sessionId, STT: "$finalTranscript"',
+      );
+
       final result = await _pronunciationService.analyze(
         sessionId: sessionId,
         audio: audio,
         exercise: _selectedExercise.exercise,
+      );
+
+      PronunciationLogger.scoring(
+        'Kết quả nhận được: Điểm overall = ${result.overallScore}, Nhận dạng = "${result.recognizedText}"',
       );
 
       final session = PracticeSession(
@@ -192,8 +260,8 @@ class _PronunciationPageState extends State<PronunciationPage> {
         status: PracticeStatus.completed,
       );
 
-      // Auto-save practice to repository
       await _learningRepo.savePractice(session: session, result: result);
+      PronunciationLogger.info('DB', 'Đã lưu phiên $sessionId vào LearningRepository thành công');
 
       if (mounted) {
         setState(() {
@@ -203,13 +271,15 @@ class _PronunciationPageState extends State<PronunciationPage> {
         });
       }
     } on AppFailure catch (e) {
+      PronunciationLogger.error('API', 'Lỗi phân tích phát âm (${e.code.name}): ${e.message}', e);
       if (mounted) {
         setState(() {
           _currentError = e;
           _isAnalyzing = false;
         });
       }
-    } catch (e) {
+    } catch (e, stack) {
+      PronunciationLogger.error('API', 'Ngoại lệ không xác định khi chấm điểm: $e', e, stack);
       if (mounted) {
         setState(() {
           _currentError = AppFailure(
@@ -224,23 +294,29 @@ class _PronunciationPageState extends State<PronunciationPage> {
 
   Future<void> _cancelRecording() async {
     _recordingTimer?.cancel();
+    _speechRecognizer.cancel();
     await _recorder.cancelRecording();
+    PronunciationLogger.info('UI', 'Đã hủy phiên ghi âm.');
     if (mounted) {
       setState(() {
         _elapsedMilliseconds = 0;
+        _liveTranscript = '';
       });
     }
   }
 
   void _selectExercise(ExerciseDetail ex) {
+    PronunciationLogger.info('UI', 'Người dùng chọn bài mới: "${ex.referenceText}" (ID: ${ex.id})');
     if (_recorder.isRecording) {
       _recorder.cancelRecording();
+      _speechRecognizer.cancel();
     }
     setState(() {
       _selectedExercise = ex;
       _latestResult = null;
       _currentError = null;
       _isSaved = false;
+      _liveTranscript = '';
     });
   }
 
@@ -514,7 +590,16 @@ class _PronunciationPageState extends State<PronunciationPage> {
           amplitudeStream: _recorder.amplitudeStream,
           isRecording: _recorder.isRecording,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+
+        // Live Speech-to-Text banner during recording
+        SpeechTranscriptView(
+          referenceText: _selectedExercise.referenceText,
+          liveTranscript: _liveTranscript,
+          isRecording: _recorder.isRecording,
+          finalRecognizedText: _latestResult?.recognizedText,
+        ),
+        const SizedBox(height: 12),
 
         // Recording Controller
         RecordingControlBar(
@@ -609,6 +694,15 @@ class _PronunciationPageState extends State<PronunciationPage> {
           OverallScoreBadge(score: _latestResult!.overallScore),
           const SizedBox(height: 16),
 
+          // Detailed speech transcript comparison
+          SpeechTranscriptView(
+            referenceText: _selectedExercise.referenceText,
+            liveTranscript: '',
+            isRecording: false,
+            finalRecognizedText: _latestResult!.recognizedText,
+          ),
+          const SizedBox(height: 16),
+
           // Recognized Text feedback
           Container(
             padding: const EdgeInsets.all(16),
@@ -701,6 +795,10 @@ class _PronunciationPageState extends State<PronunciationPage> {
               ),
           ],
         ],
+
+        // Live Diagnostic Log Console
+        const SizedBox(height: 16),
+        const DiagnosticLogView(),
       ],
     );
   }

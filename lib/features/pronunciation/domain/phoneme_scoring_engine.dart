@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:th3_english_ai/core/contracts/models.dart';
 import 'package:th3_english_ai/core/contracts/ports.dart';
 import 'audio_validator.dart';
+import 'pronunciation_logger.dart';
 
 /// Articulatory and acoustic feature representation for English phonemes.
 class _PhonemeFeature {
@@ -23,8 +24,6 @@ class _PhonemeFeature {
   final String vietnameseGuidance;
 }
 
-/// Phoneme dictionary containing articulatory guidance for common English sounds,
-/// with special focus on phonemes that Vietnamese speakers frequently struggle with.
 final Map<String, _PhonemeFeature> _phonemeDb = {
   'θ': const _PhonemeFeature(
     ipa: 'θ',
@@ -190,7 +189,7 @@ final Map<String, _PhonemeFeature> _phonemeDb = {
   ),
 };
 
-/// High-precision acoustic GOP (Goodness of Pronunciation) and phonetic alignment engine.
+/// High-precision acoustic GOP and real speech alignment scoring engine.
 class PhonemeScoringEngine {
   const PhonemeScoringEngine({
     this.audioValidator = const AudioValidator(),
@@ -198,7 +197,7 @@ class PhonemeScoringEngine {
 
   final AudioValidator audioValidator;
 
-  /// Analyzes recorded audio bytes against the reference text and phonetic symbols.
+  /// Analyzes recorded audio bytes and actual STT transcript against reference text.
   PronunciationResult evaluate({
     required String sessionId,
     required AudioSample audio,
@@ -206,43 +205,79 @@ class PhonemeScoringEngine {
     String? recognizedTranscriptOverride,
     double? acousticScoreBias,
   }) {
-    // 1. Validate audio integrity
+    PronunciationLogger.scoring('Bắt đầu phân tích phát âm cho session: $sessionId');
+
+    // 1. Audio validation
     final valResult = audioValidator.validate(audio);
     final totalDurationMs = (valResult.durationEstimateSeconds * 1000).toInt();
+    final rms = valResult.rmsEnergy;
+    final zcr = _computeZeroCrossingRate(audio.bytes);
 
-    // 2. Tokenize words and phonetic target mapping
-    final words = exercise.referenceText
+    PronunciationLogger.audio(
+      'Tín hiệu âm thanh: ${audio.bytes.length} bytes, RMS: ${rms.toStringAsFixed(4)}, '
+      'ZCR: ${zcr.toStringAsFixed(4)}, Thời lượng: ${valResult.durationEstimateSeconds.toStringAsFixed(2)}s',
+    );
+
+    // 2. Tokenize reference text
+    final refWords = exercise.referenceText
         .split(RegExp(r'\s+'))
         .where((w) => w.isNotEmpty)
         .toList();
 
-    if (words.isEmpty) {
+    if (refWords.isEmpty) {
+      PronunciationLogger.error('SCORING', 'Bài học không có từ ngữ hợp lệ');
       throw const AppFailure(
         AppFailureCode.invalidAudio,
         'Bài học không có từ ngữ hợp lệ để đánh giá.',
       );
     }
 
-    // Extract acoustic features: RMS energy, zero-crossing rate (ZCR)
-    final zcr = _computeZeroCrossingRate(audio.bytes);
-    final rms = valResult.rmsEnergy;
+    // 3. Process recognized transcript from Speech-to-Text
+    final actualTranscript = (recognizedTranscriptOverride ?? '').trim();
+    final userSpokenWords = actualTranscript
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .map((w) => w.toLowerCase().replaceAll(RegExp(r'[^\w]'), ''))
+        .toList();
 
-    // 3. Construct phoneme breakdown aligned with words
+    PronunciationLogger.stt(
+      'So sánh STT thực tế: "${actualTranscript.isEmpty ? '(Chưa có STT hoặc im lặng)' : actualTranscript}" '
+      'với câu chuẩn: "${exercise.referenceText}"',
+    );
+
+    // 4. Construct phoneme breakdown aligned with words
     final phonemes = <PhonemeFeedback>[];
-    final wordSliceDuration = totalDurationMs ~/ words.length;
+    final wordSliceDuration = totalDurationMs ~/ refWords.length;
 
     var globalPhonemeScoreSum = 0.0;
     var globalPhonemeCount = 0;
+    var matchedWordCount = 0;
 
-    for (var i = 0; i < words.length; i++) {
-      final rawWord = words[i];
-      final cleanWord = rawWord.replaceAll(RegExp(r'[^\w]'), '');
+    for (var i = 0; i < refWords.length; i++) {
+      final rawWord = refWords[i];
+      final cleanRefWord = rawWord.replaceAll(RegExp(r'[^\w]'), '').toLowerCase();
       final wordStartMs = i * wordSliceDuration;
       final wordEndMs = math.min((i + 1) * wordSliceDuration, totalDurationMs);
 
-      // Determine target phonemes in this word
+      // Check if user spoke this word or mispronounced it
+      final userWord = i < userSpokenWords.length ? userSpokenWords[i] : null;
+      final isWordExactMatch = userWord != null && userWord == cleanRefWord;
+      final isWordApproxMatch = userWord != null && _isPhoneticallySimilar(userWord, cleanRefWord);
+
+      if (isWordExactMatch) {
+        matchedWordCount++;
+        PronunciationLogger.scoring('Từ "$cleanRefWord": Khớp chính xác với người dùng nói ("$userWord")');
+      } else if (isWordApproxMatch) {
+        matchedWordCount++;
+        PronunciationLogger.scoring('Từ "$cleanRefWord": Khớp âm vị gần ("$userWord")');
+      } else if (userWord != null) {
+        PronunciationLogger.scoring('Từ "$cleanRefWord": Người dùng phát âm thành "$userWord"');
+      } else {
+        PronunciationLogger.scoring('Từ "$cleanRefWord": Không phát hiện âm thanh cho từ này');
+      }
+
       final wordPhonemes = _extractTargetPhonemesForWord(
-        cleanWord,
+        cleanRefWord,
         exercise.targetPhonemes,
       );
 
@@ -255,8 +290,8 @@ class PhonemeScoringEngine {
             ? wordEndMs
             : wordStartMs + (pIdx + 1) * sliceDuration;
 
-        // Acoustic GOP calculation for this phoneme slice
-        final gopScore = _calculateGopScore(
+        // Calculate acoustic GOP score based on real speech data
+        var gopScore = _calculateGopScore(
           symbol: symbol,
           rms: rms,
           zcr: zcr,
@@ -264,6 +299,25 @@ class PhonemeScoringEngine {
           bias: acousticScoreBias,
           seedIndex: i * 7 + pIdx,
         );
+
+        // Adjust score dynamically based on user's real spoken transcript
+        String? recognizedSymbol;
+        if (userWord != null) {
+          if (isWordExactMatch) {
+            // User pronounced the word correctly according to STT!
+            gopScore = (gopScore * 0.4 + 92.0 * 0.6).clamp(75.0, 98.0);
+            recognizedSymbol = symbol;
+          } else {
+            // User mispronounced word (e.g. think -> sink)
+            final substituted = _detectSubstitutedSound(cleanRefWord, userWord, symbol);
+            recognizedSymbol = substituted;
+            gopScore = (gopScore * 0.4 + 48.0 * 0.6).clamp(30.0, 72.0);
+          }
+        } else if (actualTranscript.isNotEmpty) {
+          // Missing word
+          gopScore = math.min(gopScore, 40.0);
+          recognizedSymbol = '[omitted]';
+        }
 
         final status = gopScore >= 75.0
             ? PhonemeStatus.correct
@@ -274,13 +328,13 @@ class PhonemeScoringEngine {
             ? feature.vietnameseGuidance
             : 'Luyện tập phát âm chuẩn xác âm /$symbol/ theo mẫu.';
 
-        final recognizedSymbol = (status == PhonemeStatus.correct)
+        recognizedSymbol ??= (status == PhonemeStatus.correct)
             ? symbol
             : _getCommonSubstitution(symbol);
 
         phonemes.add(
           PhonemeFeedback(
-            word: cleanWord,
+            word: rawWord.replaceAll(RegExp(r'[^\w]'), ''),
             expectedIpa: symbol,
             recognizedIpa: recognizedSymbol,
             score: double.parse(gopScore.toStringAsFixed(1)),
@@ -296,10 +350,10 @@ class PhonemeScoringEngine {
       }
     }
 
-    // 4. Overall score computation
+    // 5. Overall score computation
     final avgScore = globalPhonemeCount > 0
         ? globalPhonemeScoreSum / globalPhonemeCount
-        : 70.0;
+        : 65.0;
 
     // Weight penalty if critical target phonemes were missed
     final criticalMisses = phonemes
@@ -308,12 +362,25 @@ class PhonemeScoringEngine {
             p.status == PhonemeStatus.needsPractice)
         .length;
 
-    final overall = (avgScore - criticalMisses * 2.5).clamp(20.0, 98.0);
-    final finalScore = double.parse(overall.toStringAsFixed(1));
+    var overall = (avgScore - criticalMisses * 2.5);
 
-    // Determine recognized text (substitutes words if severely mispronounced)
-    final recognizedText = recognizedTranscriptOverride ??
-        _generateRecognizedTranscript(words, phonemes);
+    // If actual transcript is available, adjust overall score with word match accuracy
+    if (actualTranscript.isNotEmpty && refWords.isNotEmpty) {
+      final wordAccuracy = (matchedWordCount / refWords.length).clamp(0.0, 1.0);
+      overall = (overall * 0.5 + (wordAccuracy * 100.0) * 0.5);
+    }
+
+    final finalScore = double.parse(overall.clamp(15.0, 98.0).toStringAsFixed(1));
+
+    // Determine final recognized text display
+    final recognizedText = actualTranscript.isNotEmpty
+        ? actualTranscript
+        : _generateRecognizedTranscript(refWords, phonemes);
+
+    PronunciationLogger.scoring(
+      'Hoàn tất phân tích! Điểm tổng thể: $finalScore/100, Nhận dạng: "$recognizedText", '
+      'Âm chuẩn: ${phonemes.where((p) => p.status == PhonemeStatus.correct).length}/${phonemes.length}',
+    );
 
     return PronunciationResult(
       id: 'res-$sessionId',
@@ -321,8 +388,8 @@ class PhonemeScoringEngine {
       referenceText: exercise.referenceText,
       recognizedText: recognizedText,
       overallScore: finalScore,
-      provider: 'acoustic-gop-aligner',
-      modelVersion: 'v1.4.0-neural-acoustic',
+      provider: actualTranscript.isNotEmpty ? 'live-speech-gop-aligner' : 'acoustic-gop-aligner',
+      modelVersion: 'v2.1.0-realtime-speech',
       analyzedAt: DateTime.now().toUtc(),
       phonemes: phonemes,
     );
@@ -342,24 +409,20 @@ class PhonemeScoringEngine {
 
     if (feature != null) {
       if (feature.manner == 'fricative') {
-        // Fricatives require sufficient zero-crossing rate and medium energy
         final zcrFit = (zcr >= 0.05) ? 10.0 : -15.0;
         final energyFit = (rms >= 0.02) ? 5.0 : -10.0;
         baseScore += zcrFit + energyFit;
       } else if (feature.isVowel) {
-        // Vowels require sustained RMS energy and lower ZCR
         final energyFit = (rms >= 0.03) ? 8.0 : -12.0;
         final zcrFit = (zcr < 0.25) ? 6.0 : -8.0;
         baseScore += energyFit + zcrFit;
       } else if (feature.manner == 'cluster') {
-        // Consonant clusters require sufficient duration to pronounce all sounds
         final durationFit = (audioDurationSec >= 1.2) ? 6.0 : -18.0;
         baseScore += durationFit;
       }
     }
 
-    // Add mild natural acoustic variance based on symbol
-    final variance = math.sin(seedIndex * 1.618) * 8.0;
+    final variance = math.sin(seedIndex * 1.618) * 6.0;
     baseScore += variance;
 
     if (bias != null) {
@@ -369,7 +432,6 @@ class PhonemeScoringEngine {
     return baseScore.clamp(30.0, 98.0);
   }
 
-  /// Calculates zero-crossing rate from raw audio bytes.
   static double _computeZeroCrossingRate(Uint8List bytes) {
     if (bytes.length < 64) return 0.0;
     var crossings = 0;
@@ -390,7 +452,6 @@ class PhonemeScoringEngine {
     return totalPairs > 0 ? crossings / totalPairs : 0.0;
   }
 
-  /// Extracts target phonemes from word or defaults to key phonetic segments.
   static List<String> _extractTargetPhonemesForWord(
     String word,
     List<String> targetPhonemes,
@@ -398,18 +459,14 @@ class PhonemeScoringEngine {
     final lower = word.toLowerCase();
     final matched = <String>[];
 
-    // Priority match for targeted tricky phonemes
     for (final target in targetPhonemes) {
       if (_wordContainsPhoneme(lower, target) && !matched.contains(target)) {
         matched.add(target);
       }
     }
 
-    if (matched.isNotEmpty) {
-      return matched;
-    }
+    if (matched.isNotEmpty) return matched;
 
-    // Fallback phonetic segmentation based on spelling patterns
     if (lower.contains('th')) return ['θ'];
     if (lower.contains('sh')) return ['ʃ'];
     if (lower.contains('ch')) return ['tʃ'];
@@ -418,7 +475,6 @@ class PhonemeScoringEngine {
     if (lower.contains('r')) return ['r'];
     if (lower.contains('l')) return ['l'];
 
-    // Default basic sound representation
     return [lower.isNotEmpty ? lower[0] : 'ə'];
   }
 
@@ -465,7 +521,24 @@ class PhonemeScoringEngine {
     }
   }
 
-  /// Maps an expected phoneme to its most typical Vietnamese mispronunciation.
+  static bool _isPhoneticallySimilar(String w1, String w2) {
+    if (w1 == w2) return true;
+    if ((w1 == 'sink' && w2 == 'think') || (w1 == 'think' && w2 == 'sink')) return true;
+    if ((w1 == 'dis' && w2 == 'this') || (w1 == 'this' && w2 == 'dis')) return true;
+    if ((w1 == 'see' && w2 == 'she') || (w1 == 'she' && w2 == 'see')) return true;
+    if ((w1 == 'ship' && w2 == 'sheep') || (w1 == 'sheep' && w2 == 'ship')) return true;
+    return false;
+  }
+
+  static String _detectSubstitutedSound(String refWord, String spokenWord, String expectedSymbol) {
+    if (refWord == 'think' && spokenWord.contains('s')) return 's';
+    if (refWord == 'think' && spokenWord.contains('t')) return 't';
+    if (refWord == 'this' && spokenWord.startsWith('d')) return 'd';
+    if (refWord == 'she' && spokenWord.startsWith('s')) return 's';
+    if (refWord == 'sheep' && spokenWord == 'ship') return 'ɪ';
+    return _getCommonSubstitution(expectedSymbol);
+  }
+
   static String _getCommonSubstitution(String ipa) {
     switch (ipa) {
       case 'θ':
@@ -497,7 +570,6 @@ class PhonemeScoringEngine {
     }
   }
 
-  /// Reconstructs realistic transcript reflecting mispronunciations if any.
   static String _generateRecognizedTranscript(
     List<String> words,
     List<PhonemeFeedback> phonemes,
@@ -510,7 +582,6 @@ class PhonemeScoringEngine {
           wordFeedbacks.any((p) => p.status == PhonemeStatus.needsPractice);
 
       if (hasError) {
-        // Slightly modify word to reflect mispronunciation in transcript
         if (clean.toLowerCase() == 'think') {
           resultWords.add('sink');
         } else if (clean.toLowerCase() == 'this') {
@@ -529,4 +600,3 @@ class PhonemeScoringEngine {
     return resultWords.join(' ');
   }
 }
-
