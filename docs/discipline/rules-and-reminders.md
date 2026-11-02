@@ -1,137 +1,60 @@
-# Tài liệu Kỷ luật và Tiến độ (Discipline & Progress) — Nhóm 12
+﻿# Kỷ luật và tiến độ — bản tích hợp 02/11/2026
 
-> **CSE441 · Phát triển ứng dụng cho các thiết bị di động**  
-> **Người thực hiện:** Lý Đình Sơn (Lớp 65KTPM)  
-> **Nhánh Git:** `son-feature/discipline-progress`  
-> **Phạm vi module:** `lib/features/discipline/`, `test/discipline/`, `docs/discipline/`
+Module ban đầu: Lý Đình Sơn. Trường bổ sung sửa lỗi và tích hợp theo yêu cầu nhóm trưởng. Dữ liệu giả lập được nhóm chấp thuận để phát triển và demo; không thay thế bằng chứng nhận thông báo trên thiết bị thật.
 
----
+## Dashboard và quy tắc ngày học
 
-## 1. Giới thiệu chức năng
+- Chỉ tính phiên completed, durationSeconds > 0, đúng user và đã kết thúc; loại phiên hủy/lỗi và dữ liệu tương lai.
+- Dùng múi giờ IANA của hồ sơ với thư viện timezone; hỗ trợ UTC và thay đổi DST. Múi giờ không hợp lệ báo lỗi thay vì ngầm dùng UTC+7.
+- Gán phiên qua nửa đêm cho ngày bắt đầu. Nhiều phiên/ngày cộng thời lượng nhưng chỉ tính một ngày streak.
+- Ngày luyện khác ngày đạt mục tiêu: chỉ cần thời lượng dương để giữ streak. Streak tính lùi từ hôm nay hoặc hôm qua; bỏ từ hai ngày thì về 0.
+- Dashboard đọc toàn bộ lịch sử từ repository để không cắt chuỗi ở 30 ngày. Biểu đồ vẫn chỉ hiển thị 7 ngày gần nhất. Truy vấn toàn lịch sử phù hợp phạm vi bài tập; khi dữ liệu lớn cần bổ sung API tổng hợp/phân trang.
+- Mục tiêu ngày áp dụng vào biểu đồ 7 ngày theo cài đặt hiện tại; không lưu lịch sử thay đổi mục tiêu ở hợp đồng v1.
+- Tự làm mới mỗi 30 giây khi trang còn hoạt động, và khi app trở lại foreground; nhờ đó tiến độ đổi ngày không cần người dùng refresh. Adapter có thể implement Listenable để báo đổi hồ sơ/dữ liệu ngay; adapter không phát tín hiệu vẫn được kiểm tra lại theo chu kỳ.
 
-Module **Kỷ luật và tiến độ** giúp người học xây dựng và duy trì thói quen luyện phát âm tiếng Anh hằng ngày, bao gồm 4 nhóm tính năng trọng tâm:
+## Dữ liệu và hồ sơ giả lập
 
-1. **Chuỗi ngày liên tiếp (Streak 🔥):** Theo dõi số ngày luyện tập liên tục, vinh danh sự kiên trì và cảnh báo khi sắp đứt chuỗi.
-2. **Vòng tiến độ mục tiêu hôm nay:** Đối chiếu thời gian luyện thực tế với mục tiêu số phút/ngày của người học (mặc định 15 phút/ngày).
-3. **Biểu đồ thời lượng 7 ngày qua (*Rolling 7 days*):** Biểu đồ cột trực quan hiển thị số phút học từng ngày, tự động đổi màu khi đạt mục tiêu và 3 thẻ tóm tắt nhanh (*Chuỗi ngày, Tổng phút tuần, Số ngày đạt mục tiêu*).
-4. **Cài đặt mục tiêu & Nhắc học (`ReminderService`):** Lựa chọn preset mục tiêu phút/ngày, bật/tắt thông báo và chọn giờ nhắc học với thông báo đẩy native trên Android và fallback trên Web.
-5. **Thanh công cụ mô phỏng (Demo Bar):** Cho phép giáo viên / người chấm điểm mô phỏng nhanh các tình huống (+5 phút học, +15 phút đạt mục tiêu, bắn thông báo thử) để nghiệm thu trực tiếp.
+Chạy mặc định bằng `flutter run -d chrome` hoặc thiết bị Android. Có hai hồ sơ mẫu, chọn ngay trên trang Tiến độ. Hồ sơ thứ nhất có lịch sử mẫu theo ngày Việt Nam; hồ sơ thứ hai dùng UTC và lịch sử riêng. Mục tiêu, giờ nhắc và tiến độ tách theo user.
 
----
+Dữ liệu/cài đặt chỉ ở bộ nhớ, reset khi khởi động lại. Dashboard ghi rõ dữ liệu giả lập. Nút cộng phút chỉ hiện với fake repository và không ghi vào repository thật. FakeReminderService mô phỏng quyền/lịch; không gửi thông báo hệ điều hành. Các phiên demo không phải kết quả luyện phát âm AI.
 
-## 2. Công thức và Quy tắc tính toán
+## Android: adapter thông báo thật
 
-Toàn bộ logic tính toán được đóng gói độc lập trong class `DisciplineCalculator` (`lib/features/discipline/services/discipline_calculator.dart`) với các quy tắc tuân thủ nghiêm ngặt Hợp đồng v1:
-
-### 2.1. Quy tắc tính Ngày học & Lọc phiên hợp lệ
-* **Chỉ phiên `PracticeStatus.completed` có `durationSeconds > 0` mới được tính:** Loại bỏ hoàn toàn các phiên bị hủy (`cancelled`), phiên lỗi phân tích (`analysisFailed`) hoặc thời gian chờ mạng/ứng dụng không hoạt động.
-* **Thời gian UTC sang Múi giờ địa phương:** Chuyển đổi timestamp UTC của phiên học sang múi giờ người dùng (`Asia/Ho_Chi_Minh` — UTC+7) để xác định ngày dương lịch địa phương (`DateTime.utc(year, month, day)`).
-* **Quy tắc phiên qua nửa đêm:** Gán phiên học cho ngày bắt đầu (`startedAt`) theo múi giờ hồ sơ.
-* **Tổng hợp nhiều phiên trong ngày:** Nếu người học thực hiện nhiều phiên trong cùng một ngày, tổng thời lượng được cộng dồn, nhưng chỉ tính là **1 ngày** cho chuỗi streak.
-
-### 2.2. Quy tắc tính Chuỗi ngày liên tiếp (Streak)
-* **Streak đang tiếp diễn:**
-  * Nếu hôm nay đã có ít nhất một phiên luyện hợp lệ: `Streak = 1 + số ngày liên tiếp trước đó`.
-  * Nếu hôm nay chưa học, nhưng hôm qua có học: `Streak = số ngày liên tiếp tính đến hôm qua` (người dùng vẫn bảo toàn chuỗi và có hạn đến hết 23:59 hôm nay để tiếp tục).
-* **Đứt chuỗi (Streak = 0):** Nếu ngày luyện tập gần nhất cũ hơn hôm qua (cách từ 2 ngày trở lên), chuỗi streak lập tức quay về 0.
-
-### 2.3. Quy tắc Biểu đồ 7 ngày gần nhất
-* Cửa sổ 7 ngày trượt: Tính từ `Hôm nay - 6 ngày` đến `Hôm nay`.
-* Tỷ lệ hoàn thành ngày: $\text{ratio} = \min\left(1.0, \frac{\text{totalSeconds}}{\text{goalMinutes} \times 60}\right)$.
-* Đổi màu trạng thái:
-  * Đạt/vượt mục tiêu: Màu xanh lục đậm `#1B8A5A` kèm icon tích xanh.
-  * Đã học nhưng chưa đạt: Màu xanh Teal `#12796F` dịu mắt.
-  * Chưa học: Màu xám nhạt `#E0E5E3`.
-
----
-
-## 3. Thiết kế Giao diện Thích ứng & Chi tiết Trực quan (UI/UX)
-
-Giao diện `ProgressPage` được thiết kế theo phong cách **Modern EdTech Cards**, kết hợp đồng bộ với `AppTheme` (màu chủ đạo Teal `#12796F`, nền `#F5F8F7`):
-* **Header Chào mừng (`ProgressHeaderCard`):** Lời chào ngữ cảnh theo buổi sáng/chiều/tối, avatar chữ cái có viền phát sáng, ngày tháng tiếng Việt và huy hiệu cấp độ kỷ luật (*Tân Binh 🌱, Đồng 🥉, Bạc 🥈, Vàng 🌟, Bậc Thầy 👑*).
-* **Thẻ Chuỗi ngày Gamification (`StreakHeroCard`):** Huy hiệu ngọn lửa rực rỡ 🔥, thanh mốc thành tích mở khóa danh hiệu theo số ngày và dải 7 chấm tròn/ngọn lửa mini hiển thị tính liên tục của tuần học.
-* **Thẻ Tiến độ hôm nay (`DailyGoalRing`):** Vòng tiến độ tròn dày dặn bo góc mượt mà, phân loại nhịp độ (*Khởi động 🌱, Tăng tốc ⚡, Về đích 🎯, Vượt chỉ tiêu 🎉*) và 3 thông số phụ: *Đã luyện*, *Còn lại*, *Vượt mốc*.
-* **Biểu đồ cột Gradient & Tương tác thông minh (`WeeklyBarChart`):** Cột gradient chuyển màu theo trạng thái đạt mục tiêu, đường mốc mục tiêu nét đứt, chạm vào từng cột để xem chi tiết ngày đó, bổ sung 2 chỉ số *Trung bình/ngày* và *Ngày chăm chỉ nhất tuần*.
-* **Cài đặt mục tiêu & Nhắc học (`SettingsReminderCard`):** Preset chips có icon gợi ý định hướng, khung giờ đồng hồ điện tử lớn (*Digital Clock Tile*), khung xem trước thông báo trên màn hình khóa (*Notification Preview Mockup*) và callout lưu ý nền tảng Web/Android.
-* **Công cụ nghiệm thu (`DemoSimulationBar`):** Thẻ Developer Toolkit tinh gọn hỗ trợ người chấm điểm mô phỏng nhanh dữ liệu.
-
-Sử dụng `LayoutBuilder` để tự động tối ưu bố cục theo kích thước màn hình:
-
-| Viewport | Bố cục hiển thị | Chi tiết |
-| :--- | :--- | :--- |
-| **Mobile (< 800px)** | **1 cột cuộn dọc (Single Column)** | Header $\rightarrow$ Thẻ Streak 🔥 $\rightarrow$ Vòng tiến độ $\rightarrow$ Biểu đồ tuần $\rightarrow$ Cài đặt & Nhắc học $\rightarrow$ Thanh Demo. |
-| **Desktop / Web ($\ge$ 800px)** | **2 cột cân đối (Two-Column Grid)** | Header full-width phía trên.<br>• **Cột chính (Trái, flex: 3):** Thẻ Streak, Vòng tiến độ, Biểu đồ 7 ngày.<br>• **Cột phụ (Phải, flex: 2):** Cài đặt mục tiêu, Giờ nhắc học & Mockup thông báo, Thanh Demo nghiệm thu. |
-
----
-
-## 4. Dịch vụ Thông báo (`ReminderService`) & Khả năng nền tảng
-
-> Cập nhật tích hợp 02/11/2026: bản chạy mặc định dùng dữ liệu và thông báo giả lập theo thống nhất của nhóm. Xem [cấu hình dùng chung](../coordination/demo-setup.md). `LocalReminderService.scheduleDaily` trên Android hiện chỉ hủy lịch cũ và ghi log, chưa gọi API đặt lịch. Các test reminder bên dưới chỉ kiểm tra FakeReminderService, chưa nghiệm thu thông báo Android thật.
-
-### 4.1. Tích hợp trên Android Native
-* Sử dụng thư viện `flutter_local_notifications: ^22.3.3` và `flutter_web_plugins` (SDK Flutter để đăng ký plugin trên Web).
-* Các quyền được bổ sung trong `android/app/src/main/AndroidManifest.xml`:
-  ```xml
-  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-  <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-  <uses-permission android:name="android.permission.VIBRATE" />
-  ```
-* Luồng dự kiến: gọi `ReminderService.scheduleDaily(settings)` khi đổi cài đặt và `cancel(userId)` khi tắt/chuyển hồ sơ. Việc đặt lịch hệ thống và hủy/lên lịch khi đổi hồ sơ còn cần triển khai, kiểm thử.
-
-### 4.2. Giới hạn trên Web (Documented Limitation)
-* Khi chạy trên nền tảng Web (`kIsWeb`), thông báo nền khi đóng trình duyệt bị giới hạn bởi chính sách Web Push Service Worker.
-* Giao diện hiển thị rõ thông báo lưu ý: *“Lưu ý trên Web: Thông báo chỉ hỗ trợ khi trình duyệt đang mở.”*
-
----
-
-## 5. Kết quả Kiểm thử & Nghiệm thu (Test Matrix)
-
-Module đã xây dựng bộ test tự động toàn diện tại `test/discipline/`, đạt **18/18 test PASS** (và 32/32 test toàn dự án PASS):
-
-1. **`test/discipline/discipline_calculator_test.dart` (7 tests):**
-   * ✅ Chuyển đổi timestamp UTC sang múi giờ `Asia/Ho_Chi_Minh` chính xác.
-   * ✅ Bỏ qua các phiên `cancelled`, `analysisFailed` và phiên có thời lượng 0s.
-   * ✅ Cộng dồn nhiều phiên cùng ngày thành 1 ngày streak.
-   * ✅ Giữ streak nếu hôm qua có học nhưng hôm nay chưa học.
-   * ✅ Reset streak về 0 khi bỏ học từ 2 ngày trở lên.
-   * ✅ Tính đúng chuỗi 5 ngày liên tiếp xuyên tháng (29/10 đến 02/11).
-   * ✅ Xử lý chính xác phiên học kéo dài qua nửa đêm (thuộc ngày bắt đầu).
-
-2. **`test/discipline/reminder_service_test.dart` (5 tests):**
-   * ✅ Xin quyền thông báo trả về `ReminderPermission.granted`.
-   * ✅ Lên lịch nhắc nhở hằng ngày khi `reminderEnabled = true`.
-   * ✅ Tự động hủy lịch khi `reminderEnabled = false`.
-   * ✅ Hủy lịch theo ID người dùng.
-   * ✅ Kích hoạt thông báo tức thì thành công.
-
-3. **`test/discipline/progress_page_test.dart` (6 tests):**
-   * ✅ Render giao diện không lỗi, không tràn pixel (overflow) tại màn hình Mobile hẹp **360px**.
-   * ✅ Render mượt mà tại màn hình Tablet **768px**.
-   * ✅ Render đúng dạng 2 cột tại Desktop **800px** và **1366px**.
-   * ✅ Thao tác chọn chip đổi mục tiêu (5p, 10p, 15p, 20p, 30p) tự động cập nhật và lưu cài đặt.
-   * ✅ Nút Demo `+5p học hôm nay` cộng dồn thời gian và cập nhật UI ngay lập tức.
-
----
-
-## 6. Hướng dẫn chạy và nghiệm thu
-
-### Chạy kiểm thử tự động
 ```bash
-# Kiểm tra riêng module kỷ luật & tiến độ
-flutter test test/discipline/
+flutter run -d <android-device-id> --dart-define=USE_REAL_NOTIFICATIONS=true
+```
 
-# Kiểm tra toàn bộ dự án
+Dữ liệu học vẫn giả lập; service thông báo chuyển sang LocalReminderService. Nhắc mặc định tắt, người dùng phải bật để xin quyền. Nút thông báo thử cũng xin quyền trước khi gửi.
+
+- Khởi tạo plugin, kiểm tra quyền và gọi zonedSchedule với thời điểm kế tiếp theo múi giờ hồ sơ, lặp theo DateTimeComponents.time.
+- Dùng inexactAllowWhileIdle, không cần SCHEDULE_EXACT_ALARM/USE_EXACT_ALARM. Android có thể trì hoãn vì tiết kiệm pin; không cam kết đúng từng phút, không bảo đảm hoạt động sau khi bị buộc dừng.
+- Dùng ID dành riêng 12001 cho hồ sơ đang chọn; đổi giờ/hồ sơ thay cùng ID, tránh nhiều lịch. Khi chuyển user, hủy lịch cũ trước khi áp dụng cài đặt mới. Khi tắt nhắc, hủy lịch; service mới sau khởi động lại vẫn có thể hủy ID đã lưu trong hệ điều hành.
+- Có ScheduledNotificationReceiver/BootReceiver và RECEIVE_BOOT_COMPLETED để plugin phục hồi lịch đã lưu khi khởi động lại máy. Việc lưu cài đặt bền vững trong app còn chờ repository thật của Khanh; bản demo khởi động lại sẽ reset dữ liệu và đồng bộ lại lịch theo hồ sơ demo mặc định.
+- Khi từ chối quyền/nền tảng không hỗ trợ, giao diện không lưu trạng thái bật nhắc. Lỗi đặt lịch hiển thị cho người dùng. Không báo thành công thông báo thử nếu quyền bị từ chối hoặc plugin lỗi.
+- Khởi tạo/service có giải phóng timer/listener; phản hồi repository sau khi widget dispose không gọi setState.
+
+## Web
+
+Thông báo dùng quyền trình duyệt và HTML Notification. Timer kiểm tra giờ theo múi giờ hồ sơ mỗi 10 giây khi trang còn mở; mỗi user/ngày/phút chỉ gửi một lần trong vòng đời service. Không có Web Push/Service Worker cho nhắc nền khi đóng tab. Trình duyệt có thể giới hạn timer nền; đây không phải cơ chế hẹn giờ nền đáng tin cậy.
+
+## Kiểm thử tự động
+
+```bash
+flutter analyze
 flutter test
+flutter build apk --release
+flutter build web --release
 ```
 
-### Chạy ứng dụng trên Chrome / Android
-```bash
-# Chạy trên trình duyệt Web (Chrome)
-flutter run -d chrome
+Toàn dự án có 46 test đạt, gồm 14 test nền và 32 test discipline:
 
-# Chạy trên thiết bị / máy ảo Android
-flutter run -d <android-device-id>
-```
-Sau khi mở ứng dụng, chọn tab **Tiến độ** ở thanh điều hướng để xem và tương tác với giao diện đã hoàn thiện.
+- 7 test calculator gốc: UTC+7, cùng ngày, trạng thái không hợp lệ, liên tiếp/bỏ ngày và phiên qua nửa đêm.
+- 5 test FakeReminderService và 6 test giao diện gốc (360/768/800/1366px, mục tiêu, cộng phút demo).
+- 7 test service thật qua mock Android method channel: có gọi đặt lịch lặp đúng múi giờ/ngày kế tiếp, cùng ID khi đổi giờ/user, hủy lịch, từ chối quyền, lỗi plugin, hủy sau restart, nền tảng không hỗ trợ; kiểm tra IANA/DST.
+- 7 test hồi quy dashboard: streak 45 ngày, đổi user và dữ liệu/cài đặt riêng, chuyển ngày tự động, dispose khi đang tải, quyền denied/unsupported, lỗi đặt lịch không lưu bật nhắc.
 
+Mock channel xác nhận lời gọi tới plugin và xử lý của app, không chứng minh hệ điều hành đã hiển thị thông báo. Chưa có thiết bị Android kết nối trong phiên sửa để nghiệm thu thực tế.
+
+## Nghiệm thu thiết bị còn cần thực hiện
+
+Trên Android thật: bật/từ chối quyền; chọn giờ gần hiện tại; ghi giờ nhận khi app mở/nền; đổi giờ/tắt nhắc/đổi hồ sơ; kiểm tra không nhận lịch cũ; thử khởi động lại thiết bị. Ghi model máy, phiên bản Android và tình trạng tối ưu pin. Trên Chrome: cấp/từ chối quyền, thử thông báo, đổi giờ và đóng tab để xác nhận giới hạn. Không điền kết quả PASS khi chưa đo thực tế.

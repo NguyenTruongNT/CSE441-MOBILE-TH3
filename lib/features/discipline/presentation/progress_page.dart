@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../app/shared/app_states.dart';
@@ -20,23 +22,34 @@ class ProgressPage extends StatefulWidget {
     this.userRepository,
     this.learningRepository,
     this.reminderService,
+    this.clock,
   });
 
   final UserRepository? userRepository;
   final LearningRepository? learningRepository;
   final ReminderService? reminderService;
+  final Clock? clock;
 
   @override
   State<ProgressPage> createState() => _ProgressPageState();
 }
 
-class _ProgressPageState extends State<ProgressPage> {
+class _ProgressPageState extends State<ProgressPage>
+    with WidgetsBindingObserver {
   late final LearningRepository _learningRepository;
   late final ReminderService _reminderService;
-  final DisciplineCalculator _calculator = const DisciplineCalculator();
+  late final DisciplineCalculator _calculator;
+  Timer? _refreshTimer;
+  bool _refreshing = false;
+  bool _saving = false;
+  bool _reloadRequested = false;
+  String? _scheduledUser;
+  String? _scheduleKey;
+  List<UserProfile> _profiles = [];
 
   bool _isLoading = true;
   String? _errorMessage;
+  String? _reminderError;
 
   String _currentUserId = 'default-user-01';
   String _displayName = 'Học viên';
@@ -48,8 +61,20 @@ class _ProgressPageState extends State<ProgressPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _calculator = DisciplineCalculator(clock: widget.clock);
     _learningRepository = widget.learningRepository ?? FakeLearningRepository();
     _reminderService = widget.reminderService ?? LocalReminderService();
+    final users = widget.userRepository;
+    if (users is Listenable) (users as Listenable).addListener(_onDataChanged);
+    final learning = _learningRepository;
+    if (learning is Listenable) {
+      (learning as Listenable).addListener(_onDataChanged);
+    }
+    _refreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _onDataChanged(),
+    );
 
     final service = _reminderService;
     if (service is LocalReminderService) {
@@ -61,13 +86,36 @@ class _ProgressPageState extends State<ProgressPage> {
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    final users = widget.userRepository;
+    if (users is Listenable) {
+      (users as Listenable).removeListener(_onDataChanged);
+    }
+    final learning = _learningRepository;
+    if (learning is Listenable) {
+      (learning as Listenable).removeListener(_onDataChanged);
+    }
     final service = _reminderService;
     if (service is LocalReminderService) {
       service.onNotificationTriggered.removeListener(
         _handleNotificationReceived,
       );
+      if (widget.reminderService == null) service.dispose();
     }
     super.dispose();
+  }
+
+  void _onDataChanged() {
+    if (mounted) unawaited(_loadDashboardData());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _scheduleKey = null;
+      _onDataChanged();
+    }
   }
 
   void _handleNotificationReceived() {
@@ -84,28 +132,54 @@ class _ProgressPageState extends State<ProgressPage> {
   }
 
   Future<void> _loadDashboardData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    if (!mounted) return;
+    if (_refreshing || _saving) {
+      _reloadRequested = true;
+      return;
+    }
+    _refreshing = true;
 
     try {
       // 1. Resolve current active user
+      UserProfile? profile;
       if (widget.userRepository != null) {
-        final profile = await widget.userRepository!.getSelectedProfile();
-        if (profile != null) {
-          _currentUserId = profile.id;
-          _displayName = profile.displayName;
+        profile = await widget.userRepository!.getSelectedProfile();
+        if (profile == null) {
+          if (_scheduledUser != null) {
+            await _reminderService.cancel(_scheduledUser!);
+          }
+          _scheduledUser = null;
+          _scheduleKey = null;
+          throw StateError('Hãy chọn hồ sơ học tập trước.');
         }
+        _profiles = await widget.userRepository!.listProfiles();
+        _currentUserId = profile.id;
+        _displayName = profile.displayName;
+      }
+      if (!mounted) return;
+      if (_scheduledUser != null && _scheduledUser != _currentUserId) {
+        await _reminderService.cancel(_scheduledUser!);
+        _scheduleKey = null;
+        _scheduledUser = null;
       }
 
       // 2. Load settings for user
       _settings = await _learningRepository.getSettings(_currentUserId);
+      if (profile != null && _settings.timeZone != profile.timeZone) {
+        _settings = LearningSettings(
+          userId: _currentUserId,
+          dailyGoalMinutes: _settings.dailyGoalMinutes,
+          reminderEnabled: _settings.reminderEnabled,
+          reminderHour: _settings.reminderHour,
+          reminderMinute: _settings.reminderMinute,
+          timeZone: profile.timeZone,
+        );
+      }
 
-      // 3. Load sessions for the past 30 days
-      final nowUtc = DateTime.now().toUtc();
-      final fromUtc = nowUtc.subtract(const Duration(days: 30));
-      final toUtc = nowUtc.add(const Duration(days: 1));
+      // All history is needed for streaks longer than the chart's 7-day window.
+      final nowUtc = (widget.clock ?? DateTime.now)().toUtc();
+      final fromUtc = DateTime.utc(1);
+      final toUtc = nowUtc.add(const Duration(microseconds: 1));
 
       final sessions = await _learningRepository.listSessions(
         userId: _currentUserId,
@@ -118,21 +192,61 @@ class _ProgressPageState extends State<ProgressPage> {
         sessions: sessions,
         settings: _settings,
       );
+      if (!mounted) return;
+      final key =
+          '${_settings.userId}/${_settings.reminderEnabled}/${_settings.reminderHour}/${_settings.reminderMinute}/${_settings.timeZone}/${_settings.dailyGoalMinutes}';
+      if (key != _scheduleKey) {
+        try {
+          await _reminderService.scheduleDaily(_settings);
+          _scheduledUser = _currentUserId;
+          _scheduleKey = key;
+          _reminderError = null;
+        } catch (error) {
+          _reminderError = 'Chưa đặt được nhắc học: $error';
+        }
+      }
 
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
+        _errorMessage = null;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _errorMessage = 'Không thể tải dữ liệu tiến độ: $e';
       });
+    } finally {
+      _refreshing = false;
+      if (_reloadRequested && mounted) {
+        _reloadRequested = false;
+        unawaited(_loadDashboardData());
+      }
     }
   }
 
   Future<void> _handleSaveSettings(LearningSettings newSettings) async {
-    await _learningRepository.saveSettings(newSettings);
-    await _reminderService.scheduleDaily(newSettings);
+    if (_saving || _refreshing) {
+      throw StateError('Đang xử lý cài đặt, vui lòng thử lại.');
+    }
+    _saving = true;
+    try {
+      await _reminderService.scheduleDaily(newSettings);
+      try {
+        await _learningRepository.saveSettings(newSettings);
+      } catch (_) {
+        await _reminderService.scheduleDaily(_settings);
+        rethrow;
+      }
+      _scheduleKey = null;
+    } finally {
+      _saving = false;
+      if (_reloadRequested && mounted) {
+        _reloadRequested = false;
+        unawaited(_loadDashboardData());
+      }
+    }
     await _loadDashboardData();
   }
 
@@ -168,6 +282,36 @@ class _ProgressPageState extends State<ProgressPage> {
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Column(
                   children: [
+                    if (_reminderError != null)
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(_reminderError!),
+                        ),
+                      ),
+                    if (_profiles.isNotEmpty &&
+                        _learningRepository is FakeLearningRepository)
+                      DropdownButton<String>(
+                        value: _currentUserId,
+                        isExpanded: true,
+                        items: [
+                          for (final profile in _profiles)
+                            DropdownMenuItem(
+                              value: profile.id,
+                              child: Text(
+                                'Hồ sơ demo: ${profile.displayName}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                        onChanged: (id) async {
+                          if (id != null) {
+                            await widget.userRepository!.selectProfile(id);
+                            await _loadDashboardData();
+                          }
+                        },
+                      ),
                     if (_learningRepository is FakeLearningRepository) ...[
                       const Card(
                         child: Padding(

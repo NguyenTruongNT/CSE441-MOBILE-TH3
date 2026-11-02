@@ -1,6 +1,21 @@
 # Kiểm tra khung ứng dụng của Trường
 
-Phạm vi: khung độc lập, chưa ghép module nghiệp vụ của Khanh/Đăng/Sơn. Kết quả này không xác nhận đủ 7 checklist hoặc chất lượng AI.
+## Bản tích hợp Tiến độ — 02/11/2026
+
+Đã có module Sơn và sửa bổ sung của Trường: đặt lịch Android theo múi giờ, hủy/thay lịch, đổi hồ sơ, streak dài, tự cập nhật qua ngày và hai hồ sơ giả lập. Dữ liệu và thông báo mặc định vẫn mô phỏng theo thống nhất của nhóm.
+
+- `flutter analyze`: không có issue.
+- `flutter test`: **46/46 đạt**, gồm **32 test discipline + 14 test nền**. Test Android dùng LocalReminderService và plugin thật qua mock method channel; chưa phải kiểm tra nhận thông báo hệ điều hành.
+- `flutter build apk --release`: thành công, APK tại `build/app/outputs/flutter-apk/app-release.apk` (49.6 MB, debug signing).
+- `flutter build web --release`: thành công, đầu ra `build/web`.
+- `flutter devices`: chỉ có Windows, Chrome, Edge; không có Android kết nối để nghiệm thu nhận thông báo.
+- Chưa xác nhận CSDL/API AI thật, dữ liệu bền vững hoặc thông báo sau khởi động lại máy trên thiết bị thực.
+
+Xem [quy tắc và ma trận nghiệm thu còn lại](../discipline/rules-and-reminders.md). Phần bên dưới là lịch sử kiểm tra khung trước khi ghép Sơn, không phản ánh số test hiện tại.
+
+## Lịch sử kiểm tra khung
+
+Phạm vi cũ: khung độc lập, chưa ghép module nghiệp vụ của Khanh/Đăng/Sơn. Kết quả này không xác nhận đủ 7 checklist hoặc chất lượng AI.
 
 ## Kết quả đã chạy
 
