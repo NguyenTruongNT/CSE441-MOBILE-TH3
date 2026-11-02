@@ -1,12 +1,14 @@
 ﻿# TH3: Ứng dụng học tiếng Anh với phân tích phát âm AI
 
+> Cập nhật tích hợp 02/11/2026: trang Tiến độ có hai hồ sơ và dữ liệu giả lập theo thống nhất nhóm. Đã sửa streak dài, đổi hồ sơ, cập nhật qua ngày mới và đặt lịch Android qua plugin thật; thông báo mặc định vẫn mô phỏng. Xem [cách chạy](docs/coordination/demo-setup.md) và [quy tắc, test, giới hạn](docs/discipline/rules-and-reminders.md). Chưa nghiệm thu nhận thông báo trên thiết bị Android thật.
+
 > **CSE441 · Phát triển ứng dụng cho các thiết bị di động**
 >
 > Lớp **65KTPM** · Nhóm **12** · Flutter · Android & Web
 
 > **Hạn nộp: trước 22h00 ngày 03/11/2026 — giờ Việt Nam (UTC+7).**
 
-> **Trạng thái hiện tại:** Đã có khung ứng dụng và hợp đồng module; chưa tích hợp CSDL, phát âm AI và nhắc học thực tế. Phân công đã được người dùng duyệt; xác nhận nhận việc của từng thành viên được thực hiện trong nhóm.
+> **Trạng thái hiện tại:** Có khung, hợp đồng và module Tiến độ; chạy demo bằng dữ liệu trong bộ nhớ. CSDL, phát âm AI và nghiệm thu thông báo thiết bị thật còn chờ tích hợp/kiểm tra. Phân công đã được người dùng duyệt.
 
 **Điều hướng nhanh**
 
@@ -36,7 +38,7 @@
 | **Nguyễn Văn Trường**<br>Nhóm trưởng | Phân chia, điều phối; hợp đồng chung; khung ứng dụng; review, merge và tích hợp | Đã có hợp đồng v1, khung thích ứng, 14 test đạt và tài liệu bàn giao. [Chi tiết & việc chờ](docs/coordination/truong-tasks.md). Chờ ghép module thật, kiểm thử toàn bộ và hồ sơ nộp. | `truong-chore/project-integration` | 🟡 Đang làm |
 | **Vũ Tuấn Khanh** | CSDL, lưu trữ, hồ sơ người dùng và lịch sử | Schema/migration, repository, màn hình hồ sơ/lịch sử, kiểm thử dữ liệu | `khanh-feature/user-data` | ⬜ Chưa bắt đầu |
 | **Vũ Hải Đăng** | Thu âm, API nhận dạng, phân tích âm vị, chấm điểm và phản hồi | Luồng luyện phát âm, điểm/âm vị sai, bài tập cải thiện, đánh giá nhiều giọng | `dang-feature/pronunciation-ai` | ⬜ Chưa bắt đầu |
-| **Lý Đình Sơn** | Mục tiêu, streak, thống kê và nhắc học | Dashboard, cài đặt mục tiêu/nhắc học, kiểm thử quy tắc ngày học | `son-feature/discipline-progress` | ⬜ Chưa bắt đầu |
+| **Lý Đình Sơn** | Mục tiêu, streak, thống kê và nhắc học | Đã tích hợp code và bản sửa của Trường; có demo hai hồ sơ, test dashboard và adapter Android. [Chi tiết](docs/discipline/rules-and-reminders.md). Chờ nghiệm thu thông báo thiết bị thật. | `son-feature/discipline-progress` | 🟡 Đang làm |
 
 **Quy ước trạng thái:** ⬜ Chưa bắt đầu · 🟡 Đang làm · 🔴 Bị vướng · 🔵 Chờ review · ✅ Hoàn thành.
 
@@ -254,9 +256,9 @@ Chạy Android với ID lấy từ `flutter devices`:
 flutter run -d <device-id>
 ```
 
-**Hiện các lệnh này chạy khung English AI**, gồm Tiến độ, Luyện phát âm, Lịch sử và Hồ sơ. Dưới 800px có điều hướng dưới; từ 800px có thanh bên. Mỗi trang ghi rõ đang chờ tích hợp, chưa thu âm/chấm điểm/lưu dữ liệu/nhắc học. Bản khung không cần khóa API hay backend.
+**Các lệnh này chạy English AI với trang Tiến độ bằng dữ liệu giả lập**, gồm mục tiêu, streak, biểu đồ 7 ngày, hai hồ sơ mẫu và nhắc học mô phỏng. Ba trang Luyện phát âm, Lịch sử và Hồ sơ còn chờ tích hợp. Dưới 800px có điều hướng dưới; từ 800px có thanh bên. Không cần khóa API/backend cho demo. Thêm `--dart-define=USE_REAL_NOTIFICATIONS=true` để thử adapter thông báo thật cùng dữ liệu học giả lập; xem [hướng dẫn](docs/coordination/demo-setup.md).
 
-Đã phân tích mã và chạy **14/14 test đạt**. Xem phạm vi kiểm tra và kết quả build tại [verification.md](docs/coordination/verification.md); chưa nghiệm thu thiết bị thật hoặc luồng nghiệp vụ.
+Đã phân tích mã và chạy **46/46 test đạt**, build APK/web release thành công. Xem phạm vi kiểm tra tại [verification.md](docs/coordination/verification.md); chưa nghiệm thu nhận thông báo Android trên thiết bị thật hoặc luồng CSDL/AI đầy đủ.
 
 ### Cấu hình bản hoàn chỉnh
 
@@ -288,7 +290,7 @@ Kiểm thử cần thiết bị/backend có hướng dẫn riêng do Trường b
 6. Xem Lịch sử và Tiến độ để theo dõi kết quả, thời gian, mục tiêu và streak.
 7. Chuyển hồ sơ và mở lại ứng dụng để kiểm tra dữ liệu riêng, lưu trữ bền vững.
 
-Đây là luồng nghiệm thu sau tích hợp, chưa sử dụng được trên bản khung hiện tại. Hiện có thể mở ứng dụng, chuyển bốn mục và kiểm tra bố cục mobile/desktop.
+Đây là luồng nghiệm thu sau khi ghép đủ module CSDL/AI. Hiện có thể dùng Tiến độ với dữ liệu và hai hồ sơ giả lập, chỉnh mục tiêu/giờ nhắc, cộng phút demo, bật adapter thông báo thật bằng tham số chạy và chuyển bốn mục để kiểm tra bố cục. Dữ liệu demo không được lưu bền vững và không phải kết quả AI.
 
 <a id="kiem-thu"></a>
 
