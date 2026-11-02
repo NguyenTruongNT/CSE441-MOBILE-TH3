@@ -44,7 +44,7 @@ class DemoSimulationBar extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Công cụ nghiệm thu & Mô phỏng',
+                    'Công cụ nghiệm thu & Mô phỏng (Demo Tool)',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF12796F),
@@ -55,7 +55,7 @@ class DemoSimulationBar extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Thao tác nhanh để kiểm tra tính năng streak, vòng tiến độ và thông báo mà không cần chờ đợi:',
+              'Mô phỏng nhanh các tình huống thực tế để kiểm tra chuỗi streak, tiến độ và thông báo:',
               style: TextStyle(fontSize: 12, color: Colors.black54),
             ),
             const SizedBox(height: 12),
@@ -63,7 +63,7 @@ class DemoSimulationBar extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                // Button 1: Add 5 minutes
+                // Button 1: Add 5 minutes (Matches test finder)
                 FilledButton.tonalIcon(
                   onPressed: () => _addMinutes(context, 5),
                   icon: const Icon(Icons.add, size: 16),

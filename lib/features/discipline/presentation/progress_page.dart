@@ -7,6 +7,7 @@ import '../services/discipline_calculator.dart';
 import '../services/local_reminder_service.dart';
 import 'widgets/daily_goal_ring.dart';
 import 'widgets/demo_simulation_bar.dart';
+import 'widgets/progress_header_card.dart';
 import 'widgets/settings_reminder_card.dart';
 import 'widgets/streak_hero_card.dart';
 import 'widgets/weekly_bar_chart.dart';
@@ -37,8 +38,11 @@ class _ProgressPageState extends State<ProgressPage> {
   String? _errorMessage;
 
   String _currentUserId = 'default-user-01';
+  String _displayName = 'Học viên';
   late LearningSettings _settings;
   late DisciplineStats _stats;
+
+  NotificationPayload? _activeNotificationBanner;
 
   @override
   void initState() {
@@ -46,7 +50,35 @@ class _ProgressPageState extends State<ProgressPage> {
     _learningRepository =
         widget.learningRepository ?? FakeLearningRepository();
     _reminderService = widget.reminderService ?? LocalReminderService();
+
+    final service = _reminderService;
+    if (service is LocalReminderService) {
+      service.onNotificationTriggered.addListener(_handleNotificationReceived);
+    }
+
     _loadDashboardData();
+  }
+
+  @override
+  void dispose() {
+    final service = _reminderService;
+    if (service is LocalReminderService) {
+      service.onNotificationTriggered.removeListener(_handleNotificationReceived);
+    }
+    super.dispose();
+  }
+
+  void _handleNotificationReceived() {
+    if (!mounted) return;
+    final service = _reminderService;
+    if (service is LocalReminderService) {
+      final payload = service.onNotificationTriggered.value;
+      if (payload != null) {
+        setState(() {
+          _activeNotificationBanner = payload;
+        });
+      }
+    }
   }
 
   Future<void> _loadDashboardData() async {
@@ -61,6 +93,7 @@ class _ProgressPageState extends State<ProgressPage> {
         final profile = await widget.userRepository!.getSelectedProfile();
         if (profile != null) {
           _currentUserId = profile.id;
+          _displayName = profile.displayName;
         }
       }
 
@@ -131,9 +164,17 @@ class _ProgressPageState extends State<ProgressPage> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1200),
-                child: isWide
-                    ? _buildDesktopLayout()
-                    : _buildMobileLayout(),
+                child: Column(
+                  children: [
+                    if (_activeNotificationBanner != null) ...[
+                      _buildHeadsUpNotificationBanner(
+                        _activeNotificationBanner!,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    isWide ? _buildDesktopLayout() : _buildMobileLayout(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -142,45 +183,123 @@ class _ProgressPageState extends State<ProgressPage> {
     );
   }
 
+  /// Heads-Up Floating Notification Banner visible on both Web and Mobile
+  Widget _buildHeadsUpNotificationBanner(NotificationPayload payload) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFFF9800), width: 1.5),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF9800).withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.notifications_active_rounded,
+              color: Color(0xFFFFB74D),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  payload.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  payload.body,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close_rounded, color: Colors.white60, size: 20),
+            onPressed: () {
+              setState(() {
+                _activeNotificationBanner = null;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 2-Column responsive layout for Desktop & Web widescreen
   Widget _buildDesktopLayout() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        // Main Column: Analytics & Charts
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              StreakHeroCard(stats: _stats),
-              const SizedBox(height: 16),
-              DailyGoalRing(stats: _stats),
-              const SizedBox(height: 16),
-              WeeklyBarChart(stats: _stats),
-            ],
-          ),
+        ProgressHeaderCard(
+          displayName: _displayName,
+          stats: _stats,
         ),
-        const SizedBox(width: 20),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Main Column: Analytics & Charts
+            Expanded(
+              flex: 3,
+              child: Column(
+                children: [
+                  StreakHeroCard(stats: _stats),
+                  const SizedBox(height: 16),
+                  DailyGoalRing(stats: _stats),
+                  const SizedBox(height: 16),
+                  WeeklyBarChart(stats: _stats),
+                ],
+              ),
+            ),
+            const SizedBox(width: 20),
 
-        // Side Column: Settings & Demo Actions
-        Expanded(
-          flex: 2,
-          child: Column(
-            children: [
-              SettingsReminderCard(
-                settings: _settings,
-                reminderService: _reminderService,
-                onSaveSettings: _handleSaveSettings,
+            // Side Column: Settings & Demo Actions
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  SettingsReminderCard(
+                    settings: _settings,
+                    reminderService: _reminderService,
+                    onSaveSettings: _handleSaveSettings,
+                  ),
+                  const SizedBox(height: 16),
+                  DemoSimulationBar(
+                    userId: _currentUserId,
+                    repository: _learningRepository,
+                    reminderService: _reminderService,
+                    onDataChanged: _loadDashboardData,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              DemoSimulationBar(
-                userId: _currentUserId,
-                repository: _learningRepository,
-                reminderService: _reminderService,
-                onDataChanged: _loadDashboardData,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
@@ -190,6 +309,11 @@ class _ProgressPageState extends State<ProgressPage> {
   Widget _buildMobileLayout() {
     return Column(
       children: [
+        ProgressHeaderCard(
+          displayName: _displayName,
+          stats: _stats,
+        ),
+        const SizedBox(height: 16),
         StreakHeroCard(stats: _stats),
         const SizedBox(height: 16),
         DailyGoalRing(stats: _stats),
@@ -212,4 +336,3 @@ class _ProgressPageState extends State<ProgressPage> {
     );
   }
 }
-

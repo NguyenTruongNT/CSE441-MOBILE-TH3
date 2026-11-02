@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:th3_english_ai/core/contracts/contracts.dart';
 
-/// Card allowing users to configure daily practice goal and notification reminder.
+/// Card allowing users to configure daily practice goal and notification reminder with preview mockup.
 class SettingsReminderCard extends StatelessWidget {
   const SettingsReminderCard({
     super.key,
@@ -53,20 +53,40 @@ class SettingsReminderCard extends StatelessWidget {
             const SizedBox(height: 18),
 
             // 1. Goal presets
-            Text(
-              'Mục tiêu học mỗi ngày (phút):',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Mục tiêu học mỗi ngày:',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                Text(
+                  _getPresetHint(settings.dailyGoalMinutes),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
+
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: _goalPresets.map((minutes) {
                 final isSelected = settings.dailyGoalMinutes == minutes;
                 return ChoiceChip(
+                  avatar: Icon(
+                    _getPresetIcon(minutes),
+                    size: 15,
+                    color: isSelected ? primaryColor : Colors.black54,
+                  ),
                   label: Text('$minutes phút'),
                   selected: isSelected,
                   selectedColor: primaryColor.withValues(alpha: 0.18),
@@ -98,7 +118,7 @@ class SettingsReminderCard extends StatelessWidget {
               child: Divider(height: 1),
             ),
 
-            // 2. Reminder settings
+            // 2. Reminder Switch & Time Selector
             Row(
               children: [
                 Expanded(
@@ -128,7 +148,6 @@ class SettingsReminderCard extends StatelessWidget {
                   activeThumbColor: primaryColor,
                   onChanged: (enabled) async {
                     if (enabled) {
-                      // Request permission first
                       final permission =
                           await reminderService.requestPermission();
                       if (permission == ReminderPermission.denied &&
@@ -164,64 +183,144 @@ class SettingsReminderCard extends StatelessWidget {
 
             if (settings.reminderEnabled) ...[
               const SizedBox(height: 12),
+              // Digital Clock Tile
               InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 onTap: () => _pickTime(context),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
+                    horizontal: 14,
+                    vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F4),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFD4DFDC)),
+                    gradient: LinearGradient(
+                      colors: [
+                        primaryColor.withValues(alpha: 0.08),
+                        const Color(0xFFF1F5F4),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.alarm_rounded, color: primaryColor, size: 20),
-                      const SizedBox(width: 8),
+                      Icon(Icons.alarm_on_rounded, color: primaryColor, size: 24),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
-                          'Giờ nhắc:',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Giờ hẹn chuông:',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              '$hourStr:$minStr',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: primaryColor,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
+                      FilledButton.tonalIcon(
+                        onPressed: () => _pickTime(context),
+                        icon: const Icon(Icons.edit_calendar_rounded, size: 16),
+                        label: const Text('Đổi giờ'),
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
                         ),
-                        decoration: BoxDecoration(
-                          color: primaryColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '$hourStr:$minStr',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: primaryColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(
-                        Icons.edit_outlined,
-                        size: 16,
-                        color: Colors.black54,
                       ),
                     ],
                   ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Notification Lock-Screen Preview Mockup
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C3E50),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.notifications_active_rounded,
+                          size: 14,
+                          color: Color(0xFF81C784),
+                        ),
+                        const SizedBox(width: 6),
+                        const Expanded(
+                          child: Text(
+                            'Xem trước thông báo',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white70,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$hourStr:$minStr',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white60,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'English AI · Giờ học mỗi ngày 🔥',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Đã đến lúc luyện phát âm! Hoàn thành ${settings.dailyGoalMinutes} phút hôm nay để giữ vững chuỗi ngày nhé.',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white70,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
 
             const SizedBox(height: 14),
 
-            // Platform limitations banner
+            // Platform Callout Card
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -246,8 +345,8 @@ class SettingsReminderCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       kIsWeb
-                          ? 'Ghi chú Web: Thông báo đẩy chỉ hỗ trợ khi trình duyệt đang mở (không hỗ trợ chạy nền khi đóng trình duyệt).'
-                          : 'Android: Đã tích hợp chuông nhắc hằng ngày vào đúng $hourStr:$minStr theo giờ hệ thống.',
+                          ? 'Ghi chú Web: Thông báo chỉ hỗ trợ khi tab trình duyệt đang mở (không hỗ trợ chạy nền khi đóng trình duyệt).'
+                          : 'Android: Hệ thống sẽ tự động nhắc nhở vào đúng $hourStr:$minStr hằng ngày ngay cả khi đóng ứng dụng.',
                       style: TextStyle(
                         fontSize: 12,
                         color: kIsWeb
@@ -264,6 +363,40 @@ class SettingsReminderCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  IconData _getPresetIcon(int minutes) {
+    switch (minutes) {
+      case 5:
+        return Icons.bolt_rounded;
+      case 10:
+        return Icons.timer_rounded;
+      case 15:
+        return Icons.local_fire_department_rounded;
+      case 20:
+        return Icons.fitness_center_rounded;
+      case 30:
+        return Icons.emoji_events_rounded;
+      default:
+        return Icons.access_time_rounded;
+    }
+  }
+
+  String _getPresetHint(int minutes) {
+    switch (minutes) {
+      case 5:
+        return '⚡ Nhanh gọn';
+      case 10:
+        return '🎯 Tiêu chuẩn';
+      case 15:
+        return '🔥 Khuyên dùng';
+      case 20:
+        return '💪 Chuyên sâu';
+      case 30:
+        return '🏆 Bứt phá';
+      default:
+        return '';
+    }
   }
 
   Future<void> _pickTime(BuildContext context) async {
