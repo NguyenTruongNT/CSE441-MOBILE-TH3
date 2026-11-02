@@ -1,5 +1,6 @@
 import '../../../core/contracts/contracts.dart';
 import '../models/discipline_stats.dart';
+import 'discipline_time.dart';
 
 /// Clock typedef for deterministic time testing.
 typedef Clock = DateTime Function();
@@ -10,25 +11,9 @@ class DisciplineCalculator {
 
   final Clock _clock;
 
-  /// Returns the timezone offset for the given timezone identifier.
-  /// Defaults to +07:00 (Asia/Ho_Chi_Minh).
-  Duration getTimeZoneOffset(String timeZone) {
-    switch (timeZone) {
-      case 'Asia/Ho_Chi_Minh':
-      case 'Asia/Bangkok':
-      case 'Asia/Jakarta':
-        return const Duration(hours: 7);
-      case 'UTC':
-        return Duration.zero;
-      default:
-        return const Duration(hours: 7);
-    }
-  }
-
   /// Converts a UTC DateTime to a local calendar date (midnight 00:00:00).
   DateTime toLocalDate(DateTime utcDateTime, String timeZone) {
-    final offset = getTimeZoneOffset(timeZone);
-    final local = utcDateTime.toUtc().add(offset);
+    final local = profileTime(utcDateTime, timeZone);
     return DateTime.utc(local.year, local.month, local.day);
   }
 
@@ -45,13 +30,18 @@ class DisciplineCalculator {
 
     for (final session in sessions) {
       // Rule: Only completed sessions with duration > 0 are valid practice.
-      if (session.status != PracticeStatus.completed ||
+      if (session.userId != settings.userId ||
+          session.endedAt.isAfter(nowUtc) ||
+          session.status != PracticeStatus.completed ||
           session.durationSeconds <= 0) {
         continue;
       }
 
       // Rule: Attributed to start date in user's profile timezone.
-      final sessionLocalDate = toLocalDate(session.startedAt, settings.timeZone);
+      final sessionLocalDate = toLocalDate(
+        session.startedAt,
+        settings.timeZone,
+      );
       secondsByDate[sessionLocalDate] =
           (secondsByDate[sessionLocalDate] ?? 0) + session.durationSeconds;
     }
@@ -119,4 +109,3 @@ class DisciplineCalculator {
     return streakCount;
   }
 }
-

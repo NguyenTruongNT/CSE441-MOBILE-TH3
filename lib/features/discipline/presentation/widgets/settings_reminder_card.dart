@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:th3_english_ai/core/contracts/contracts.dart';
 
+import '../../data/fake_discipline_data.dart';
+
 /// Card allowing users to configure daily practice goal and notification reminder with preview mockup.
 class SettingsReminderCard extends StatelessWidget {
   const SettingsReminderCard({
@@ -148,10 +150,10 @@ class SettingsReminderCard extends StatelessWidget {
                   activeThumbColor: primaryColor,
                   onChanged: (enabled) async {
                     if (enabled) {
-                      final permission =
-                          await reminderService.requestPermission();
-                      if (permission == ReminderPermission.denied &&
-                          context.mounted) {
+                      final permission = await reminderService
+                          .requestPermission();
+                      if (permission != ReminderPermission.granted) {
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -164,7 +166,7 @@ class SettingsReminderCard extends StatelessWidget {
                     }
 
                     if (context.mounted) {
-                      _updateSettings(
+                      await _updateSettings(
                         context,
                         LearningSettings(
                           userId: settings.userId,
@@ -202,11 +204,17 @@ class SettingsReminderCard extends StatelessWidget {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: primaryColor.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.alarm_on_rounded, color: primaryColor, size: 24),
+                      Icon(
+                        Icons.alarm_on_rounded,
+                        color: primaryColor,
+                        size: 24,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -324,11 +332,14 @@ class SettingsReminderCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: kIsWeb ? const Color(0xFFFFF8E1) : const Color(0xFFE8F5E9),
+                color: kIsWeb
+                    ? const Color(0xFFFFF8E1)
+                    : const Color(0xFFE8F5E9),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color:
-                      kIsWeb ? const Color(0xFFFFE082) : const Color(0xFFA5D6A7),
+                  color: kIsWeb
+                      ? const Color(0xFFFFE082)
+                      : const Color(0xFFA5D6A7),
                 ),
               ),
               child: Row(
@@ -344,9 +355,11 @@ class SettingsReminderCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      kIsWeb
+                      reminderService is FakeReminderService
+                          ? 'Chế độ giả lập: không gửi thông báo hệ thống.'
+                          : kIsWeb
                           ? 'Ghi chú Web: Thông báo chỉ hỗ trợ khi tab trình duyệt đang mở (không hỗ trợ chạy nền khi đóng trình duyệt).'
-                          : 'Android: Hệ thống sẽ tự động nhắc nhở vào đúng $hourStr:$minStr hằng ngày ngay cả khi đóng ứng dụng.',
+                          : 'Android: Nhắc mỗi ngày khoảng $hourStr:$minStr theo múi giờ hồ sơ. Hệ thống tiết kiệm pin có thể làm trễ thông báo; buộc dừng ứng dụng có thể ngăn nhắc học.',
                       style: TextStyle(
                         fontSize: 12,
                         color: kIsWeb
@@ -427,7 +440,16 @@ class SettingsReminderCard extends StatelessWidget {
     BuildContext context,
     LearningSettings newSettings,
   ) async {
-    await onSaveSettings(newSettings);
+    try {
+      await onSaveSettings(newSettings);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không lưu được cài đặt: $error')),
+        );
+      }
+      return;
+    }
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
