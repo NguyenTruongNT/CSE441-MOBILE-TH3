@@ -1,15 +1,38 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../core/contracts/contracts.dart';
+import 'web_notification_helper.dart';
+
+/// Payload delivered when an in-app or system notification is triggered.
+class NotificationPayload {
+  const NotificationPayload({
+    required this.title,
+    required this.body,
+    required this.timestamp,
+  });
+
+  final String title;
+  final String body;
+  final DateTime timestamp;
+}
 
 /// Implementation of [ReminderService] using Flutter Local Notifications.
-/// Supports native Android scheduled alarms and provides clear web fallback.
+/// Supports native Android scheduled alarms and provides real Web browser notifications.
 class LocalReminderService implements ReminderService {
   LocalReminderService({FlutterLocalNotificationsPlugin? plugin})
     : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   final FlutterLocalNotificationsPlugin _plugin;
   bool _isInitialized = false;
+
+  /// Notifier for in-app floating banner when a notification triggers.
+  final ValueNotifier<NotificationPayload?> onNotificationTriggered =
+      ValueNotifier(null);
+
+  Timer? _periodicWebTimer;
+  int? _lastFiredMinute;
+  LearningSettings? _currentScheduledSettings;
 
   /// Ensures platform notifications are initialized.
   Future<void> initialize() async {
@@ -38,8 +61,9 @@ class LocalReminderService implements ReminderService {
   @override
   Future<ReminderPermission> requestPermission() async {
     if (kIsWeb) {
-      // Documented limitation: Web push/background reminder requires service workers.
-      return ReminderPermission.unsupported;
+      // Request real Web Browser notification permission (Chrome / Edge / Firefox)
+      final granted = await requestBrowserNotificationPermission();
+      return granted ? ReminderPermission.granted : ReminderPermission.denied;
     }
 
     await initialize();
@@ -65,14 +89,18 @@ class LocalReminderService implements ReminderService {
 
   @override
   Future<void> scheduleDaily(LearningSettings settings) async {
+    _currentScheduledSettings = settings;
+
     if (!settings.reminderEnabled) {
       await cancel(settings.userId);
       return;
     }
 
     if (kIsWeb) {
+      // Start in-tab scheduled monitoring on Web
+      _startWebReminderCheck();
       debugPrint(
-        'Web notification: Scheduled daily reminder at ${settings.reminderHour}:${settings.reminderMinute.toString().padLeft(2, '0')}. (Note: background notifications on web are limited).',
+        'Web notification: Scheduled daily reminder at ${settings.reminderHour}:${settings.reminderMinute.toString().padLeft(2, '0')}.',
       );
       return;
     }
@@ -93,7 +121,12 @@ class LocalReminderService implements ReminderService {
 
   @override
   Future<void> cancel(String userId) async {
+    _currentScheduledSettings = null;
+    _periodicWebTimer?.cancel();
+    _lastFiredMinute = null;
+
     if (kIsWeb) return;
+
     await initialize();
     final notificationId = _idForUser(userId);
     await _plugin.cancel(id: notificationId);
@@ -105,8 +138,20 @@ class LocalReminderService implements ReminderService {
     required String title,
     required String body,
   }) async {
+    // 1. Notify in-app banner listener
+    onNotificationTriggered.value = NotificationPayload(
+      title: title,
+      body: body,
+      timestamp: DateTime.now(),
+    );
+
     if (kIsWeb) {
-      debugPrint('Test notification on Web: $title - $body');
+      // 2. Trigger real HTML5 Chrome Browser Notification
+      final showedBrowser = await triggerBrowserNotification(
+        title: title,
+        body: body,
+      );
+      debugPrint('Web browser notification triggered: $showedBrowser ($title)');
       return true;
     }
 
@@ -135,6 +180,30 @@ class LocalReminderService implements ReminderService {
       debugPrint('Failed to send test notification: $e');
       return false;
     }
+  }
+
+  void _startWebReminderCheck() {
+    _periodicWebTimer?.cancel();
+    if (!kIsWeb) return;
+
+    _periodicWebTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      final s = _currentScheduledSettings;
+      if (s == null || !s.reminderEnabled) return;
+
+      final now = DateTime.now();
+      if (now.hour == s.reminderHour && now.minute == s.reminderMinute) {
+        if (_lastFiredMinute != now.minute) {
+          _lastFiredMinute = now.minute;
+          sendImmediateTestNotification(
+            title: 'English AI · Giờ học mỗi ngày 🔥',
+            body:
+                'Đã đến giờ luyện nói tiếng Anh hôm nay! Hãy dành ${s.dailyGoalMinutes} phút để duy trì ngọn lửa chuỗi ngày nhé.',
+          );
+        }
+      } else {
+        _lastFiredMinute = null;
+      }
+    });
   }
 
   int _idForUser(String userId) => userId.hashCode & 0x7FFFFFFF;
