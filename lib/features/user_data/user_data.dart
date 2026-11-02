@@ -4,3 +4,5 @@ export 'data/user_data_schema.dart';
 export 'data/user_data_serializers.dart';
 export 'data/user_data_store.dart';
 export 'demo/user_data_demo_seed.dart';
+export 'presentation/profile_form_dialog.dart';
+export 'presentation/profile_page.dart';
