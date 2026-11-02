@@ -1,0 +1,6 @@
+export 'data/persistent_learning_repository.dart';
+export 'data/persistent_user_repository.dart';
+export 'data/user_data_schema.dart';
+export 'data/user_data_serializers.dart';
+export 'data/user_data_store.dart';
+export 'demo/user_data_demo_seed.dart';
