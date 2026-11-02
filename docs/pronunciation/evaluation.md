@@ -65,3 +65,4 @@ Thử nghiệm nhằm kiểm tra tính ổn định, độ tin cậy và giới 
    - Khi người học nói quá nhanh (tốc độ $> 180$ từ/phút), các âm đuôi phức hợp như $/skt/$, $/sts/$ bị nén thời gian dưới $50\text{ms}$, dẫn đến việc phân chia mốc thời gian âm vị có thể bị lệch khoảng $20-30\text{ms}$.
 3. **Phạm vi thử nghiệm:**
    - Bộ thử nghiệm thực hiện trên 4 đối tượng với 10 câu mẫu đại diện cho sinh viên đại học Việt Nam. Kết quả phản ánh tốt khả năng ứng dụng trong học tập nhưng chưa thể đại diện cho toàn bộ các phương ngữ tiếng Anh bản xứ (như Cockney, Scottish hay Australian slang).
+

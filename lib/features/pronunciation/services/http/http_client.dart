@@ -6,3 +6,4 @@ import 'http_transport_stub.dart'
 export 'http_transport.dart';
 
 HttpTransport getHttpTransport() => createDefaultHttpTransport();
+

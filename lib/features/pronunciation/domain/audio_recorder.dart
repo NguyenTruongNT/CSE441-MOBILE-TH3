@@ -24,3 +24,4 @@ abstract interface class AudioRecorderController {
   Future<void> cancelRecording();
   void dispose();
 }
+

@@ -79,3 +79,4 @@ class AudioSampleFixtures {
     return createWavSample(durationSeconds: 0.2);
   }
 }
+

@@ -67,3 +67,4 @@ class ImprovementRecommendation {
   final String articulatoryTip;
   final ExerciseDetail suggestedExercise;
 }
+

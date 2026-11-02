@@ -65,3 +65,4 @@ void main() {
     expect(recs.first.suggestedExercise.referenceText, isNotEmpty);
   });
 }
+

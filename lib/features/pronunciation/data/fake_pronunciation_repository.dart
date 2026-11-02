@@ -110,3 +110,4 @@ class FakeInternalLearningRepository implements LearningRepository {
     _settings[settings.userId] = settings;
   }
 }
+

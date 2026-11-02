@@ -9,6 +9,7 @@ import '../domain/audio_recorder.dart';
 import '../domain/exercise_models.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/fake_pronunciation_service.dart';
+import '../services/recorder/audio_recorder_factory.dart';
 import 'widgets/audio_sample_player.dart';
 import 'widgets/exercise_card.dart';
 import 'widgets/improvement_exercise_card.dart';
@@ -65,6 +66,10 @@ class _PronunciationPageState extends State<PronunciationPage> {
   int _elapsedMilliseconds = 0;
   StreamSubscription<double>? _ampSub;
 
+  bool _useSimulation = false;
+  late final AudioRecorderController _realRecorder;
+  late final AudioRecorderController _simulatedRecorder;
+
   @override
   void initState() {
     super.initState();
@@ -72,12 +77,26 @@ class _PronunciationPageState extends State<PronunciationPage> {
     _learningRepo = widget.learningRepository ?? FakeInternalLearningRepository();
     _pronunciationService =
         widget.pronunciationService ?? FakePronunciationService();
-    _recorder = widget.audioRecorder ?? SimulatedAudioRecorder();
     _catalog = widget.exercises ?? DefaultExercises.catalog;
+
+    _realRecorder = widget.audioRecorder ?? getPlatformAudioRecorder();
+    _simulatedRecorder = SimulatedAudioRecorder();
+    _recorder = _useSimulation ? _simulatedRecorder : _realRecorder;
 
     _selectedExercise = _catalog.first;
 
     _initializeAsync();
+  }
+
+  void _toggleRecorder(bool simulation) {
+    if (_recorder.isRecording) {
+      _recorder.cancelRecording();
+    }
+    setState(() {
+      _useSimulation = simulation;
+      _recorder = simulation ? _simulatedRecorder : _realRecorder;
+      _currentError = null;
+    });
   }
 
   Future<void> _initializeAsync() async {
@@ -317,11 +336,35 @@ class _PronunciationPageState extends State<PronunciationPage> {
               ],
             ),
           ),
-          if (_currentProfile != null)
-            Chip(
-              avatar: const Icon(Icons.person_outline, size: 16),
-              label: Text(_currentProfile!.displayName),
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SegmentedButton<bool>(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(
+                    value: false,
+                    icon: Icon(Icons.mic_rounded, size: 16),
+                    label: Text('Micro thật', style: TextStyle(fontSize: 12)),
+                  ),
+                  ButtonSegment(
+                    value: true,
+                    icon: Icon(Icons.graphic_eq_rounded, size: 16),
+                    label: Text('Mô phỏng', style: TextStyle(fontSize: 12)),
+                  ),
+                ],
+                selected: {_useSimulation},
+                onSelectionChanged: (set) => _toggleRecorder(set.first),
+              ),
+              if (_currentProfile != null) ...[
+                const SizedBox(width: 12),
+                Chip(
+                  avatar: const Icon(Icons.person_outline, size: 16),
+                  label: Text(_currentProfile!.displayName),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );

@@ -166,3 +166,4 @@ class DefaultExercises {
     return recommendations;
   }
 }
+

@@ -151,3 +151,4 @@ class AudioValidator {
     return (bytes.length / 32000.0).clamp(0.1, 120.0);
   }
 }
+

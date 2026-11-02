@@ -35,3 +35,4 @@ class PlatformHttpTransport implements HttpTransport {
 }
 
 HttpTransport createDefaultHttpTransport() => const PlatformHttpTransport();
+
