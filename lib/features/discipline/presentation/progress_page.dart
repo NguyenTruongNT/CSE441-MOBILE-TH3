@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../app/shared/app_states.dart';
 import '../../../core/contracts/contracts.dart';
 import '../data/fake_discipline_data.dart';
@@ -47,8 +48,7 @@ class _ProgressPageState extends State<ProgressPage> {
   @override
   void initState() {
     super.initState();
-    _learningRepository =
-        widget.learningRepository ?? FakeLearningRepository();
+    _learningRepository = widget.learningRepository ?? FakeLearningRepository();
     _reminderService = widget.reminderService ?? LocalReminderService();
 
     final service = _reminderService;
@@ -63,7 +63,9 @@ class _ProgressPageState extends State<ProgressPage> {
   void dispose() {
     final service = _reminderService;
     if (service is LocalReminderService) {
-      service.onNotificationTriggered.removeListener(_handleNotificationReceived);
+      service.onNotificationTriggered.removeListener(
+        _handleNotificationReceived,
+      );
     }
     super.dispose();
   }
@@ -166,6 +168,18 @@ class _ProgressPageState extends State<ProgressPage> {
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Column(
                   children: [
+                    if (_learningRepository is FakeLearningRepository) ...[
+                      const Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text(
+                            'Dữ liệu giả lập · Dùng để phát triển và demo. '
+                            'Tiến độ và cài đặt sẽ đặt lại khi khởi động lại ứng dụng.',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     if (_activeNotificationBanner != null) ...[
                       _buildHeadsUpNotificationBanner(
                         _activeNotificationBanner!,
@@ -240,7 +254,11 @@ class _ProgressPageState extends State<ProgressPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close_rounded, color: Colors.white60, size: 20),
+            icon: const Icon(
+              Icons.close_rounded,
+              color: Colors.white60,
+              size: 20,
+            ),
             onPressed: () {
               setState(() {
                 _activeNotificationBanner = null;
@@ -256,10 +274,7 @@ class _ProgressPageState extends State<ProgressPage> {
   Widget _buildDesktopLayout() {
     return Column(
       children: [
-        ProgressHeaderCard(
-          displayName: _displayName,
-          stats: _stats,
-        ),
+        ProgressHeaderCard(displayName: _displayName, stats: _stats),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,12 +305,13 @@ class _ProgressPageState extends State<ProgressPage> {
                     onSaveSettings: _handleSaveSettings,
                   ),
                   const SizedBox(height: 16),
-                  DemoSimulationBar(
-                    userId: _currentUserId,
-                    repository: _learningRepository,
-                    reminderService: _reminderService,
-                    onDataChanged: _loadDashboardData,
-                  ),
+                  if (_learningRepository is FakeLearningRepository)
+                    DemoSimulationBar(
+                      userId: _currentUserId,
+                      repository: _learningRepository,
+                      reminderService: _reminderService,
+                      onDataChanged: _loadDashboardData,
+                    ),
                 ],
               ),
             ),
@@ -309,10 +325,7 @@ class _ProgressPageState extends State<ProgressPage> {
   Widget _buildMobileLayout() {
     return Column(
       children: [
-        ProgressHeaderCard(
-          displayName: _displayName,
-          stats: _stats,
-        ),
+        ProgressHeaderCard(displayName: _displayName, stats: _stats),
         const SizedBox(height: 16),
         StreakHeroCard(stats: _stats),
         const SizedBox(height: 16),
@@ -326,12 +339,13 @@ class _ProgressPageState extends State<ProgressPage> {
           onSaveSettings: _handleSaveSettings,
         ),
         const SizedBox(height: 16),
-        DemoSimulationBar(
-          userId: _currentUserId,
-          repository: _learningRepository,
-          reminderService: _reminderService,
-          onDataChanged: _loadDashboardData,
-        ),
+        if (_learningRepository is FakeLearningRepository)
+          DemoSimulationBar(
+            userId: _currentUserId,
+            repository: _learningRepository,
+            reminderService: _reminderService,
+            onDataChanged: _loadDashboardData,
+          ),
       ],
     );
   }

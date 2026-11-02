@@ -66,6 +66,8 @@ Sử dụng `LayoutBuilder` để tự động tối ưu bố cục theo kích t
 
 ## 4. Dịch vụ Thông báo (`ReminderService`) & Khả năng nền tảng
 
+> Cập nhật tích hợp 02/11/2026: bản chạy mặc định dùng dữ liệu và thông báo giả lập theo thống nhất của nhóm. Xem [cấu hình dùng chung](../coordination/demo-setup.md). `LocalReminderService.scheduleDaily` trên Android hiện chỉ hủy lịch cũ và ghi log, chưa gọi API đặt lịch. Các test reminder bên dưới chỉ kiểm tra FakeReminderService, chưa nghiệm thu thông báo Android thật.
+
 ### 4.1. Tích hợp trên Android Native
 * Sử dụng thư viện `flutter_local_notifications: ^22.3.3` và `flutter_web_plugins` (SDK Flutter để đăng ký plugin trên Web).
 * Các quyền được bổ sung trong `android/app/src/main/AndroidManifest.xml`:
@@ -73,10 +75,9 @@ Sử dụng `LayoutBuilder` để tự động tối ưu bố cục theo kích t
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-  <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
   <uses-permission android:name="android.permission.VIBRATE" />
   ```
-* Cơ chế: Khi người dùng bật switch và chọn giờ (ví dụ `20:00`), ứng dụng gọi `ReminderService.scheduleDaily(settings)` để lên lịch hẹn giờ hệ thống Android. Khi tắt switch hoặc chuyển tài khoản, ứng dụng gọi `cancel(userId)` theo ID duy nhất.
+* Luồng dự kiến: gọi `ReminderService.scheduleDaily(settings)` khi đổi cài đặt và `cancel(userId)` khi tắt/chuyển hồ sơ. Việc đặt lịch hệ thống và hủy/lên lịch khi đổi hồ sơ còn cần triển khai, kiểm thử.
 
 ### 4.2. Giới hạn trên Web (Documented Limitation)
 * Khi chạy trên nền tảng Web (`kIsWeb`), thông báo nền khi đóng trình duyệt bị giới hạn bởi chính sách Web Push Service Worker.

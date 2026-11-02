@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:th3_english_ai/core/contracts/contracts.dart';
+
 import '../../data/fake_discipline_data.dart';
 import '../../services/local_reminder_service.dart';
 
@@ -86,7 +87,10 @@ class DemoSimulationBar extends StatelessWidget {
                 // Button 3: Trigger Test Notification
                 OutlinedButton.icon(
                   onPressed: () => _testNotification(context),
-                  icon: const Icon(Icons.notifications_active_outlined, size: 16),
+                  icon: const Icon(
+                    Icons.notifications_active_outlined,
+                    size: 16,
+                  ),
                   label: const Text('Bắn thông báo thử'),
                   style: OutlinedButton.styleFrom(
                     textStyle: const TextStyle(fontSize: 12),
@@ -107,17 +111,7 @@ class DemoSimulationBar extends StatelessWidget {
         minutes: minutes,
       );
     } else {
-      final now = DateTime.now().toUtc();
-      final session = PracticeSession(
-        id: 'sim-${DateTime.now().millisecondsSinceEpoch}',
-        userId: userId,
-        exerciseId: 'demo-quick-practice',
-        startedAt: now.subtract(Duration(minutes: minutes)),
-        endedAt: now,
-        durationSeconds: minutes * 60,
-        status: PracticeStatus.completed,
-      );
-      await repository.savePractice(session: session);
+      return;
     }
 
     onDataChanged();
@@ -138,15 +132,13 @@ class DemoSimulationBar extends StatelessWidget {
       sent = await (reminderService as LocalReminderService)
           .sendImmediateTestNotification(
             title: 'English AI · Nhắc học',
-            body:
-                'Đã đến giờ luyện tiếng Anh hôm nay! Hãy giữ vững ngọn lửa chuỗi ngày nhé 🔥',
+            body: 'Đã đến giờ luyện tiếng Anh hôm nay! Hãy giữ vững ngọn lửa chuỗi ngày nhé 🔥',
           );
     } else if (reminderService is FakeReminderService) {
       sent = await (reminderService as FakeReminderService)
           .sendImmediateTestNotification(
             title: 'English AI · Nhắc học',
-            body:
-                'Đã đến giờ luyện tiếng Anh hôm nay! Hãy giữ vững ngọn lửa chuỗi ngày nhé 🔥',
+            body: 'Đã đến giờ luyện tiếng Anh hôm nay! Hãy giữ vững ngọn lửa chuỗi ngày nhé 🔥',
           );
     }
 
@@ -155,7 +147,9 @@ class DemoSimulationBar extends StatelessWidget {
         SnackBar(
           content: Text(
             sent
-                ? 'Đã kích hoạt thông báo thử nghiệm thành công!'
+                ? reminderService is FakeReminderService
+                      ? 'Đã mô phỏng thông báo; chưa gửi thông báo hệ thống.'
+                      : 'Đã kích hoạt thông báo thử nghiệm thành công!'
                 : 'Không thể kích hoạt thông báo trên nền tảng này.',
           ),
           duration: const Duration(seconds: 2),
