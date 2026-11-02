@@ -4,3 +4,4 @@ import 'stub_speech_synthesizer.dart'
 
 TextToSpeechPlayer getPlatformTextToSpeechPlayer() =>
     createTextToSpeechPlayer();
+

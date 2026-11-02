@@ -8,3 +8,4 @@ abstract interface class TextToSpeechPlayer {
   Stream<bool> get isPlayingStream;
   void dispose();
 }
+

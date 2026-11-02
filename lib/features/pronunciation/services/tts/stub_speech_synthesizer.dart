@@ -43,3 +43,4 @@ class StubTextToSpeechPlayer implements TextToSpeechPlayer {
 }
 
 TextToSpeechPlayer createTextToSpeechPlayer() => StubTextToSpeechPlayer();
+
