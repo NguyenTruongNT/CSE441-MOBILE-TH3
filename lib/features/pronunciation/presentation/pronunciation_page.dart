@@ -423,7 +423,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Luyện phát âm với AI · Module Vũ Hải Đăng',
+                  'Luyện phát âm với AI',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),

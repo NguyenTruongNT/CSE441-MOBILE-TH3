@@ -83,7 +83,10 @@ class PronunciationLogger {
     }
 
     _logStreamController.add(entry);
-    debugPrint('[PronunciationAI] ${entry.toString()}');
+    // Only output to terminal when an error occurs
+    if (level == LogLevel.error) {
+      debugPrint('[PronunciationAI:ERROR] ${entry.toString()}');
+    }
   }
 
   static void clear() {

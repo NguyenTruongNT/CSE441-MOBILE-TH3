@@ -128,7 +128,6 @@ Future<void> _handleAnalyze(
     // If client STT was empty (e.g. Opera GX / Firefox / Brave without Web Speech),
     // perform real speech transcription via Python stt_engine.py!
     if (recognizedTranscript.isEmpty) {
-      stdout.writeln('[$sessionId] Running Python STT engine for ${audioBytes.length} bytes ($mimeType)...');
       final sttRes = await _runSttEngine(
         audioBytes: audioBytes,
         mimeType: mimeType,
@@ -141,7 +140,7 @@ Future<void> _handleAnalyze(
         final code = sttRes['code'] as String? ?? 'insufficientEvidence';
         final errorMsg = sttRes['error'] as String? ??
             'Không nhận diện được giọng nói tiếng Anh trong bản ghi âm. Vui lòng nói to và rõ ràng hơn.';
-        stdout.writeln('[$sessionId] STT failed: $code - $errorMsg');
+        stderr.writeln('[$sessionId] STT failed: $code - $errorMsg');
         _sendJsonError(
           request.response,
           HttpStatus.badRequest,
@@ -152,7 +151,6 @@ Future<void> _handleAnalyze(
       }
 
       recognizedTranscript = (sttRes['transcript'] as String? ?? '').trim();
-      stdout.writeln('[$sessionId] STT Transcribed text: "$recognizedTranscript"');
 
       if (recognizedTranscript.isEmpty) {
         _sendJsonError(
@@ -163,8 +161,6 @@ Future<void> _handleAnalyze(
         );
         return;
       }
-    } else {
-      stdout.writeln('[$sessionId] Using client-provided transcript: "$recognizedTranscript"');
     }
 
     // Evaluate phonemes based on real recognized speech
