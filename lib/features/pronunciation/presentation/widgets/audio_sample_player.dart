@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../services/tts/speech_synthesizer.dart';
+import '../../services/tts/speech_synthesizer_factory.dart';
 
 /// Interactive audio preview button allowing learners to listen to native pronunciation.
 class AudioSamplePlayer extends StatefulWidget {
@@ -17,28 +19,41 @@ class AudioSamplePlayer extends StatefulWidget {
 }
 
 class _AudioSamplePlayerState extends State<AudioSamplePlayer> {
+  late final TextToSpeechPlayer _ttsPlayer;
+  StreamSubscription<bool>? _playSub;
   bool _isPlaying = false;
-  Timer? _playbackTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _ttsPlayer = getPlatformTextToSpeechPlayer();
+    _playSub = _ttsPlayer.isPlayingStream.listen((playing) {
+      if (mounted) {
+        setState(() => _isPlaying = playing);
+      }
+    });
+  }
 
   void _togglePlayback() {
     if (_isPlaying) {
-      _playbackTimer?.cancel();
-      setState(() => _isPlaying = false);
+      _ttsPlayer.stop();
     } else {
-      setState(() => _isPlaying = true);
-      // Simulate playback time (1.8s) for the reference text
-      _playbackTimer?.cancel();
-      _playbackTimer = Timer(const Duration(milliseconds: 1800), () {
-        if (mounted) {
-          setState(() => _isPlaying = false);
-        }
-      });
+      _ttsPlayer.speak(widget.referenceText, rate: 0.85);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AudioSamplePlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.referenceText != widget.referenceText && _isPlaying) {
+      _ttsPlayer.stop();
     }
   }
 
   @override
   void dispose() {
-    _playbackTimer?.cancel();
+    _playSub?.cancel();
+    _ttsPlayer.dispose();
     super.dispose();
   }
 
@@ -63,4 +78,3 @@ class _AudioSamplePlayerState extends State<AudioSamplePlayer> {
     );
   }
 }
-

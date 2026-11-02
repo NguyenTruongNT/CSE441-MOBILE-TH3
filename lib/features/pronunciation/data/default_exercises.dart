@@ -52,22 +52,22 @@ class DefaultExercises {
     ExerciseDetail(
       exercise: const Exercise(
         id: 'ex-04-ch-vs-j',
-        referenceText: 'Charles chooses a cheap watch',
-        referenceIpa: '/tʃɑːrlz ˈtʃuːzɪz ə tʃiːp wɒtʃ/',
-        targetPhonemes: ['tʃ'],
+        referenceText: 'Charles chooses a cheap watch while John rejoices',
+        referenceIpa: '/tʃɑːrlz ˈtʃuːzɪz ə tʃiːp wɒtʃ waɪl dʒɒn rɪˈdʒɔɪsɪz/',
+        targetPhonemes: ['tʃ', 'dʒ'],
         sampleAudioUri: null,
       ),
       category: 'Phụ âm tắc xát',
       difficulty: 'Nâng cao',
-      description: 'Luyện âm /tʃ/ vô thanh ở đầu từ và cuối từ.',
+      description: 'Phân biệt âm /tʃ/ vô thanh và /dʒ/ hữu thanh ở đầu và cuối từ.',
       vietnameseTip:
-          'Chặn hơi bằng đầu lưỡi tại chân răng cửa trên, rồi bật mạnh ra đồng thời chu môi. Không nhầm thành /tr/ của tiếng Việt.',
+          'Chặn hơi bằng đầu lưỡi tại nướu răng trên rồi bật mạnh ra đồng thời chu môi. Rung thanh quản với /dʒ/, không rung với /tʃ/.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
         id: 'ex-05-vowel-ship-vs-sheep',
-        referenceText: 'The sheep on the ship looks big',
-        referenceIpa: '/ðə ʃiːp ɒn ðə ʃɪp lʊks bɪɡ/',
+        referenceText: 'The sheep on the ship looks big and neat',
+        referenceIpa: '/ðə ʃiːp ɒn ðə ʃɪp lʊks bɪɡ ænd niːt/',
         targetPhonemes: ['iː', 'ɪ'],
         sampleAudioUri: null,
       ),
@@ -121,6 +121,118 @@ class DefaultExercises {
       vietnameseTip:
           'Khởi đầu từ âm /ə/ lướt nhẹ sang /ʊ/, môi từ từ thu tròn lại ở cuối âm.',
     ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-09-nasal-velar-drill',
+        referenceText: 'The young singer is thinking of a song',
+        referenceIpa: '/ðə jʌŋ ˈsɪŋər ɪz ˈθɪŋkɪŋ əv ə sɒŋ/',
+        targetPhonemes: ['ŋk', 'ŋ'],
+        sampleAudioUri: null,
+      ),
+      category: 'Âm mũi và âm vòm',
+      difficulty: 'Trung bình',
+      description: 'Luyện âm mũi /ŋ/ trong "young, song" và cụm âm /ŋk/ trong "thinking".',
+      vietnameseTip:
+          'Nâng cuống lưỡi chạm ngạc mềm cho hơi thoát qua mũi. Với /ŋk/, sau khi ngắt hơi ở mũi phải bật dứt khoát âm /k/ ở đuôi từ.',
+    ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-10-nasal-bilabial-drill',
+        referenceText: 'Many modern men make more money',
+        referenceIpa: '/ˈmeni ˈmɒdən men meɪk mɔːr ˈmʌni/',
+        targetPhonemes: ['m', 'n'],
+        sampleAudioUri: null,
+      ),
+      category: 'Phụ âm mũi',
+      difficulty: 'Cơ bản',
+      description: 'Luyện phụ âm môi /m/ và phụ âm răng /n/ rõ nét ở đầu và cuối từ.',
+      vietnameseTip:
+          'Khép chặt hai môi lại để luồng hơi rung qua khoang mũi. Khi đọc các từ có đuôi /m/ cần ngậm chặt miệng để giữ trọn vẹn âm.',
+    ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-11-dental-unvoiced-drill',
+        referenceText: 'Think through thirty-three thoughts on Thursday',
+        referenceIpa: '/θɪŋk θruː ˈθɜːti θriː θɔːts ɒn ˈθɜːzdeɪ/',
+        targetPhonemes: ['θ'],
+        sampleAudioUri: null,
+      ),
+      category: 'Phụ âm răng xát',
+      difficulty: 'Nâng cao',
+      description: 'Chuyên sâu luyện âm /θ/ vô thanh đứng đầu các từ nối tiếp.',
+      vietnameseTip:
+          'Đầu lưỡi thò nhẹ giữa hai hàm răng, thổi luồng hơi êm qua khe răng, không phát âm thành /s/ hay /t/.',
+    ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-12-v-vs-w',
+        referenceText: 'We visit wonderful villages every Wednesday',
+        referenceIpa: '/wiː ˈvɪzɪt ˈwʌndəfʊl ˈvɪlɪdʒɪz ˈevri ˈwenzdeɪ/',
+        targetPhonemes: ['v', 'w'],
+        sampleAudioUri: null,
+      ),
+      category: 'Cặp âm dễ nhầm',
+      difficulty: 'Trung bình',
+      description: 'Phân biệt răng chạm môi /v/ và tròn môi /w/.',
+      vietnameseTip:
+          'Với /v/, răng cửa trên chạm nhẹ môi dưới và rung thanh quản. Với /w/, chu tròn hai môi rồi mở nhanh ra, răng không chạm môi.',
+    ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-13-p-vs-b',
+        referenceText: 'Peter paid for a big black bag',
+        referenceIpa: '/ˈpiːtər peɪd fər ə bɪɡ blæk bæɡ/',
+        targetPhonemes: ['p', 'b'],
+        sampleAudioUri: null,
+      ),
+      category: 'Phụ âm bật hơi',
+      difficulty: 'Cơ bản',
+      description: 'Phân biệt âm bật hơi không rung /p/ và âm rung thanh quản /b/.',
+      vietnameseTip:
+          'Với /p/, mím môi nén hơi rồi bật mạnh (có gió thổi vào lòng bàn tay). Với /b/, rung thanh quản ngay khi mở môi, không thổi gió.',
+    ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-14-u-vs-oo',
+        referenceText: 'The cool pool is full of good wood',
+        referenceIpa: '/ðə kuːl puːl ɪz fʊl əv ɡʊd wʊd/',
+        targetPhonemes: ['uː', 'ʊ'],
+        sampleAudioUri: null,
+      ),
+      category: 'Nguyên âm ngắn và dài',
+      difficulty: 'Trung bình',
+      description: 'Phân biệt nguyên âm tròn môi kéo dài /uː/ và nguyên âm ngắn /ʊ/.',
+      vietnameseTip:
+          'Với /uː/, chu tròn môi sâu về trước và ngân dài. Với /ʊ/, thả lỏng nhẹ môi và hàm, phát âm ngắn dứt khoát.',
+    ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-15-vowel-ae-vs-e',
+        referenceText: 'The bad man had a black cat',
+        referenceIpa: '/ðə bæd mæn hæd ə blæk kæt/',
+        targetPhonemes: ['æ', 'e'],
+        sampleAudioUri: null,
+      ),
+      category: 'Nguyên âm đơn',
+      difficulty: 'Trung bình',
+      description: 'Luyện nguyên âm bẹt /æ/ mở rộng khẩu hình theo chiều dọc.',
+      vietnameseTip:
+          'Hạ thấp hàm dưới mở to miệng theo chiều dọc, đè phẳng cuống lưỡi xuống, phát âm âm lai giữa /a/ và /e/.',
+    ),
+    ExerciseDetail(
+      exercise: const Exercise(
+        id: 'ex-16-z-vs-j',
+        referenceText: 'Zebras zoom through the jungle with joy',
+        referenceIpa: '/ˈzebrəz zuːm θruː ðə ˈdʒʌŋɡl wɪð dʒɔɪ/',
+        targetPhonemes: ['z', 'dʒ'],
+        sampleAudioUri: null,
+      ),
+      category: 'Phụ âm xát và tắc xát',
+      difficulty: 'Nâng cao',
+      description: 'Phân biệt âm xát răng /z/ và âm tắc xát vòm /dʒ/.',
+      vietnameseTip:
+          'Với /z/, khép hai răng và rung mạnh thanh quản. Với /dʒ/, chu môi và khép đầu lưỡi sau chân răng rồi bật ra kết hợp rung thanh quản.',
+    ),
   ];
 
   /// Find exercise recommendations targeting specific phonemes that need improvement.
@@ -130,6 +242,9 @@ class DefaultExercises {
   }) {
     final recommendations = <ImprovementRecommendation>[];
     final seenPhonemes = <String>{};
+    final usedExerciseIds = <String>{
+      ?currentExerciseId,
+    };
 
     for (final feedback in weakPhonemes) {
       if (feedback.status != PhonemeStatus.needsPractice) continue;
@@ -137,21 +252,37 @@ class DefaultExercises {
       if (seenPhonemes.contains(target)) continue;
       seenPhonemes.add(target);
 
-      // Find an exercise that specifically trains this phoneme
+      // 1. Find an exercise that specifically trains this exact phoneme
       ExerciseDetail? match;
       for (final ex in catalog) {
-        if (ex.id != currentExerciseId &&
-            ex.targetPhonemes.any((p) => p.contains(target) || target.contains(p))) {
+        if (!usedExerciseIds.contains(ex.id) &&
+            ex.targetPhonemes.any((p) => p == target || p.contains(target) || target.contains(p))) {
           match = ex;
           break;
         }
       }
 
-      // If no exact target phoneme match, pick any different exercise
+      // 2. If no exact match among unused exercises, find any exercise containing the target
+      if (match == null) {
+        for (final ex in catalog) {
+          if (ex.id != currentExerciseId &&
+              ex.targetPhonemes.any((p) => p == target || p.contains(target) || target.contains(p))) {
+            match = ex;
+            break;
+          }
+        }
+      }
+
+      // 3. Fallback: choose the next unused exercise in the catalog
       match ??= catalog.firstWhere(
-        (ex) => ex.id != currentExerciseId,
-        orElse: () => catalog.first,
+        (ex) => !usedExerciseIds.contains(ex.id),
+        orElse: () => catalog.firstWhere(
+          (ex) => ex.id != currentExerciseId,
+          orElse: () => catalog.first,
+        ),
       );
+
+      usedExerciseIds.add(match.id);
 
       recommendations.add(
         ImprovementRecommendation(
@@ -161,9 +292,11 @@ class DefaultExercises {
           suggestedExercise: match,
         ),
       );
+
+      // Limit to top 3 actionable recommendations to avoid visual overload
+      if (recommendations.length >= 3) break;
     }
 
     return recommendations;
   }
 }
-

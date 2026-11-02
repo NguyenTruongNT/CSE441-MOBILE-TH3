@@ -185,7 +185,214 @@ final Map<String, _PhonemeFeature> _phonemeDb = {
     manner: 'cluster',
     place: 'velar',
     vietnameseGuidance:
-        'Đẩy âm mũi /ŋ/ lên vòm họng rồi bật dứt khoát âm chặn /k/.',
+        'Nâng cuống lưỡi chạm ngạc mềm đẩy âm mũi /ŋ/, sau đó ngắt luồng hơi và bật mạnh âm đuôi /k/. Tránh nuốt âm /k/ ở cuối từ như "think".',
+  ),
+  'ŋ': const _PhonemeFeature(
+    ipa: 'ŋ',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'nasal',
+    place: 'velar',
+    vietnameseGuidance:
+        'Cuống lưỡi nâng chạm vòm họng mềm, đẩy hơi thoát qua mũi tạo âm ngân, không chạm đầu lưỡi vào răng.',
+  ),
+  'm': const _PhonemeFeature(
+    ipa: 'm',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'nasal',
+    place: 'bilabial',
+    vietnameseGuidance:
+        'Khép chặt hai môi lại, rung dây thanh quản để luồng âm ngân qua khoang mũi. Khi ở cuối từ như "method" hay "time" phải ngậm chặt môi.',
+  ),
+  'n': const _PhonemeFeature(
+    ipa: 'n',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'nasal',
+    place: 'alveolar',
+    vietnameseGuidance:
+        'Đầu lưỡi chạm chắc vào nướu răng cửa trên, rung dây thanh quản và cho hơi thoát qua mũi.',
+  ),
+  'p': const _PhonemeFeature(
+    ipa: 'p',
+    isVowel: false,
+    isVoiced: false,
+    manner: 'plosive',
+    place: 'bilabial',
+    vietnameseGuidance:
+        'Mím chặt hai môi nén hơi rồi bật luồng gió mạnh ra ngoài, không rung dây thanh quản (có gió thổi vào tay).',
+  ),
+  'b': const _PhonemeFeature(
+    ipa: 'b',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'plosive',
+    place: 'bilabial',
+    vietnameseGuidance:
+        'Khép hai môi rồi mở ra đồng thời rung mạnh dây thanh quản, không bật luồng gió mạnh như âm /p/.',
+  ),
+  't': const _PhonemeFeature(
+    ipa: 't',
+    isVowel: false,
+    isVoiced: false,
+    manner: 'plosive',
+    place: 'alveolar',
+    vietnameseGuidance:
+        'Chạm đầu lưỡi lên vòm nướu răng trên rồi bật dứt khoát luồng hơi ra, không rung thanh quản.',
+  ),
+  'd': const _PhonemeFeature(
+    ipa: 'd',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'plosive',
+    place: 'alveolar',
+    vietnameseGuidance:
+        'Đầu lưỡi chạm nướu trên như /t/ nhưng rung dây thanh quản, không bật luồng gió mạnh.',
+  ),
+  'k': const _PhonemeFeature(
+    ipa: 'k',
+    isVowel: false,
+    isVoiced: false,
+    manner: 'plosive',
+    place: 'velar',
+    vietnameseGuidance:
+        'Nâng phần sau của lưỡi chạm vòm họng mềm, nén hơi rồi bật mạnh luồng khí ra ngoài.',
+  ),
+  'ɡ': const _PhonemeFeature(
+    ipa: 'ɡ',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'plosive',
+    place: 'velar',
+    vietnameseGuidance:
+        'Khẩu hình giống /k/ nhưng rung mạnh dây thanh quản, phát âm dứt khoát.',
+  ),
+  'f': const _PhonemeFeature(
+    ipa: 'f',
+    isVowel: false,
+    isVoiced: false,
+    manner: 'fricative',
+    place: 'labiodental',
+    vietnameseGuidance:
+        'Đặt răng cửa trên chạm nhẹ vào viền môi dưới, thổi luồng hơi êm qua kẽ răng, không rung thanh quản.',
+  ),
+  'v': const _PhonemeFeature(
+    ipa: 'v',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'fricative',
+    place: 'labiodental',
+    vietnameseGuidance:
+        'Răng cửa trên chạm nhẹ vào môi dưới như /f/ nhưng rung mạnh thanh quản, tránh phát âm thành /w/ hay /d/.',
+  ),
+  'w': const _PhonemeFeature(
+    ipa: 'w',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'approximant',
+    place: 'labio-velar',
+    vietnameseGuidance:
+        'Chu tròn hai môi về phía trước như huýt sáo rồi mở nhanh sang hai bên, răng không được chạm môi.',
+  ),
+  'j': const _PhonemeFeature(
+    ipa: 'j',
+    isVowel: false,
+    isVoiced: true,
+    manner: 'approximant',
+    place: 'palatal',
+    vietnameseGuidance:
+        'Nâng phần giữa lưỡi gần sát vòm miệng trên rồi lướt mượt mà sang nguyên âm kế tiếp (như trong "young", "you").',
+  ),
+  'h': const _PhonemeFeature(
+    ipa: 'h',
+    isVowel: false,
+    isVoiced: false,
+    manner: 'fricative',
+    place: 'glottal',
+    vietnameseGuidance:
+        'Mở miệng tự nhiên, thở nhẹ một luồng hơi từ cổ họng ra ngoài như tiếng thở phào.',
+  ),
+  'uː': const _PhonemeFeature(
+    ipa: 'uː',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'long-vowel',
+    place: 'back-close',
+    vietnameseGuidance:
+        'Chu môi tròn sâu về phía trước, cuống lưỡi nâng cao về phía sau vòm họng và ngân dài âm.',
+  ),
+  'ʊ': const _PhonemeFeature(
+    ipa: 'ʊ',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'short-vowel',
+    place: 'back-near-close',
+    vietnameseGuidance:
+        'Thả lỏng môi và cơ hàm, môi chỉ hơi hơi tròn, phát âm dứt khoát và ngắn hơn /uː/.',
+  ),
+  'æ': const _PhonemeFeature(
+    ipa: 'æ',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'short-vowel',
+    place: 'front-open',
+    vietnameseGuidance:
+        'Hạ thấp cơ hàm mở rộng miệng theo chiều dọc, đè phẳng cuống lưỡi xuống, phát âm lai giữa /a/ và /e/.',
+  ),
+  'e': const _PhonemeFeature(
+    ipa: 'e',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'short-vowel',
+    place: 'front-mid',
+    vietnameseGuidance:
+        'Mở miệng vừa phải, khóe môi hơi bè sang hai bên, phát âm ngắn gọn dứt khoát.',
+  ),
+  'ɑː': const _PhonemeFeature(
+    ipa: 'ɑː',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'long-vowel',
+    place: 'back-open',
+    vietnameseGuidance:
+        'Mở to miệng thả lỏng hàm dưới, hạ thấp lưỡi về sau khoang miệng và ngân dài âm.',
+  ),
+  'ʌ': const _PhonemeFeature(
+    ipa: 'ʌ',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'short-vowel',
+    place: 'back-mid',
+    vietnameseGuidance:
+        'Mở miệng hờ tự nhiên, phát âm ngắn và dứt khoát (như âm "á" trong tiếng Việt nhưng trầm hơn).',
+  ),
+  'aɪ': const _PhonemeFeature(
+    ipa: 'aɪ',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'diphthong',
+    place: 'closing',
+    vietnameseGuidance:
+        'Bắt đầu từ âm /a/ mở rộng miệng, lướt mượt mà khép dần về âm /ɪ/ với khóe môi mở sang bên.',
+  ),
+  'aʊ': const _PhonemeFeature(
+    ipa: 'aʊ',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'diphthong',
+    place: 'closing',
+    vietnameseGuidance:
+        'Bắt đầu từ âm /a/ mở rộng miệng, lướt mượt mà sang /ʊ/ với hai môi dần thu tròn lại.',
+  ),
+  'ɔɪ': const _PhonemeFeature(
+    ipa: 'ɔɪ',
+    isVowel: true,
+    isVoiced: true,
+    manner: 'diphthong',
+    place: 'closing',
+    vietnameseGuidance:
+        'Bắt đầu từ âm /ɔː/ tròn môi, lướt dần sang /ɪ/ với miệng dẹt lại như đang cười.',
   ),
 };
 

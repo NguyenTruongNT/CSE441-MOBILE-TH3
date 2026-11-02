@@ -22,7 +22,7 @@ class ImprovementExerciseCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.4),
+        color: theme.colorScheme.primaryContainer.withOpacity(0.35),
         border: Border.all(
           color: theme.colorScheme.primary.withOpacity(0.3),
         ),
@@ -31,7 +31,10 @@ class ImprovementExerciseCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -48,7 +51,22 @@ class ImprovementExerciseCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(),
+              if (recommendation.targetWord.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceVariant.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'Từ: "${recommendation.targetWord}"',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -63,31 +81,81 @@ class ImprovementExerciseCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
+
+          // Articulatory tip for the weak phoneme
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: theme.colorScheme.outlineVariant.withOpacity(0.6),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline_rounded,
+                  size: 18,
+                  color: Color(0xFFD97706),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Chỉnh khẩu hình âm /${recommendation.problemPhoneme}/:',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        recommendation.articulatoryTip,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Suggested Drill Exercise
           Text(
-            targetEx.referenceText,
+            'Bài luyện đề xuất: ${targetEx.referenceText}',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 15,
+              fontSize: 14,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             targetEx.referenceIpa,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               fontStyle: FontStyle.italic,
               color: theme.colorScheme.primary,
               fontFamily: 'monospace',
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
-            targetEx.vietnameseTip,
+            targetEx.description,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 12),
+
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton.tonalIcon(

@@ -816,12 +816,15 @@ class _PronunciationPageState extends State<PronunciationPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Danh sách bài luyện',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                'Danh sách bài luyện',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               '${exercises.length} bài',
               style: theme.textTheme.labelMedium?.copyWith(
