@@ -321,10 +321,20 @@ Memory store không được dùng làm bằng chứng cho ca kiểm thử này.
 Ngày kiểm tra: 02/11/2026
 
 ```text
-flutter test test/user_data: 52 test đạt
+flutter test test/user_data: 58 test đạt
+flutter test: toàn bộ test dự án đạt
 flutter analyze: No issues found
-flutter test: toàn bộ test đạt
+```
 
+Persistent store:
+
+```text
+shared_preferences: 2.5.6
+SharedPreferencesUserDataStore: đã triển khai
+Unit test fake preferences client: đạt
+Kiểm thử đóng/mở lại Android: chưa thực hiện
+Kiểm thử refresh/mở lại Web: chưa thực hiện
+```
 ## 10. Lỗi và giới hạn còn lại
 
 - Persistent store đang chờ dependency lưu trữ được thêm vào mã nguồn chung.
