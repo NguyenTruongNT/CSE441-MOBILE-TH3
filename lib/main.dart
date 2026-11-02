@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app/app.dart';
 import 'app/app_shell.dart';
 import 'features/discipline/discipline.dart';
+import 'features/pronunciation/pronunciation.dart';
 
 void main() {
   // Shared demo data survives tab changes, but resets when the app restarts.
@@ -19,6 +20,10 @@ void main() {
           learningRepository: learning,
           userRepository: users,
           reminderService: reminders,
+        ),
+        pronunciation: (context) => PronunciationPage(
+          learningRepository: learning,
+          userRepository: users,
         ),
       ),
     ),

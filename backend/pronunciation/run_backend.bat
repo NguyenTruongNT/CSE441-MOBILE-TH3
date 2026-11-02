@@ -5,3 +5,4 @@ echo ========================================================
 cd /d "%~dp0..\.."
 dart run backend/pronunciation/bin/server.dart
 pause
+

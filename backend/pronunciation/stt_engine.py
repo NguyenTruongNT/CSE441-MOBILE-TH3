@@ -75,3 +75,4 @@ if __name__ == "__main__":
     target_phonemes = sys.argv[3] if len(sys.argv) > 3 else "[]"
     
     print(transcribe_and_evaluate(audio_file, ref_text, target_phonemes))
+
