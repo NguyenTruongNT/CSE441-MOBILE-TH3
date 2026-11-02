@@ -7,6 +7,8 @@ Nhánh: `son-feature/discipline-progress`, commit `a8d80047744f122eaafd4a83855f1
 
 ## Kết luận
 
+**Bản sửa tiếp theo theo yêu cầu Trường:** nhánh `truong-fix/discipline-completion` đã bổ sung đặt lịch Android, đổi hồ sơ, streak không giới hạn 30 ngày, múi giờ IANA và cập nhật khi qua ngày. Đã có 46 test toàn dự án đạt. Báo cáo này giữ nguyên kết quả review commit Sơn ban đầu; trạng thái mới và phần nghiệm thu thiết bị còn lại xem `../discipline/rules-and-reminders.md`.
+
 **Cập nhật sau review:** nhóm đã thống nhất dùng thêm dữ liệu giả lập. Nhánh `truong-fix/discipline-demo-config` bổ sung cấu hình Android, chạy fake mặc định có nhãn, và chặn demo ghi vào dữ liệu thật. Xem `demo-setup.md` để dùng bản sửa. Các nhận xét/kết quả bên dưới ghi nhận commit Sơn ban đầu, không phải kết quả kiểm tra bản sửa.
 
 Chưa đạt nghiệm thu toàn bộ. Chưa merge PR vào main vì chức năng nhắc Android chưa được triển khai thực sự. Không đánh dấu Sơn hoàn thành chỉ dựa trên các test hiện có.

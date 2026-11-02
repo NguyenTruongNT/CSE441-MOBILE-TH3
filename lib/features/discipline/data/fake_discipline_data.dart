@@ -1,19 +1,21 @@
 import '../../../core/contracts/contracts.dart';
 
+import 'package:flutter/foundation.dart';
+
+import '../services/discipline_time.dart';
+
 /// In-memory mock of [LearningRepository] for independent development and testing.
 class FakeLearningRepository implements LearningRepository {
   FakeLearningRepository({
     Map<String, LearningSettings>? initialSettings,
     List<PracticeSession>? initialSessions,
   }) {
-    if (initialSettings != null) {
-      _settings.addAll(initialSettings);
-    }
     if (initialSessions != null) {
       _sessions.addAll(initialSessions);
     } else {
       _seedDefaultPracticeData();
     }
+    if (initialSettings != null) _settings.addAll(initialSettings);
   }
 
   final Map<String, LearningSettings> _settings = {};
@@ -23,12 +25,18 @@ class FakeLearningRepository implements LearningRepository {
   /// Populates a realistic 5-day streak and weekly practice records.
   void _seedDefaultPracticeData() {
     final now = DateTime.now().toUtc();
+    final local = profileTime(now, 'Asia/Ho_Chi_Minh');
+    final midnight = DateTime.utc(
+      local.year,
+      local.month,
+      local.day,
+    ).subtract(const Duration(hours: 7));
     const defaultUserId = 'default-user-01';
 
     _settings[defaultUserId] = LearningSettings(
       userId: defaultUserId,
       dailyGoalMinutes: 15,
-      reminderEnabled: true,
+      reminderEnabled: false,
       reminderHour: 20,
       reminderMinute: 0,
       timeZone: 'Asia/Ho_Chi_Minh',
@@ -40,8 +48,10 @@ class FakeLearningRepository implements LearningRepository {
         id: 'seed-session-0',
         userId: defaultUserId,
         exerciseId: 'ex-vowel-01',
-        startedAt: now.subtract(const Duration(minutes: 45)),
-        endedAt: now.subtract(const Duration(minutes: 35)),
+        startedAt: now.subtract(const Duration(minutes: 10)).isBefore(midnight)
+            ? midnight
+            : now.subtract(const Duration(minutes: 10)),
+        endedAt: now,
         durationSeconds: 600,
         status: PracticeStatus.completed,
       ),
@@ -53,8 +63,12 @@ class FakeLearningRepository implements LearningRepository {
         id: 'seed-session-1',
         userId: defaultUserId,
         exerciseId: 'ex-consonant-01',
-        startedAt: now.subtract(const Duration(days: 1, hours: 2)),
-        endedAt: now.subtract(const Duration(days: 1, hours: 1, minutes: 42)),
+        startedAt: midnight
+            .subtract(const Duration(days: 1))
+            .add(const Duration(hours: 10)),
+        endedAt: midnight
+            .subtract(const Duration(days: 1))
+            .add(const Duration(hours: 10, minutes: 18)),
         durationSeconds: 1080,
         status: PracticeStatus.completed,
       ),
@@ -66,8 +80,12 @@ class FakeLearningRepository implements LearningRepository {
         id: 'seed-session-2a',
         userId: defaultUserId,
         exerciseId: 'ex-diphthong-01',
-        startedAt: now.subtract(const Duration(days: 2, hours: 4)),
-        endedAt: now.subtract(const Duration(days: 2, hours: 3, minutes: 48)),
+        startedAt: midnight
+            .subtract(const Duration(days: 2))
+            .add(const Duration(hours: 10)),
+        endedAt: midnight
+            .subtract(const Duration(days: 2))
+            .add(const Duration(hours: 10, minutes: 12)),
         durationSeconds: 720,
         status: PracticeStatus.completed,
       ),
@@ -77,8 +95,12 @@ class FakeLearningRepository implements LearningRepository {
         id: 'seed-session-2b',
         userId: defaultUserId,
         exerciseId: 'ex-stress-01',
-        startedAt: now.subtract(const Duration(days: 2, hours: 2)),
-        endedAt: now.subtract(const Duration(days: 2, hours: 1, minutes: 50)),
+        startedAt: midnight
+            .subtract(const Duration(days: 2))
+            .add(const Duration(hours: 11)),
+        endedAt: midnight
+            .subtract(const Duration(days: 2))
+            .add(const Duration(hours: 11, minutes: 10)),
         durationSeconds: 600,
         status: PracticeStatus.completed,
       ),
@@ -90,8 +112,12 @@ class FakeLearningRepository implements LearningRepository {
         id: 'seed-session-3',
         userId: defaultUserId,
         exerciseId: 'ex-intonation-01',
-        startedAt: now.subtract(const Duration(days: 3, hours: 3)),
-        endedAt: now.subtract(const Duration(days: 3, hours: 2, minutes: 45)),
+        startedAt: midnight
+            .subtract(const Duration(days: 3))
+            .add(const Duration(hours: 10)),
+        endedAt: midnight
+            .subtract(const Duration(days: 3))
+            .add(const Duration(hours: 10, minutes: 15)),
         durationSeconds: 900,
         status: PracticeStatus.completed,
       ),
@@ -103,8 +129,12 @@ class FakeLearningRepository implements LearningRepository {
         id: 'seed-session-4',
         userId: defaultUserId,
         exerciseId: 'ex-linking-01',
-        startedAt: now.subtract(const Duration(days: 4, hours: 5)),
-        endedAt: now.subtract(const Duration(days: 4, hours: 4, minutes: 40)),
+        startedAt: midnight
+            .subtract(const Duration(days: 4))
+            .add(const Duration(hours: 10)),
+        endedAt: midnight
+            .subtract(const Duration(days: 4))
+            .add(const Duration(hours: 10, minutes: 20)),
         durationSeconds: 1200,
         status: PracticeStatus.completed,
       ),
@@ -139,8 +169,7 @@ class FakeLearningRepository implements LearningRepository {
       return session.userId == userId &&
           !session.startedAt.isBefore(fromUtc) &&
           session.startedAt.isBefore(toUtc);
-    }).toList()
-      ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+    }).toList()..sort((a, b) => b.startedAt.compareTo(a.startedAt));
   }
 
   @override
@@ -148,6 +177,9 @@ class FakeLearningRepository implements LearningRepository {
     required String userId,
     required String sessionId,
   }) async {
+    if (!_sessions.any((s) => s.id == sessionId && s.userId == userId)) {
+      return null;
+    }
     return _results[sessionId];
   }
 
@@ -204,6 +236,7 @@ class FakeReminderService implements ReminderService {
     if (!settings.reminderEnabled) {
       await cancel(settings.userId);
     } else {
+      scheduled.clear();
       scheduled[settings.userId] = settings;
     }
   }
@@ -222,3 +255,45 @@ class FakeReminderService implements ReminderService {
   }
 }
 
+/// Two isolated demo profiles; no authentication or durable storage is implied.
+class FakeUserRepository extends ChangeNotifier implements UserRepository {
+  final List<UserProfile> _profiles = [
+    UserProfile(
+      id: 'default-user-01',
+      displayName: 'Học viên mẫu',
+      createdAt: DateTime.utc(2026, 10, 1),
+    ),
+    UserProfile(
+      id: 'demo-user-02',
+      displayName: 'Học viên thứ hai',
+      timeZone: 'UTC',
+      createdAt: DateTime.utc(2026, 10, 1),
+    ),
+  ];
+  String _selected = 'default-user-01';
+  @override
+  Future<List<UserProfile>> listProfiles() async =>
+      List.unmodifiable(_profiles);
+  @override
+  Future<UserProfile?> getSelectedProfile() async =>
+      _profiles.firstWhere((p) => p.id == _selected);
+  @override
+  Future<void> selectProfile(String userId) async {
+    if (!_profiles.any((p) => p.id == userId)) {
+      throw ArgumentError('Hồ sơ không tồn tại.');
+    }
+    _selected = userId;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> saveProfile(UserProfile profile) async {
+    final index = _profiles.indexWhere((p) => p.id == profile.id);
+    if (index < 0) {
+      _profiles.add(profile);
+    } else {
+      _profiles[index] = profile;
+    }
+    notifyListeners();
+  }
+}

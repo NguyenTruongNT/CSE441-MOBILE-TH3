@@ -8,7 +8,7 @@
 - `lib/app/shared/app_states.dart`: loading, message và retry dùng chung.
 - `lib/core/contracts/contracts.dart`: import chung của model/interface; chi tiết ở `contracts.md`.
 
-Trên nhánh `truong-fix/discipline-demo-config`, trang Tiến độ đã ghép module Sơn bằng fake repository và fake reminder được tạo một lần ở main. Các trang còn lại chờ tích hợp. Xem [cách chạy giả lập và thử thông báo thật](demo-setup.md). Ví dụ constructor injection bên dưới dành cho giai đoạn ghép đủ module.
+Trang Tiến độ đã ghép module Sơn bằng fake repository, hai hồ sơ mẫu và fake reminder được tạo một lần ở main. Có thể bật LocalReminderService bằng dart-define. Các trang còn lại chờ tích hợp. Xem [cách chạy giả lập và thử thông báo thật](demo-setup.md). Ví dụ constructor injection bên dưới dành cho giai đoạn ghép đủ module. Adapter UserRepository/LearningRepository có thể implement Listenable để dashboard nhận thay đổi ngay; nếu không, dashboard kiểm tra lại mỗi 30 giây và khi app trở về foreground.
 
 ## Constructor injection
 

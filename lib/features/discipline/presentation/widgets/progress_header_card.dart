@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/discipline_stats.dart';
+import '../../services/discipline_time.dart';
 
 /// Professional greeting banner displaying learner profile, date, and motivational status.
 class ProgressHeaderCard extends StatelessWidget {
@@ -18,11 +20,17 @@ class ProgressHeaderCard extends StatelessWidget {
     final primaryColor = theme.colorScheme.primary;
 
     final greeting = _getGreetingMessage();
-    final formattedDate = _formatVietnameseDate(DateTime.now());
+    final formattedDate = _formatVietnameseDate(stats.todayRecord.date);
     final badgeLabel = _getDisciplineBadge(stats.currentStreak);
 
     final initials = displayName.trim().isNotEmpty
-        ? displayName.trim().split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase()
+        ? displayName
+              .trim()
+              .split(' ')
+              .map((w) => w.isNotEmpty ? w[0] : '')
+              .take(2)
+              .join()
+              .toUpperCase()
         : 'HV';
 
     return Container(
@@ -38,9 +46,7 @@ class ProgressHeaderCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: primaryColor.withValues(alpha: 0.15),
-        ),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.15)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -177,7 +183,7 @@ class ProgressHeaderCard extends StatelessWidget {
   }
 
   String _getGreetingMessage() {
-    final hour = DateTime.now().hour;
+    final hour = profileTime(DateTime.now(), stats.timeZone).hour;
     if (hour < 12) return 'Chào buổi sáng';
     if (hour < 18) return 'Chào buổi chiều';
     return 'Chào buổi tối';

@@ -1,53 +1,37 @@
-# Cấu hình dùng chung cho Trường và Sơn
+﻿# Chạy bản tích hợp Tiến độ
 
-Nhánh tích hợp: `truong-fix/discipline-demo-config`, dựa trên nhánh Sơn tại `a8d8004`.
-
-## Chạy dữ liệu giả lập
-
-Nhóm thống nhất dùng thêm dữ liệu giả lập để phát triển và demo. Bản chạy mặc định dùng `FakeLearningRepository` và `FakeReminderService`, không cần CSDL, API hay quyền thông báo. Dashboard có nhãn dữ liệu giả lập. Các tab còn lại vẫn chờ tích hợp.
+## Mặc định: dữ liệu và thông báo giả lập
 
 ```bash
+git switch main
+git pull --ff-only origin main
 flutter pub get
 flutter run -d chrome
-flutter run -d <android-device-id>
 ```
 
-Repository được tạo một lần ở main và truyền vào ProgressPage. Có dữ liệu mẫu, đổi mục tiêu và nút cộng phút để thử UI. Dữ liệu/cài đặt chỉ lưu trong bộ nhớ và đặt lại khi khởi động lại ứng dụng. Thông báo mặc định được mô phỏng, không gửi tới hệ điều hành. Thanh công cụ mô phỏng chỉ hiện khi dùng fake repository và không ghi phiên giả vào repository thật.
+Android: thay chrome bằng ID từ `flutter devices`. Bản chạy có hai hồ sơ demo, đổi hồ sơ ở đầu trang Tiến độ, dữ liệu và cài đặt tách riêng. Dữ liệu trong bộ nhớ được tạo một lần tại main; reset khi khởi động lại. Nhắc mặc định tắt, bật nhắc chỉ mô phỏng quyền/lịch. Nút cộng phút chỉ xuất hiện với fake repository.
 
-## Thử thông báo hệ thống
-
-Giữ dữ liệu học giả lập nhưng dùng LocalReminderService:
+## Dữ liệu giả lập + thông báo thật
 
 ```bash
 flutter run -d <android-device-id> --dart-define=USE_REAL_NOTIFICATIONS=true
 flutter run -d chrome --dart-define=USE_REAL_NOTIFICATIONS=true
 ```
 
-Chế độ này dành cho Sơn phát triển/kiểm tra adapter thật. Cần cấp quyền thông báo bằng thao tác trong giao diện. Nút thông báo thử dùng đường gọi thông báo thật; trên web cần trình duyệt hỗ trợ và cấp quyền, nhắc theo timer chỉ hoạt động khi trang còn mở. Android đặt lịch hằng ngày vẫn chưa triển khai trong service tại mốc này; cấu hình build và receiver không thay thế code đặt lịch. Không dùng kết quả fake để kết luận thông báo hệ thống đã hoạt động.
+Bật nhắc học để xin quyền, chọn giờ nhắc hoặc dùng nút thông báo thử. LocalReminderService đã gọi zonedSchedule thật trên Android, dùng múi giờ hồ sơ và lịch không chính xác tuyệt đối để tránh yêu cầu quyền exact alarm. Có thể trễ do cơ chế tiết kiệm pin; không bảo đảm hoạt động sau khi buộc dừng app. Web chỉ nhắc khi trang còn mở và trình duyệt cho phép thông báo.
 
-## Cấu hình Android
+Quyền POST_NOTIFICATIONS/RECEIVE_BOOT_COMPLETED, receiver phục hồi lịch và Gradle desugaring đã cấu hình. Không cần SCHEDULE_EXACT_ALARM/USE_EXACT_ALARM. Android release của bài tập vẫn dùng debug signing.
 
-- Bật `isCoreLibraryDesugaringEnabled` và dependency `desugar_jdk_libs:2.1.4` theo README của plugin được cài.
-- Khai báo ScheduledNotificationReceiver và ScheduledNotificationBootReceiver để sẵn sàng cho triển khai lịch/khôi phục lịch.
-- Giữ POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, SCHEDULE_EXACT_ALARM và VIBRATE. Bỏ USE_EXACT_ALARM trùng mục đích; nếu Sơn chọn exact scheduling thì còn phải xử lý quyền tương ứng trong code.
-- APK release hiện dùng debug signing của bài tập.
+## Sơn cập nhật code sửa vào nhánh riêng
 
-## Dùng chung code
-
-Sơn có thể ghép nhánh sửa cấu hình vào nhánh của mình:
+Sau khi bản sửa được merge main:
 
 ```bash
 git fetch origin
 git switch son-feature/discipline-progress
-git merge origin/truong-fix/discipline-demo-config
+git merge origin/main
 ```
 
-Trường tiếp tục kiểm tra tích hợp trên `truong-fix/discipline-demo-config`. Chưa merge vào main hoặc đánh dấu hoàn tất phần nhắc Android. Các việc còn lại theo báo cáo `son-review-2026-11-02.md`: lịch Android thật, đổi hồ sơ, streak trên 30 ngày và minh chứng/test bổ sung.
+Trường sử dụng main sau khi pull. Không cần lấy nhánh cấu hình cũ. Khi ghép CSDL, truyền UserRepository/LearningRepository/ReminderService vào ProgressPage; không dùng fake làm lưu trữ bền vững. Adapter có thể implement Listenable để báo thay đổi ngay, nếu không dashboard kiểm tra lại mỗi 30 giây và khi app trở về foreground.
 
-## Kết quả kiểm tra bản sửa — 02/11/2026
-
-- `flutter analyze`: không có issue.
-- `flutter test`: 32/32 test đạt.
-- `flutter build apk --release`: thành công; APK tại `build/app/outputs/flutter-apk/app-release.apk` (48.0 MB).
-- `flutter build web --release`: thành công; đầu ra tại `build/web`.
-- Chưa chạy nghiệm thu thông báo hoặc cài APK trên thiết bị thật trong phiên này.
+Xem [quy tắc, test và cách nghiệm thu thông báo](../discipline/rules-and-reminders.md). Code đã bổ sung đặt lịch/hủy/đổi user, streak 45 ngày và xử lý lỗi, nhưng chưa có bằng chứng nhận thông báo trên Android thật. Không đánh dấu hoàn tất nghiệm thu thiết bị chỉ dựa trên build hoặc mock test.
