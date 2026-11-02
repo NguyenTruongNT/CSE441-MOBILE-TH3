@@ -326,14 +326,25 @@ flutter test: toàn bộ test dự án đạt
 flutter analyze: No issues found
 ```
 
-Persistent store:
+Persistent storage:
 
 ```text
 shared_preferences: 2.5.6
 SharedPreferencesUserDataStore: đã triển khai
-Unit test fake preferences client: đạt
-Kiểm thử đóng/mở lại Android: chưa thực hiện
-Kiểm thử refresh/mở lại Web: chưa thực hiện
+Unit test persistent store: đạt
+Web refresh: dữ liệu hồ sơ còn
+Web chạy lại: dữ liệu hồ sơ còn
+Android chạy lại: dữ liệu hồ sơ còn
+Selected profile sau mở lại: còn chính xác
+```
+
+Giới hạn:
+
+```text
+Hồ sơ là dữ liệu cục bộ, không phải tài khoản đăng nhập.
+Lịch sử có dữ liệu thật khi module phát âm gọi savePractice.
+Không lưu audio hoặc API secret trong SharedPreferences.
+```
 ```
 ## 10. Lỗi và giới hạn còn lại
 
