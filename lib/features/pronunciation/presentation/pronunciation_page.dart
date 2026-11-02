@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:th3_english_ai/core/contracts/models.dart';
 import 'package:th3_english_ai/core/contracts/ports.dart';
@@ -57,6 +58,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
   UserProfile? _currentProfile;
   late ExerciseDetail _selectedExercise;
   String _selectedCategory = 'Tất cả';
+  String _searchKeyword = '';
 
   bool _hasMicPermission = true;
   bool _isAnalyzing = false;
@@ -334,15 +336,31 @@ class _PronunciationPageState extends State<PronunciationPage> {
       ...{for (final e in _catalog) e.category},
     ];
 
-    final filteredExercises = _selectedCategory == 'Tất cả'
-        ? _catalog
-        : _catalog.where((e) => e.category == _selectedCategory).toList();
+    final filteredExercises = _catalog.where((e) {
+      final matchesCategory =
+          _selectedCategory == 'Tất cả' || e.category == _selectedCategory;
+      if (!matchesCategory) return false;
+      if (_searchKeyword.isEmpty) return true;
+      return e.referenceText.toLowerCase().contains(_searchKeyword) ||
+          e.referenceIpa.toLowerCase().contains(_searchKeyword) ||
+          e.targetPhonemes.any((p) => p.toLowerCase().contains(_searchKeyword)) ||
+          e.description.toLowerCase().contains(_searchKeyword);
+    }).toList();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 900;
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.stylus,
+        },
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 900;
 
-        return SingleChildScrollView(
+          return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Center(
             child: ConstrainedBox(
@@ -385,7 +403,8 @@ class _PronunciationPageState extends State<PronunciationPage> {
           ),
         );
       },
-    );
+    ),
+  );
   }
 
   Widget _buildHeader(ThemeData theme) {
@@ -834,31 +853,95 @@ class _PronunciationPageState extends State<PronunciationPage> {
           ],
         ),
         const SizedBox(height: 10),
-        // Category Filter Chips
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: categories.map((cat) {
-              final isSel = cat == _selectedCategory;
-              return Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: FilterChip(
-                  label: Text(cat),
-                  selected: isSel,
-                  onSelected: (_) => setState(() => _selectedCategory = cat),
-                ),
-              );
-            }).toList(),
+
+        // Search Bar
+        TextField(
+          onChanged: (text) =>
+              setState(() => _searchKeyword = text.trim().toLowerCase()),
+          decoration: InputDecoration(
+            hintText: 'Tìm bài học, từ vựng, âm vị…',
+            hintStyle: TextStyle(
+              fontSize: 13,
+              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+            ),
+            prefixIcon: const Icon(Icons.search, size: 18),
+            isDense: true,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.35),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
-        const SizedBox(height: 12),
-        // Exercise cards
-        for (final ex in exercises)
-          ExerciseCard(
-            exerciseDetail: ex,
-            isSelected: ex.id == _selectedExercise.id,
-            onTap: () => _selectExercise(ex),
-          ),
+        const SizedBox(height: 10),
+
+        // Category Filter Chips in a neat Wrap (No horizontal scroll trap!)
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: categories.map((cat) {
+            final isSel = cat == _selectedCategory;
+            return FilterChip(
+              visualDensity: VisualDensity.compact,
+              label: Text(cat, style: const TextStyle(fontSize: 12)),
+              selected: isSel,
+              onSelected: (_) => setState(() => _selectedCategory = cat),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 14),
+
+        // Exercise cards or empty state
+        if (exercises.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.search_off_rounded,
+                  size: 36,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Không có bài luyện phù hợp',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Hãy chọn danh mục khác hoặc xóa từ khóa tìm kiếm.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => setState(() {
+                    _selectedCategory = 'Tất cả';
+                    _searchKeyword = '';
+                  }),
+                  child: const Text('Xem tất cả bài học'),
+                ),
+              ],
+            ),
+          )
+        else
+          for (final ex in exercises)
+            ExerciseCard(
+              exerciseDetail: ex,
+              isSelected: ex.id == _selectedExercise.id,
+              onTap: () => _selectExercise(ex),
+            ),
       ],
     );
   }
