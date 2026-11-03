@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'app/app.dart';
 import 'app/app_shell.dart';
 import 'core/contracts/contracts.dart';
 import 'features/discipline/discipline.dart';
+import 'features/pronunciation/pronunciation.dart';
 import 'features/user_data/user_data.dart';
 
 void main() {
@@ -32,6 +33,10 @@ void main() {
   runApp(
     EnglishLearningApp(
       pages: AppPages(
+        pronunciation: (context) => PronunciationPage(
+          learningRepository: learningRepository,
+          userRepository: userRepository,
+        ),
         progress: (BuildContext context) {
           return ProgressPage(
             learningRepository: learningRepository,
