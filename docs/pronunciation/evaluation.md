@@ -1,5 +1,7 @@
 # Báo cáo đánh giá phát âm AI trên nhiều người dùng và giọng nói
 
+> **Tài liệu cũ, chưa được xác minh.** Các số liệu dưới đây chưa có bộ minh chứng đủ để nghiệm thu và không mô tả mô hình mới. Không dùng các tỷ lệ này làm kết quả nộp bài. Thực hiện lại theo [quy trình nghiệm thu](../kiem-thu-nghien-thu.md), điền biểu mẫu từ dữ liệu thực.
+
 > **Người thực hiện:** Vũ Hải Đăng  
 > **Module phụ trách:** Đánh giá phát âm AI (`dang-feature/pronunciation-ai`)  
 > **Bộ dữ liệu thử nghiệm:** 4 người học ẩn danh với đặc trưng vùng miền và mức độ thành thạo khác nhau trên bộ 10 bài luyện chứa âm vị mục tiêu.

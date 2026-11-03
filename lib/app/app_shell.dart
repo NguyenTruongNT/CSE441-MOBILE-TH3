@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
+
 /// Inject pages using closures that pass real services into feature constructors.
 /// Null builders intentionally display integration placeholders.
 class AppPages {
@@ -17,9 +19,16 @@ class AppPages {
 }
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key, required this.pages});
+  const AppShell({
+    super.key,
+    required this.pages,
+    this.accountName,
+    this.onLogout,
+  });
 
   final AppPages pages;
+  final String? accountName;
+  final VoidCallback? onLogout;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -69,7 +78,7 @@ class _AppShellState extends State<AppShell> {
       ],
     ),
     _Section(
-      title: 'Hồ sơ',
+      title: 'Tài khoản',
       icon: Icons.person_outline_rounded,
       owner: 'Vũ Tuấn Khanh',
       headline: 'Hành trình của riêng bạn.',
@@ -98,14 +107,18 @@ class _AppShellState extends State<AppShell> {
         return Scaffold(
           appBar: AppBar(
             title: Text(_sections[_selectedIndex].title),
-            actions: const [
-              Padding(
-                padding: EdgeInsets.only(right: 20),
-                child: Tooltip(
-                  message: 'CSE441 · Lớp 65KTPM · Nhóm 12',
-                  child: Icon(Icons.school_outlined),
+            actions: [
+              if (widget.onLogout != null)
+                IconButton(
+                  onPressed: widget.onLogout,
+                  tooltip: 'Đăng xuất',
+                  icon: const Icon(Icons.logout_rounded),
                 ),
-              ),
+              if (wide && widget.accountName != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 24),
+                  child: Center(child: Text(widget.accountName!)),
+                ),
             ],
           ),
           body: SafeArea(
@@ -113,12 +126,25 @@ class _AppShellState extends State<AppShell> {
               children: [
                 if (wide) ...[
                   NavigationRail(
+                    minWidth: 96,
+                    minExtendedWidth: 220,
                     extended: constraints.maxWidth >= 1100,
                     selectedIndex: _selectedIndex,
                     onDestinationSelected: _select,
-                    leading: const Padding(
+                    leading: Padding(
                       padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Icon(Icons.record_voice_over_rounded, size: 32),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: AppTheme.accentGradient,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.graphic_eq_rounded,
+                          size: 30,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                     labelType: constraints.maxWidth >= 1100
                         ? NavigationRailLabelType.none

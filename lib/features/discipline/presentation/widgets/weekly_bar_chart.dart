@@ -125,7 +125,7 @@ class _WeeklyBarChartState extends State<WeeklyBarChart> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF4F8F7),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE2EBE8)),
+                      border: Border.all(color: const Color(0xFFE8E5F7)),
                     ),
                     child: Row(
                       children: [
@@ -152,7 +152,7 @@ class _WeeklyBarChartState extends State<WeeklyBarChart> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF4F8F7),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE2EBE8)),
+                      border: Border.all(color: const Color(0xFFE8E5F7)),
                     ),
                     child: Row(
                       children: [
@@ -258,7 +258,7 @@ class _WeeklyBarChartState extends State<WeeklyBarChart> {
                 border: Border.all(
                   color: selectedRecord.isGoalMet
                       ? const Color(0xFF81C784)
-                      : const Color(0xFFCFDCD8),
+                      : const Color(0xFFDDD9F3),
                 ),
               ),
               child: Row(

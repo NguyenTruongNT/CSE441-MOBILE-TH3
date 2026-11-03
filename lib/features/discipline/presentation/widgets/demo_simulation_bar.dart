@@ -27,9 +27,9 @@ class DemoSimulationBar extends StatelessWidget {
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFCFDCD8)),
+        side: const BorderSide(color: Color(0xFFDDD9F3)),
       ),
-      color: const Color(0xFFF0F7F5),
+      color: const Color(0xFFF1F0FC),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -40,7 +40,7 @@ class DemoSimulationBar extends StatelessWidget {
                 const Icon(
                   Icons.science_outlined,
                   size: 20,
-                  color: Color(0xFF12796F),
+                  color: Color(0xFF6554D9),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -48,7 +48,7 @@ class DemoSimulationBar extends StatelessWidget {
                     'Công cụ nghiệm thu & Mô phỏng (Demo Tool)',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF12796F),
+                      color: const Color(0xFF6554D9),
                     ),
                   ),
                 ),

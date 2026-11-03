@@ -36,6 +36,29 @@ class _HistoryPageState extends State<HistoryPage> {
   void initState() {
     super.initState();
     unawaited(_loadHistory());
+    for (final repository in [
+      widget.userRepository,
+      widget.learningRepository,
+    ]) {
+      if (repository is Listenable) {
+        (repository).addListener(_onDataChanged);
+      }
+    }
+  }
+
+  void _onDataChanged() => unawaited(_loadHistory(showLoading: false));
+
+  @override
+  void dispose() {
+    for (final repository in [
+      widget.userRepository,
+      widget.learningRepository,
+    ]) {
+      if (repository is Listenable) {
+        (repository).removeListener(_onDataChanged);
+      }
+    }
+    super.dispose();
   }
 
   DateTime get _nowUtc {

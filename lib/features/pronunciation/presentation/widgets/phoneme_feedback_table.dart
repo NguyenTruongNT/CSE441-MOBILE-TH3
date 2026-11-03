@@ -5,10 +5,7 @@ import 'package:th3_english_ai/core/contracts/models.dart';
 /// Interactive table displaying phoneme-by-phoneme diagnostic details,
 /// target vs recognized IPA, timestamps, scores, and articulatory suggestions.
 class PhonemeFeedbackTable extends StatelessWidget {
-  const PhonemeFeedbackTable({
-    super.key,
-    required this.phonemes,
-  });
+  const PhonemeFeedbackTable({super.key, required this.phonemes});
 
   final List<PhonemeFeedback> phonemes;
 
@@ -26,8 +23,10 @@ class PhonemeFeedbackTable extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          spacing: 12,
+          runSpacing: 4,
           children: [
             Text(
               'Chi tiết phân tích âm vị',
@@ -83,8 +82,8 @@ class _PhonemeCard extends StatelessWidget {
         break;
     }
 
-    final hasTimestamps = feedback.startMilliseconds != null &&
-        feedback.endMilliseconds != null;
+    final hasTimestamps =
+        feedback.startMilliseconds != null && feedback.endMilliseconds != null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -97,11 +96,17 @@ class _PhonemeCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               // Word tag
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
@@ -128,7 +133,11 @@ class _PhonemeCard extends StatelessWidget {
               if (feedback.recognizedIpa != null &&
                   feedback.recognizedIpa != feedback.expectedIpa) ...[
                 const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward_rounded, size: 14, color: Colors.grey),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 14,
+                  color: Colors.grey,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '[${feedback.recognizedIpa}]',
@@ -140,7 +149,6 @@ class _PhonemeCard extends StatelessWidget {
                   ),
                 ),
               ],
-              const Spacer(),
               // Status Badge with icon + text
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -192,7 +200,9 @@ class _PhonemeCard extends StatelessWidget {
           ],
           if (hasTimestamps || feedback.score != null) ...[
             const SizedBox(height: 6),
-            Row(
+            Wrap(
+              spacing: 16,
+              runSpacing: 4,
               children: [
                 if (hasTimestamps)
                   Text(
@@ -201,7 +211,6 @@ class _PhonemeCard extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                const Spacer(),
                 if (feedback.score != null)
                   Text(
                     'Điểm: ${feedback.score!.toStringAsFixed(0)}/100',

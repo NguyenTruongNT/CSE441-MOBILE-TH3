@@ -5,7 +5,13 @@ import 'app_theme.dart';
 
 /// Composition root: replace page builders when feature modules are delivered.
 class EnglishLearningApp extends StatelessWidget {
-  const EnglishLearningApp({super.key, this.pages = const AppPages()});
+  const EnglishLearningApp({
+    super.key,
+    this.pages = const AppPages(),
+    this.home,
+  });
+
+  final Widget? home;
 
   final AppPages pages;
 
@@ -14,6 +20,6 @@ class EnglishLearningApp extends StatelessWidget {
     title: 'English AI · Nhóm 12',
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
-    home: AppShell(pages: pages),
+    home: home ?? AppShell(pages: pages),
   );
 }

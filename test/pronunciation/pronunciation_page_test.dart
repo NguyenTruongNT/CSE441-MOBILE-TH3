@@ -21,9 +21,11 @@ void main() {
         body: PronunciationPage(
           userRepository: userRepo ?? FakeInternalUserRepository(),
           learningRepository: learningRepo ?? FakeInternalLearningRepository(),
-          pronunciationService: pronunciationService ??
+          pronunciationService:
+              pronunciationService ??
               FakePronunciationService(simulatedLatency: Duration.zero),
-          audioRecorder: recorder ??
+          audioRecorder:
+              recorder ??
               SimulatedAudioRecorder(
                 simulatedAudioSample: AudioSampleFixtures.createWavSample(
                   durationSeconds: 1.5,
@@ -35,7 +37,32 @@ void main() {
     );
   }
 
-  testWidgets('PronunciationPage renders exercise catalog and focus card', (tester) async {
+  for (final width in [360.0, 768.0, 1366.0]) {
+    testWidgets('practice controls and results fit width $width', (
+      tester,
+    ) async {
+      tester.view.physicalSize = Size(width, 960);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(buildTestableWidget());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.ensureVisible(find.text('Bắt đầu ghi âm'));
+      await tester.tap(find.text('Bắt đầu ghi âm'));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.takeException(), isNull);
+      await tester.ensureVisible(find.text('Dừng & Phân tích'));
+      await tester.tap(find.text('Dừng & Phân tích'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(OverallScoreBadge), findsOneWidget);
+    });
+  }
+
+  testWidgets('PronunciationPage renders exercise catalog and focus card', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1280, 960);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -49,58 +76,64 @@ void main() {
     expect(find.text('Bắt đầu ghi âm'), findsOneWidget);
   });
 
-  testWidgets('Full practice flow: records, analyzes, shows non-color score and saves session',
-      (tester) async {
-    tester.view.physicalSize = const Size(1280, 960);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
+  testWidgets(
+    'Full practice flow: records, analyzes, shows non-color score and saves session',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 960);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-    final learningRepo = FakeInternalLearningRepository();
-    final recorder = SimulatedAudioRecorder(
-      simulatedAudioSample: AudioSampleFixtures.createWavSample(
-        durationSeconds: 1.5,
-        volume: 0.5,
-      ),
-    );
+      final learningRepo = FakeInternalLearningRepository();
+      final recorder = SimulatedAudioRecorder(
+        simulatedAudioSample: AudioSampleFixtures.createWavSample(
+          durationSeconds: 1.5,
+          volume: 0.5,
+        ),
+      );
 
-    await tester.pumpWidget(
-      buildTestableWidget(learningRepo: learningRepo, recorder: recorder),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        buildTestableWidget(learningRepo: learningRepo, recorder: recorder),
+      );
+      await tester.pumpAndSettle();
 
-    // 1. Start recording
-    await tester.tap(find.text('Bắt đầu ghi âm'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+      // 1. Start recording
+      await tester.tap(find.text('Bắt đầu ghi âm'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Dừng & Phân tích'), findsOneWidget);
+      expect(find.text('Dừng & Phân tích'), findsOneWidget);
 
-    // 2. Stop and analyze
-    await tester.tap(find.text('Dừng & Phân tích'));
-    await tester.pumpAndSettle();
+      // 2. Stop and analyze
+      await tester.tap(find.text('Dừng & Phân tích'));
+      await tester.pumpAndSettle();
 
-    // 3. Verify results displayed
-    expect(find.byType(OverallScoreBadge), findsOneWidget);
-    expect(find.byType(PhonemeFeedbackTable), findsOneWidget);
+      // 3. Verify results displayed
+      expect(find.byType(OverallScoreBadge), findsOneWidget);
+      expect(find.byType(PhonemeFeedbackTable), findsOneWidget);
 
-    // 4. Verify non-color cues (Rating label and icons)
-    expect(
-      find.byWidgetPredicate(
-        (w) =>
-            w is Text &&
-            (w.data == 'Rất tốt' || w.data == 'Khá' || w.data == 'Cần luyện thêm'),
-      ),
-      findsAtLeastNWidgets(1),
-    );
+      // 4. Verify non-color cues (Rating label and icons)
+      expect(
+        find.byWidgetPredicate(
+          (w) =>
+              w is Text &&
+              (w.data == 'Rất tốt' ||
+                  w.data == 'Khá' ||
+                  w.data == 'Cần luyện thêm'),
+        ),
+        findsAtLeastNWidgets(1),
+      );
 
-    // 5. Verify practice was persisted to LearningRepository
-    expect(learningRepo.savedSessions.length, 1);
-    expect(learningRepo.savedSessions.first.status, PracticeStatus.completed);
-    expect(learningRepo.savedResults.length, 1);
-    expect(learningRepo.savedResults.first.overallScore, greaterThan(0.0));
-  });
+      // 5. Verify practice was persisted to LearningRepository
+      expect(learningRepo.savedSessions.length, 1);
+      expect(learningRepo.savedSessions.first.status, PracticeStatus.completed);
+      expect(learningRepo.savedResults.length, 1);
+      expect(learningRepo.savedResults.first.overallScore, greaterThan(0.0));
+    },
+  );
 
-  testWidgets('Selecting a different exercise updates studio view', (tester) async {
+  testWidgets('Selecting a different exercise updates studio view', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1280, 960);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -108,7 +141,9 @@ void main() {
     await tester.pumpWidget(buildTestableWidget());
     await tester.pumpAndSettle();
 
-    final secondExerciseText = find.text('They breathe together in the weather');
+    final secondExerciseText = find.text(
+      'They breathe together in the weather',
+    );
     expect(secondExerciseText, findsOneWidget);
 
     await tester.ensureVisible(secondExerciseText);
@@ -118,15 +153,21 @@ void main() {
     expect(find.text('/ðeɪ briːð təˈɡeðər ɪn ðə ˈweðər/'), findsWidgets);
   });
 
-  testWidgets('DiagnosticLogView is removed from page UI and kept in terminal only', (tester) async {
-    tester.view.physicalSize = const Size(1280, 960);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
+  testWidgets(
+    'DiagnosticLogView is removed from page UI and kept in terminal only',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 960);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(buildTestableWidget());
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(buildTestableWidget());
+      await tester.pumpAndSettle();
 
-    // Verify diagnostic log is not cluttering the user interface
-    expect(find.textContaining('Nhật ký hệ thống & Chẩn đoán lỗi'), findsNothing);
-  });
+      // Verify diagnostic log is not cluttering the user interface
+      expect(
+        find.textContaining('Nhật ký hệ thống & Chẩn đoán lỗi'),
+        findsNothing,
+      );
+    },
+  );
 }

@@ -7,14 +7,15 @@ void main(List<String> args) async {
   final portEnv = Platform.environment['PORT'] ?? '8080';
   final port = int.tryParse(portEnv) ?? 8080;
   final upstreamApiKey = Platform.environment['SPEECH_API_KEY'];
-  final upstreamProvider = Platform.environment['SPEECH_PROVIDER'] ?? 'real-stt-engine';
+  final upstreamProvider =
+      Platform.environment['SPEECH_PROVIDER'] ?? 'real-stt-engine';
 
   final server = await HttpServer.bind(InternetAddress.anyIPv4, port);
   stdout.writeln('---------------------------------------------------------');
-  stdout.writeln('Pronunciation AI Backend Server (Real Speech Engine)');
+  stdout.writeln('Pronunciation Backend (legacy assessment disabled)');
   stdout.writeln('Listening on http://${server.address.address}:$port');
   stdout.writeln('Speech Provider: $upstreamProvider');
-  stdout.writeln('Python STT Engine: Google Speech Recognition & FFmpeg');
+  stdout.writeln('Assessment model pending; no transcript-derived scores.');
   stdout.writeln('---------------------------------------------------------');
 
   await for (final request in server) {
@@ -29,8 +30,14 @@ Future<void> _handleRequest(
 ) async {
   // Add CORS headers for Flutter Web
   request.response.headers.add('Access-Control-Allow-Origin', '*');
-  request.response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  request.response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  request.response.headers.add(
+    'Access-Control-Allow-Methods',
+    'GET, POST, OPTIONS',
+  );
+  request.response.headers.add(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, Accept',
+  );
 
   if (request.method == 'OPTIONS') {
     request.response.statusCode = HttpStatus.ok;
@@ -42,13 +49,16 @@ Future<void> _handleRequest(
 
   if (request.method == 'GET' && (path == '/' || path == '/health')) {
     request.response.headers.contentType = ContentType.json;
-    request.response.write(jsonEncode({
-      'status': 'ok',
-      'service': 'pronunciation-ai-proxy',
-      'version': '1.1.0',
-      'provider': provider,
-      'timestamp': DateTime.now().toUtc().toIso8601String(),
-    }));
+    request.response.write(
+      jsonEncode({
+        'status': 'ok',
+        'service': 'pronunciation-ai-proxy',
+        'version': '1.1.0',
+        'provider': provider,
+      'assessmentReady': _hasVerifiedPhonemeModel(),
+        'timestamp': DateTime.now().toUtc().toIso8601String(),
+      }),
+    );
     await request.response.close();
     return;
   }
@@ -69,6 +79,15 @@ Future<void> _handleAnalyze(
   String? apiKey,
   String provider,
 ) async {
+  if (!_hasVerifiedPhonemeModel()) {
+    _sendJsonError(
+      request.response,
+      HttpStatus.serviceUnavailable,
+      'insufficientEvidence',
+      'Backend cũ chưa có mô hình nhận dạng âm vị từ audio. Không trả điểm suy từ transcript. Đang chờ tích hợp mô hình đã chọn.',
+    );
+    return;
+  }
   try {
     final content = await utf8.decoder.bind(request).join();
     if (content.isEmpty) {
@@ -85,12 +104,16 @@ Future<void> _handleAnalyze(
     final sessionId = data['sessionId'] as String?;
     final referenceText = data['referenceText'] as String?;
     final referenceIpa = data['referenceIpa'] as String? ?? '';
-    final targetPhonemes = (data['targetPhonemes'] as List?)?.cast<String>() ?? [];
+    final targetPhonemes =
+        (data['targetPhonemes'] as List?)?.cast<String>() ?? [];
     final audioBase64 = data['audioBase64'] as String?;
     final mimeType = data['mimeType'] as String? ?? 'audio/wav';
     final clientTranscript = (data['clientTranscript'] as String? ?? '').trim();
 
-    if (sessionId == null || referenceText == null || audioBase64 == null || mimeType.isEmpty) {
+    if (sessionId == null ||
+        referenceText == null ||
+        audioBase64 == null ||
+        mimeType.isEmpty) {
       _sendJsonError(
         request.response,
         HttpStatus.badRequest,
@@ -138,15 +161,11 @@ Future<void> _handleAnalyze(
       final success = sttRes['success'] == true;
       if (!success) {
         final code = sttRes['code'] as String? ?? 'insufficientEvidence';
-        final errorMsg = sttRes['error'] as String? ??
+        final errorMsg =
+            sttRes['error'] as String? ??
             'Không nhận diện được giọng nói tiếng Anh trong bản ghi âm. Vui lòng nói to và rõ ràng hơn.';
         // stderr.writeln('[$sessionId] STT failed: $code - $errorMsg');
-        _sendJsonError(
-          request.response,
-          HttpStatus.badRequest,
-          code,
-          errorMsg,
-        );
+        _sendJsonError(request.response, HttpStatus.badRequest, code, errorMsg);
         return;
       }
 
@@ -190,6 +209,10 @@ Future<void> _handleAnalyze(
   }
 }
 
+// The previous transcript heuristics are retained for review only. They must
+// never serve real assessment requests while the replacement model is pending.
+bool _hasVerifiedPhonemeModel() => false;
+
 Future<Map<String, dynamic>> _runSttEngine({
   required Uint8List audioBytes,
   required String mimeType,
@@ -208,8 +231,12 @@ Future<Map<String, dynamic>> _runSttEngine({
 
   // Save audio bytes to a temp file
   final tempDir = Directory.systemTemp;
-  final ext = mimeType.contains('webm') ? 'webm' : (mimeType.contains('wav') ? 'wav' : 'tmp');
-  final tempFile = File('${tempDir.path}/stt_${DateTime.now().microsecondsSinceEpoch}.$ext');
+  final ext = mimeType.contains('webm')
+      ? 'webm'
+      : (mimeType.contains('wav') ? 'wav' : 'tmp');
+  final tempFile = File(
+    '${tempDir.path}/stt_${DateTime.now().microsecondsSinceEpoch}.$ext',
+  );
   await tempFile.writeAsBytes(audioBytes);
 
   try {
@@ -262,10 +289,7 @@ void _sendJsonError(
 ) {
   response.headers.contentType = ContentType.json;
   response.statusCode = statusCode;
-  response.write(jsonEncode({
-    'code': code,
-    'message': message,
-  }));
+  response.write(jsonEncode({'code': code, 'message': message}));
   response.close();
 }
 
@@ -300,7 +324,11 @@ bool _isPhoneticallySimilar(String w1, String w2) {
   return diff <= 1;
 }
 
-String _detectSubstitutedSound(String expectedWord, String actualWord, String expectedPhoneme) {
+String _detectSubstitutedSound(
+  String expectedWord,
+  String actualWord,
+  String expectedPhoneme,
+) {
   if (expectedPhoneme == 'θ' && actualWord.contains('s')) return 's';
   if (expectedPhoneme == 'θ' && actualWord.contains('t')) return 't';
   if (expectedPhoneme == 'ð' && actualWord.contains('d')) return 'd';
@@ -346,7 +374,8 @@ Map<String, dynamic> _evaluatePhonemes({
 
     final userWord = i < userWords.length ? userWords[i] : null;
     final isExactMatch = userWord != null && userWord == cleanRefWord;
-    final isApproxMatch = userWord != null && _isPhoneticallySimilar(userWord, cleanRefWord);
+    final isApproxMatch =
+        userWord != null && _isPhoneticallySimilar(userWord, cleanRefWord);
 
     final phonemeSymbol = targetPhonemes.isNotEmpty && i < targetPhonemes.length
         ? targetPhonemes[i % targetPhonemes.length]
@@ -362,23 +391,31 @@ Map<String, dynamic> _evaluatePhonemes({
       phonemeScore = (90.0 + (i % 3) * 2.5).clamp(82.0, 98.0);
       recognizedIpa = phonemeSymbol;
       status = 'correct';
-      suggestion = 'Phát âm chuẩn xác âm /$phonemeSymbol/ trong từ "$cleanRefWord".';
+      suggestion =
+          'Phát âm chuẩn xác âm /$phonemeSymbol/ trong từ "$cleanRefWord".';
     } else if (isApproxMatch) {
       matchedCount++;
       phonemeScore = 74.0;
       recognizedIpa = phonemeSymbol;
       status = 'needsPractice';
-      suggestion = 'Âm /$phonemeSymbol/ trong từ "$cleanRefWord" khá tốt, cần kéo dài âm rõ ràng hơn.';
+      suggestion =
+          'Âm /$phonemeSymbol/ trong từ "$cleanRefWord" khá tốt, cần kéo dài âm rõ ràng hơn.';
     } else if (userWord != null) {
       phonemeScore = 42.0;
-      recognizedIpa = _detectSubstitutedSound(cleanRefWord, userWord, phonemeSymbol);
+      recognizedIpa = _detectSubstitutedSound(
+        cleanRefWord,
+        userWord,
+        phonemeSymbol,
+      );
       status = 'needsPractice';
-      suggestion = 'Bạn phát âm từ "$cleanRefWord" thành "$userWord". Cần chú ý khẩu hình để tạo âm /$phonemeSymbol/ thay vì /$recognizedIpa/.';
+      suggestion =
+          'Bạn phát âm từ "$cleanRefWord" thành "$userWord". Cần chú ý khẩu hình để tạo âm /$phonemeSymbol/ thay vì /$recognizedIpa/.';
     } else {
       phonemeScore = 20.0;
       recognizedIpa = '[omitted]';
       status = 'needsPractice';
-      suggestion = 'Không phát hiện từ "$cleanRefWord" trong bản ghi âm (bị bỏ sót hoặc nói quá nhỏ).';
+      suggestion =
+          'Không phát hiện từ "$cleanRefWord" trong bản ghi âm (bị bỏ sót hoặc nói quá nhỏ).';
     }
 
     phonemeScore = double.parse(phonemeScore.toStringAsFixed(1));
@@ -396,11 +433,16 @@ Map<String, dynamic> _evaluatePhonemes({
     });
   }
 
-  final avgPhonemeScore = scoreSum / (refWords.isNotEmpty ? refWords.length : 1);
-  final wordAccuracy = refWords.isNotEmpty ? (matchedCount / refWords.length) : 0.0;
+  final avgPhonemeScore =
+      scoreSum / (refWords.isNotEmpty ? refWords.length : 1);
+  final wordAccuracy = refWords.isNotEmpty
+      ? (matchedCount / refWords.length)
+      : 0.0;
 
   final overall = double.parse(
-    ((avgPhonemeScore * 0.5) + (wordAccuracy * 100.0 * 0.5)).clamp(15.0, 98.0).toStringAsFixed(1),
+    ((avgPhonemeScore * 0.5) + (wordAccuracy * 100.0 * 0.5))
+        .clamp(15.0, 98.0)
+        .toStringAsFixed(1),
   );
 
   return {

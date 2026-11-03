@@ -198,7 +198,7 @@ class SettingsReminderCard extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         primaryColor.withValues(alpha: 0.08),
-                        const Color(0xFFF1F5F4),
+                        const Color(0xFFF4F3FC),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,

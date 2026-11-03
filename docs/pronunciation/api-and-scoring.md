@@ -1,5 +1,7 @@
 # Báo cáo kỹ thuật: API nhận dạng và Thuật toán chấm điểm âm vị AI
 
+> **Tài liệu thiết kế cũ, chưa đạt nghiệm thu.** Backend heuristic dựa transcript đã bị chặn trả điểm; client không còn fallback sang engine này. Các mô tả GOP/căn chỉnh và chất lượng bên dưới không phải minh chứng mô hình âm vị thật. Xem [trạng thái hiện tại](../doi-chieu-th3.md).
+
 > **Người thực hiện:** Vũ Hải Đăng  
 > **Module phụ trách:** Luyện phát âm AI (`lib/features/pronunciation/`, `backend/pronunciation/`, `test/pronunciation/`)  
 > **Nhánh Git:** `dang-feature/pronunciation-ai`  

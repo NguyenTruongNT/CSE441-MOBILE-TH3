@@ -57,7 +57,7 @@ class ProgressHeaderCard extends StatelessWidget {
             height: 50,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [primaryColor, const Color(0xFF0D5C54)],
+                colors: [primaryColor, const Color(0xFF7954DF)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

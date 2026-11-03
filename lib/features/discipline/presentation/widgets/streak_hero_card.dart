@@ -180,7 +180,7 @@ class StreakHeroCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: milestoneInfo.progress,
                 minHeight: 7,
-                backgroundColor: const Color(0xFFF1F5F4),
+                backgroundColor: const Color(0xFFF4F3FC),
                 valueColor: const AlwaysStoppedAnimation<Color>(
                   Color(0xFFFF9800),
                 ),
