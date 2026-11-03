@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:th3_english_ai/app/shared/page_activity.dart';
 import 'package:th3_english_ai/core/contracts/models.dart';
 import 'package:th3_english_ai/features/pronunciation/data/audio_sample_fixtures.dart';
 import 'package:th3_english_ai/features/pronunciation/data/fake_pronunciation_repository.dart';
@@ -170,4 +171,41 @@ void main() {
       );
     },
   );
+
+  testWidgets('leaving practice stops microphone and does not save a session', (
+    tester,
+  ) async {
+    final active = ValueNotifier(true);
+    final recorder = SimulatedAudioRecorder();
+    final repo = FakeInternalLearningRepository();
+    addTearDown(active.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder<bool>(
+            valueListenable: active,
+            builder: (context, value, child) =>
+                PageActivity(active: value, child: child!),
+            child: PronunciationPage(
+              audioRecorder: recorder,
+              learningRepository: repo,
+              pronunciationService: FakePronunciationService(
+                simulatedLatency: Duration.zero,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Bắt đầu ghi âm'));
+    await tester.tap(find.text('Bắt đầu ghi âm'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(recorder.isRecording, isTrue);
+    active.value = false;
+    await tester.pumpAndSettle();
+    expect(recorder.isRecording, isFalse);
+    expect(repo.savedSessions, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
 }

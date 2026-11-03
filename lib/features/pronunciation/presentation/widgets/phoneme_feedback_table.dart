@@ -68,7 +68,7 @@ class _PhonemeCard extends StatelessWidget {
       case PhonemeStatus.correct:
         statusColor = const Color(0xFF1B873F);
         statusIcon = Icons.check_circle_outline_rounded;
-        statusLabel = 'Chuẩn';
+        statusLabel = 'Khớp mẫu';
         break;
       case PhonemeStatus.needsPractice:
         statusColor = const Color(0xFFD97706);
@@ -126,7 +126,7 @@ class _PhonemeCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  fontFamily: 'monospace',
+                  fontFamily: 'NotoSans',
                   color: theme.colorScheme.primary,
                 ),
               ),
@@ -141,11 +141,11 @@ class _PhonemeCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   '[${feedback.recognizedIpa}]',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFFDC2626),
+                    color: statusColor,
                     fontWeight: FontWeight.w600,
-                    fontFamily: 'monospace',
+                    fontFamily: 'NotoSans',
                   ),
                 ),
               ],

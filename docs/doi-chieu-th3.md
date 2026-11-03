@@ -1,49 +1,47 @@
 # Đối chiếu TH3 và nhiệm vụ từng thành viên
 
-Ngày rà soát: 03/11/2026. Nhánh bổ sung: `truong-feature/th3-completion`.
+Rà soát ngày 03/11/2026 · nhánh `truong-feature/th3-completion`. Phân biệt phần code đã có với nghiệm thu bằng người/thiết bị thật.
 
-## Các lựa chọn đã được người dùng chốt
+## Lựa chọn đã chốt
 
-- Chọn tài khoản demo có sẵn, có đăng xuất; không tạo hồ sơ trong luồng chính.
-- Android và web; CSDL SQLite/Drift cục bộ, có bảng/giao dịch, không đồng bộ giữa thiết bị.
-- Giao diện sáng, thẻ trắng, điểm nhấn gradient xanh–tím; sidebar desktop, navbar mobile.
-- Mô hình mã nguồn mở trên backend; người dùng chấp nhận tải model và tài nguyên máy.
-- Người dùng tổ chức kiểm thử ít nhất 4 người, cùng 10 câu; cần chuẩn bị hướng dẫn và biểu mẫu.
-- Lựa chọn cụ thể Wav2Vec2Phoneme đang chờ trả lời. Chưa triển khai/tải model khi chưa chốt.
+- Chọn tài khoản demo có sẵn, đăng xuất; không tạo hồ sơ trong luồng chính.
+- Android + web; SQLite/Drift cục bộ, có bảng/giao dịch; không đồng bộ giữa thiết bị.
+- Nền sáng, thẻ trắng, gradient xanh–tím; Be Vietnam Pro đóng gói, tiêu đề đậm/nội dung thoáng.
+- Desktop có logo/tên app, sidebar thu gọn bằng icon, bấm để mở; mục chọn là thẻ gradient nổi bật.
+- Mobile có thanh dưới gọn và nút Luyện nói ở giữa; avatar trên cùng mở Tài khoản.
+- Wav2Vec2Phoneme + ASR mã nguồn mở trên backend; được phép tải model để kiểm tra.
+- Nhóm tổ chức 4 người × 10 câu, chuẩn bị bộ câu/biểu mẫu và kiểm tra Android thật.
 
 ## Checklist giảng viên
 
-| Mục | Kết quả rà soát và phần bổ sung | Trạng thái |
+| Mục | Bản code hiện tại | Phạm vi đã kiểm tra và phần còn lại |
 |---|---|---|
-| 1. CSDL người dùng, lịch sử, kết quả | Thay JSON bằng SQLite/Drift; bảng users, settings, sessions, results, phoneme_feedback và app_state; khóa ngoại, giao dịch, chống trùng, import dữ liệu cũ giữ bản gốc | Đã triển khai; có test giao dịch/rollback/tách tài khoản và mở web thật |
-| 2. Streak, thời gian, mục tiêu | Kế thừa thuật toán Sơn, dùng repository SQLite có thông báo thay đổi; cập nhật sau lưu; không tính thời gian API | Đã triển khai/test; nghiệm thu toàn luồng người thật còn chờ AI |
-| 3. Thu âm và speech recognition | Bổ sung Android PCM 16kHz/WAV thật, quyền micro/Internet; web giữ adapter thu âm. Nhận dạng backend mới chờ chốt model | Chưa hoàn tất luồng thật |
-| 4. AI so sánh âm vị/chấm điểm | Bỏ fallback sinh điểm khi mất mạng; chặn backend cũ trả điểm dựa transcript; bỏ GOP giả trên UI | Chưa hoàn tất: chờ mô hình, thuật toán và kiểm chứng |
-| 5. Điểm, đánh dấu lỗi, bài tập | Kế thừa giao diện và gợi ý của Đăng; sửa responsive và cách diễn đạt; phản hồi thật phụ thuộc mục 4 | Chưa nghiệm thu AI |
-| 6. Thông báo và tiến độ | Dùng LocalReminderService mặc định, lưu cài đặt SQLite; Android đặt lịch OS, web giới hạn tab mở | Code/test có; chưa nghiệm thu nhận trên Android thật |
-| 7. Nhiều người và giọng | Có bộ 10 câu, 4 tài khoản, CSV 40 phiên trống, cách tính đồng thuận/cảnh báo sai/bỏ lọt; tài liệu số liệu cũ được đánh dấu chưa xác minh | Chờ người thật thực hiện; không điền số liệu giả |
+| 1. CSDL người dùng/lịch sử/kết quả | SQLite/Drift với users, settings, sessions, results, phoneme_feedback, app_state; khóa ngoại/index, ghi giao dịch, chống trùng, import JSON cũ | Test giao dịch/rollback/tách tài khoản/import; lưu và mở lại qua Chrome. Còn nghiệm thu lưu/mở trên Android thật |
+| 2. Streak/thời gian/mục tiêu | Kế thừa Sơn; dùng dữ liệu SQLite có sự kiện cập nhật; không tính thời gian đợi API; ngày theo múi giờ tài khoản | Test quy tắc streak, qua ngày/DST, cập nhật sau lưu; có giao diện tiến độ |
+| 3. Thu âm/nhận dạng | Web MediaRecorder, Android PCM16 WAV; backend ASR từ audio thực | Đã chạy ghi âm qua Chrome với audio TTS tổng hợp và API thật. Còn micro Android và giọng người thật |
+| 4. AI/so sánh âm vị | Wav2Vec2Phoneme nhận nhãn từ audio, căn chỉnh edit distance với IPA; điểm 0–100 có định nghĩa; ASR không tham gia điểm | Đã tải/nạp model, gọi API CPU, kiểm tra âm thay/thêm/thiếu trong thuật toán. Chưa hiệu chuẩn với chuyên gia; đã ghi nhận model bỏ lọt một ca TTS |
+| 5. Điểm/âm lỗi/gợi ý | Kế thừa phản hồi của Đăng; hiện âm chuẩn/nhận dạng, trạng thái chữ + màu, gợi ý khẩu hình/bài liên quan; lưu chi tiết | Test UI responsive và luồng kết quả thật trên web. Mức chính xác gợi ý phụ thuộc model; chờ đối chiếu người nghe |
+| 6. Nhắc học/tiến độ | LocalReminderService thật mặc định; Android lịch OS, web tab mở; cài đặt theo tài khoản | Test lịch/đổi giờ/tắt và lưu cài đặt. Còn nhận thông báo/khởi động lại trên Android thật |
+| 7. Nhiều người/giọng | 4 tài khoản demo, 10 câu thống nhất catalog, CSV 40 phiên và hướng dẫn người nghe đối chiếu | **Chưa nghiệm thu**: chưa có 40 bản ghi/nhãn người thật. Audio tổng hợp không thay thế mục này |
+
+**Không đánh dấu hoàn thành 7/7 hoặc khẳng định độ chính xác AI chỉ dựa trên test/build.** Có thể bàn giao code và bản build để nhóm tổ chức nghiệm thu phần còn lại.
 
 ## Đối chiếu cá nhân
 
-| Thành viên | Phần kế thừa | Phần bổ sung trong đợt này | Việc còn phải nghiệm thu |
+| Thành viên | Phần code kế thừa | Phần sửa/bổ sung khi tích hợp | Việc còn cần thành viên phối hợp |
 |---|---|---|---|
-| Nguyễn Văn Trường | Hợp đồng, khung điều hướng, theme, tích hợp module | Luồng vào/đăng xuất tài khoản, theme xanh–tím, sidebar/navbar, tích hợp SQLite, sửa build Kotlin, kiểm tra responsive, tài liệu thao tác và bảng đối chiếu | Ghép mô hình đã chọn; kiểm tra toàn luồng trên thiết bị và chuẩn bị bản nộp |
-| Vũ Tuấn Khanh | Model/schema JSON, repository, kiểm tra dữ liệu, Hồ sơ/Lịch sử và test lưu trữ | SQLite có giao dịch/khóa ngoại/index; import dữ liệu cũ; tài khoản demo thay tạo hồ sơ; Lịch sử lắng nghe cập nhật | Kiểm tra lưu/mở lại trên Android thật; các ca dữ liệu với phiên AI thật |
-| Vũ Hải Đăng | 16 bài, giao diện luyện, web recorder/STT/TTS, backend và bộ test ban đầu | Android recorder/TTS thật, endpoint cấu hình, bỏ fallback/điểm GOP giả, chặn heuristic cũ, sửa tràn mobile, giữ đúng tài khoản khi lưu | Mô hình âm vị thật; lỗi/giới hạn AI; bộ thử 4 người × 10 câu và số liệu đối chiếu |
-| Lý Đình Sơn | Streak, biểu đồ, mục tiêu, adapter thông báo, test quy tắc thời gian | Đồng bộ theme; dùng dữ liệu SQLite có sự kiện thay đổi và thông báo thật mặc định | Nhận nhắc thực tế, đổi giờ/tắt/khởi động lại trên Android; web khi tab mở |
+| Nguyễn Văn Trường | Hợp đồng, khung app/theme/điều hướng, review/merge | Tài khoản demo; sidebar/navbar mới; font đóng gói; tích hợp model/SQLite; lazy page, bảo toàn trạng thái; sửa build; tài liệu và kiểm tra toàn luồng | Thu kết quả nghiệm thu, kiểm tra bản nộp và minh chứng cuối |
+| Vũ Tuấn Khanh | Model/repository/serializer người dùng, JSON, lịch sử, test | Drift SQLite có giao dịch/khóa ngoại/index; import cũ; lịch sử tự cập nhật, tên câu dễ đọc; lọc ngày đúng múi giờ; đổi tài khoản không lẫn dữ liệu | Xác nhận lưu/mở dữ liệu trên Android thật |
+| Vũ Hải Đăng | 16 bài, studio luyện, recorder/STT/TTS web, feedback, gợi ý và test | Recorder/TTS Android; backend Python + model âm vị/ASR thật; khóa revision; bỏ fallback và GOP giả; chặn thao tác trùng/đổi bài lúc phân tích; dừng micro khi rời trang; đồng bộ catalog/IPA | Thử 4 người × 10 câu, đối chiếu nhãn âm, ghi nhận nhận nhầm và đánh giá độ ổn định |
+| Lý Đình Sơn | Streak, mục tiêu, biểu đồ, nhắc học, test múi giờ | Gắn SQLite có sự kiện; thống nhất theme; adapter thật mặc định; dùng chung quy tắc ngày cho Lịch sử/Tiến độ | Đo giờ nhận nhắc, đổi/tắt lịch và khởi động lại Android; thử web khi tab mở |
 
-Các bổ sung nêu trên do Trường/Codex thực hiện trong đợt tích hợp, không xem là minh chứng từng thành viên đã tự hoàn thành phần còn thiếu. Không đánh dấu toàn bộ đề tài hoàn thành chỉ vì test/build đạt.
+Phần bổ sung do đợt tích hợp Trường/Codex thực hiện; không ghi nhận ngược thành phần từng thành viên đã tự làm. Nhánh Đăng trước đó đã merge qua PR #7; các module được kế thừa thay vì viết lại toàn bộ.
 
-## Kiểm tra đã thực hiện
+## Minh chứng kỹ thuật
 
-- `flutter analyze`: đạt ở lượt kiểm tra sau thay đổi tài khoản/SQLite/responsive.
-- `flutter test`: 132 test đạt, gồm test import dữ liệu cũ.
-- Build web release: đạt (JavaScript); thư viện TTS có cảnh báo dry-run WASM, không công bố ứng dụng Flutter WASM. SQLite WASM là thành phần CSDL riêng.
-- Build APK release: đạt, gồm cấu hình mạng cho emulator/adb reverse; đã sửa cache Kotlin khác ổ đĩa và lỗi Android lint XML.
-- Chrome thật 1366px/360px: đã mở tài khoản demo, Tiến độ và trang phát âm; SQLite khởi tạo được, không có pageerror ở các bước này.
-- Chrome: đổi mục tiêu thành 20 phút, reload trang, chọn lại tài khoản và xác nhận mục tiêu vẫn là 20 phút; ảnh `screenshots/completion/persistence-web.png`.
-- Smoke test recorder web bằng thiết bị media tổng hợp của Chrome: nhận WebM/Opus và gửi payload audio; không có pageerror. Đây không phải thử giọng người thật. API được giả lập lỗi 503 để kiểm tra đường lỗi.
-- Backend cũ: POST phân tích trả 503 `insufficientEvidence`, không trả điểm khi chưa có mô hình âm vị.
-- Không có thiết bị Android kết nối ở lúc rà soát. Chưa có thử nghiệm micro/thông báo thực và chưa có kết quả nhiều giọng cho mô hình mới.
-
-Hướng dẫn: [sử dụng](huong-dan-su-dung.md), [nghiệm thu](kiem-thu-nghien-thu.md).
+- 138 test Flutter đạt: hợp đồng, dữ liệu, SQLite, streak, API client, responsive, lazy page/sidebar và dừng micro khi rời trang.
+- 15 test Python đạt: giải mã audio, lỗi/im lặng, so sánh âm vị và bảo vệ dữ liệu API.
+- Model đã tải/nạp và trả phản hồi thật từ audio TTS trên CPU; [báo cáo cả ca nhận nhầm](pronunciation/evaluation.md).
+- Quy trình trình duyệt tự động và ảnh nằm ở [screenshots/final](../screenshots/final/); phạm vi chính xác theo `verification.json`.
+- `flutter analyze` không có vấn đề; build web release JavaScript và APK release đạt. Web dùng CanvasKit cục bộ, font Be Vietnam Pro/Noto Sans/Roboto đóng gói để không phụ thuộc CDN cho bộ render/IPA.
+- Build/test thiết bị được ghi trong [hướng dẫn nghiệm thu](kiem-thu-nghien-thu.md). Chưa có thiết bị Android kết nối, không công bố đã nghiệm thu micro/thông báo thực.

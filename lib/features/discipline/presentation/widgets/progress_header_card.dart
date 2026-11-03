@@ -89,20 +89,20 @@ class ProgressHeaderCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    Expanded(
-                      child: Text(
-                        '$greeting, $displayName!',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                    Text(
+                      '$greeting, $displayName!',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(width: 6),
                     // Discipline Tier Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -110,9 +110,9 @@ class ProgressHeaderCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF8E1),
+                        color: const Color(0xFFECE9FF),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFFFD54F)),
+                        border: Border.all(color: const Color(0xFFDAD4FC)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -120,7 +120,7 @@ class ProgressHeaderCard extends StatelessWidget {
                           const Icon(
                             Icons.military_tech_rounded,
                             size: 13,
-                            color: Color(0xFFF57F17),
+                            color: Color(0xFF5D4DE0),
                           ),
                           const SizedBox(width: 2),
                           Text(
@@ -128,7 +128,7 @@ class ProgressHeaderCard extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFFE65100),
+                              color: Color(0xFF5D4DE0),
                             ),
                           ),
                         ],
@@ -162,7 +162,7 @@ class ProgressHeaderCard extends StatelessWidget {
                     ),
                     Text(
                       stats.hasPracticedToday
-                          ? '• Đã học hôm nay ✨'
+                          ? '• Đã học hôm nay'
                           : '• Chưa học hôm nay',
                       style: TextStyle(
                         fontSize: 11,
@@ -197,9 +197,9 @@ class ProgressHeaderCard extends StatelessWidget {
 
   String _getDisciplineBadge(int streak) {
     if (streak >= 30) return 'Bậc Thầy';
-    if (streak >= 14) return 'Vàng 🌟';
-    if (streak >= 7) return 'Bạc 🥈';
-    if (streak >= 3) return 'Đồng 🥉';
-    return 'Tân Binh 🌱';
+    if (streak >= 14) return 'Vàng';
+    if (streak >= 7) return 'Bạc';
+    if (streak >= 3) return 'Đồng';
+    return 'Tân Binh';
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app_theme.dart';
+import 'app_navigation.dart';
+import 'shared/page_activity.dart';
 
 /// Inject pages using closures that pass real services into feature constructors.
 /// Null builders intentionally display integration placeholders.
@@ -28,7 +29,7 @@ class AppShell extends StatefulWidget {
 
   final AppPages pages;
   final String? accountName;
-  final VoidCallback? onLogout;
+  final Future<void> Function()? onLogout;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -36,6 +37,9 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
+  final Set<int> _visited = {0};
+  bool? _sidebarExpanded;
+  bool _loggingOut = false;
 
   static const _sections = [
     _Section(
@@ -84,14 +88,33 @@ class _AppShellState extends State<AppShell> {
       headline: 'Hành trình của riêng bạn.',
       description: 'Quản lý hồ sơ và giữ dữ liệu học tập riêng cho từng người.',
       items: [
-        'Tạo và chọn hồ sơ',
+        'Chọn tài khoản demo và đăng xuất',
         'Thông tin người học',
         'Dữ liệu lưu qua các lần mở lại',
       ],
     ),
   ];
 
-  void _select(int index) => setState(() => _selectedIndex = index);
+  void _select(int index) => setState(() {
+    _visited.add(index);
+    _selectedIndex = index;
+  });
+
+  Future<void> _logout() async {
+    if (_loggingOut || widget.onLogout == null) return;
+    setState(() => _loggingOut = true);
+    try {
+      await widget.onLogout!();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Chưa đăng xuất được. Hãy thử lại.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loggingOut = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,72 +127,51 @@ class _AppShellState extends State<AppShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= 800;
+        final expanded = _sidebarExpanded ?? constraints.maxWidth >= 1100;
+        final content = IndexedStack(
+          index: _selectedIndex,
+          children: [
+            for (var index = 0; index < _sections.length; index++)
+              KeyedSubtree(
+                key: ValueKey('page-$index'),
+                child: PageActivity(
+                  active: _selectedIndex == index,
+                  child: !_visited.contains(index)
+                      ? const SizedBox.shrink()
+                      : builders[index] == null
+                      ? _IntegrationPage(section: _sections[index])
+                      : Builder(builder: builders[index]!),
+                ),
+              ),
+          ],
+        );
         return Scaffold(
-          appBar: AppBar(
-            title: Text(_sections[_selectedIndex].title),
-            actions: [
-              if (widget.onLogout != null)
-                IconButton(
-                  onPressed: widget.onLogout,
-                  tooltip: 'Đăng xuất',
-                  icon: const Icon(Icons.logout_rounded),
-                ),
-              if (wide && widget.accountName != null)
-                Padding(
-                  padding: const EdgeInsets.only(right: 24),
-                  child: Center(child: Text(widget.accountName!)),
-                ),
-            ],
-          ),
           body: SafeArea(
+            bottom: false,
             child: Row(
               children: [
-                if (wide) ...[
-                  NavigationRail(
-                    minWidth: 96,
-                    minExtendedWidth: 220,
-                    extended: constraints.maxWidth >= 1100,
+                if (wide)
+                  LearningSidebar(
+                    expanded: expanded,
                     selectedIndex: _selectedIndex,
-                    onDestinationSelected: _select,
-                    leading: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: AppTheme.accentGradient,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.graphic_eq_rounded,
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    labelType: constraints.maxWidth >= 1100
-                        ? NavigationRailLabelType.none
-                        : NavigationRailLabelType.all,
-                    destinations: [
-                      for (final section in _sections)
-                        NavigationRailDestination(
-                          icon: Icon(section.icon),
-                          label: Text(section.title),
-                        ),
-                    ],
+                    onToggle: () =>
+                        setState(() => _sidebarExpanded = !expanded),
+                    onSelect: _select,
+                    accountName: widget.accountName,
+                    loggingOut: _loggingOut,
+                    onLogout: widget.onLogout == null ? null : _logout,
                   ),
-                  const VerticalDivider(width: 1),
-                ],
                 Expanded(
-                  child: IndexedStack(
-                    index: _selectedIndex,
+                  child: Column(
                     children: [
-                      for (var index = 0; index < _sections.length; index++)
-                        KeyedSubtree(
-                          key: ValueKey('page-$index'),
-                          child: builders[index] == null
-                              ? _IntegrationPage(section: _sections[index])
-                              : Builder(builder: builders[index]!),
-                        ),
+                      LearningTopBar(
+                        title: _sections[_selectedIndex].title,
+                        description: _sections[_selectedIndex].description,
+                        wide: wide,
+                        accountName: widget.accountName,
+                        onAccount: () => _select(3),
+                      ),
+                      Expanded(child: content),
                     ],
                   ),
                 ),
@@ -178,16 +180,9 @@ class _AppShellState extends State<AppShell> {
           ),
           bottomNavigationBar: wide
               ? null
-              : NavigationBar(
+              : LearningBottomBar(
                   selectedIndex: _selectedIndex,
-                  onDestinationSelected: _select,
-                  destinations: [
-                    for (final section in _sections)
-                      NavigationDestination(
-                        icon: Icon(section.icon),
-                        label: section.title,
-                      ),
-                  ],
+                  onSelect: _select,
                 ),
         );
       },

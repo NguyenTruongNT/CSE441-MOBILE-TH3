@@ -1,8 +1,8 @@
 @echo off
 echo ========================================================
-echo  Khoi dong Pronunciation AI Backend Server (Real STT)
+echo  English AI - Wav2Vec2 phoneme assessment (CPU)
 echo ========================================================
 cd /d "%~dp0..\.."
-dart run backend/pronunciation/bin/server.dart
+call run_backend.bat
 pause
 

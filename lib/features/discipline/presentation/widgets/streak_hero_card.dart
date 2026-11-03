@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../app/app_theme.dart';
 import '../../models/discipline_stats.dart';
 
 /// Modern gamified card showcasing streak, milestones, and 7-day continuity chips.
@@ -37,8 +39,8 @@ class StreakHeroCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: isStreakActive
-                          ? [const Color(0xFFFF9800), const Color(0xFFFF5722)]
-                          : [Colors.grey.shade300, Colors.grey.shade400],
+                          ? [AppTheme.blue, AppTheme.violet]
+                          : [const Color(0xFFDAD7F5), const Color(0xFFB5ACDD)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -46,7 +48,7 @@ class StreakHeroCard extends StatelessWidget {
                     boxShadow: isStreakActive
                         ? [
                             BoxShadow(
-                              color: const Color(0xFFFF5722).withValues(alpha: 0.35),
+                              color: AppTheme.violet.withValues(alpha: 0.25),
                               blurRadius: 14,
                               offset: const Offset(0, 5),
                             ),
@@ -54,9 +56,12 @@ class StreakHeroCard extends StatelessWidget {
                         : null,
                   ),
                   child: Center(
-                    child: Text(
-                      isStreakActive ? '🔥' : '❄️',
-                      style: const TextStyle(fontSize: 28),
+                    child: Icon(
+                      isStreakActive
+                          ? Icons.local_fire_department_rounded
+                          : Icons.ac_unit_rounded,
+                      size: 30,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -78,8 +83,8 @@ class StreakHeroCard extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                               color: isStreakActive
-                                  ? const Color(0xFFD35400)
-                                  : Colors.black87,
+                                  ? AppTheme.violet
+                                  : AppTheme.ink,
                             ),
                           ),
                           // Status Pill
@@ -151,7 +156,7 @@ class StreakHeroCard extends StatelessWidget {
                 Icon(
                   Icons.emoji_events_outlined,
                   size: 16,
-                  color: const Color(0xFFE65100),
+                  color: AppTheme.violet,
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -169,7 +174,7 @@ class StreakHeroCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFE65100),
+                    color: AppTheme.violet,
                   ),
                 ),
               ],
@@ -182,7 +187,7 @@ class StreakHeroCard extends StatelessWidget {
                 minHeight: 7,
                 backgroundColor: const Color(0xFFF4F3FC),
                 valueColor: const AlwaysStoppedAnimation<Color>(
-                  Color(0xFFFF9800),
+                  AppTheme.violet,
                 ),
               ),
             ),
@@ -213,25 +218,21 @@ class StreakHeroCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: record.hasPracticed
-                              ? const Color(0xFFFFE0B2)
+                              ? const Color(0xFFECE9FF)
                               : const Color(0xFFE0E0E0),
                           border: isToday
-                              ? Border.all(
-                                  color: const Color(0xFFFF5722),
-                                  width: 1.5,
-                                )
+                              ? Border.all(color: AppTheme.violet, width: 1.5)
                               : null,
                         ),
                         child: Center(
-                          child: Text(
-                            record.hasPracticed ? '🔥' : '·',
-                            style: TextStyle(
-                              fontSize: record.hasPracticed ? 13 : 16,
-                              color: record.hasPracticed
-                                  ? const Color(0xFFE65100)
-                                  : Colors.black38,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Icon(
+                            record.hasPracticed
+                                ? Icons.check_rounded
+                                : Icons.circle,
+                            size: record.hasPracticed ? 16 : 3,
+                            color: record.hasPracticed
+                                ? AppTheme.violet
+                                : Colors.black38,
                           ),
                         ),
                       ),
@@ -240,11 +241,10 @@ class StreakHeroCard extends StatelessWidget {
                         dayLabel,
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight:
-                              isToday ? FontWeight.bold : FontWeight.w500,
-                          color: isToday
-                              ? const Color(0xFFFF5722)
-                              : Colors.black54,
+                          fontWeight: isToday
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: isToday ? AppTheme.violet : Colors.black54,
                         ),
                       ),
                     ],
@@ -272,30 +272,30 @@ class StreakHeroCard extends StatelessWidget {
     if (streak < 3) {
       final rem = 3 - streak;
       return _MilestoneInfo(
-        description: 'Còn $rem ngày nữa để đạt mốc Đồng 🥉 (3 ngày)',
+        description: 'Còn $rem ngày nữa để đạt mốc Đồng (3 ngày)',
         progress: (streak / 3).clamp(0.0, 1.0),
       );
     } else if (streak < 7) {
       final rem = 7 - streak;
       return _MilestoneInfo(
-        description: 'Còn $rem ngày nữa để đạt mốc Bạc 🥈 (7 ngày)',
+        description: 'Còn $rem ngày nữa để đạt mốc Bạc (7 ngày)',
         progress: ((streak - 3) / (7 - 3)).clamp(0.0, 1.0),
       );
     } else if (streak < 14) {
       final rem = 14 - streak;
       return _MilestoneInfo(
-        description: 'Còn $rem ngày nữa để đạt mốc Vàng 🌟 (14 ngày)',
+        description: 'Còn $rem ngày nữa để đạt mốc Vàng (14 ngày)',
         progress: ((streak - 7) / (14 - 7)).clamp(0.0, 1.0),
       );
     } else if (streak < 30) {
       final rem = 30 - streak;
       return _MilestoneInfo(
-        description: 'Còn $rem ngày nữa để đạt Kim Cương 💎 (30 ngày)',
+        description: 'Còn $rem ngày nữa để đạt Kim Cương (30 ngày)',
         progress: ((streak - 14) / (30 - 14)).clamp(0.0, 1.0),
       );
     } else {
       return const _MilestoneInfo(
-        description: 'Đã mở khóa mốc Huyền Thoại 👑 (30+ ngày)',
+        description: 'Đã mở khóa mốc Huyền Thoại (30+ ngày)',
         progress: 1.0,
       );
     }

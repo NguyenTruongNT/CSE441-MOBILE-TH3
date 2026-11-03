@@ -1,5 +1,7 @@
 # Khởi tạo và reset module User Data
 
+> Hướng dẫn module JSON cũ, không dùng để khởi tạo/reset bản SQLite hiện hành. Bản mới chọn tài khoản demo và import dữ liệu cũ một lần; xem [schema SQLite](sqlite-schema.md) và [hướng dẫn ứng dụng](../huong-dan-su-dung.md).
+
 ## 1. Mục đích
 
 Module User Data chịu trách nhiệm quản lý:

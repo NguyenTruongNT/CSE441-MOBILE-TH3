@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+
 import '../../domain/exercise_models.dart';
 
 /// Card presenting a follow-up recommendation tailored to a weak phoneme.
@@ -23,9 +24,7 @@ class ImprovementExerciseCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer.withOpacity(0.35),
-        border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.3),
-        ),
+        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3)),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -53,7 +52,10 @@ class ImprovementExerciseCard extends StatelessWidget {
               ),
               if (recommendation.targetWord.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceVariant.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(6),
@@ -75,7 +77,10 @@ class ImprovementExerciseCard extends StatelessWidget {
                 ),
                 child: Text(
                   targetEx.difficulty,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -144,7 +149,7 @@ class ImprovementExerciseCard extends StatelessWidget {
               fontSize: 12,
               fontStyle: FontStyle.italic,
               color: theme.colorScheme.primary,
-              fontFamily: 'monospace',
+              fontFamily: 'NotoSans',
             ),
           ),
           const SizedBox(height: 4),

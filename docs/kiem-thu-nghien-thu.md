@@ -23,7 +23,7 @@
 | 09 | The young singer is thinking of a song | ŋ, ŋk |
 | 10 | Many modern men make more money | m, n |
 
-Một câu có thể không chứa đủ mọi âm được liệt kê trong nhãn bài. Chỉ chấm nhãn người nghe trên những âm thực sự có trong câu/IPA; ghi thiếu sót bài học nếu phát hiện.
+Catalog đã được đối chiếu giữa Flutter và backend bằng test tự động. Người nghe vẫn cần đối chiếu IPA/câu thực tế, ghi nhận khác biệt biến thể giọng thay vì mặc định mọi khác biệt đều là lỗi.
 
 ## Các bước cho mỗi người
 
@@ -64,3 +64,25 @@ Biểu mẫu: [evaluation-results.csv](pronunciation/evaluation-results.csv). C�
 | Rộng 360/768/1366px | Không tràn, thao tác và đọc kết quả được | Chưa ghi nhận |
 
 Ghi giờ hẹn và giờ nhận thực cho thông báo; ghi rõ máy thật/emulator, trạng thái màn hình và tiết kiệm pin. Không thay nghiệm thu thiết bị bằng unit test.
+
+## Kiểm tra kỹ thuật có thể chạy lại
+
+Đã đạt 138 test Flutter và 15 test backend. Phạm vi thử trình duyệt thực tế ghi trong [verification.json](../screenshots/final/verification.json); không tự đánh dấu cột nghiệm thu Android ở trên bằng kết quả web.
+
+Từ thư mục gốc, sau khi đã cài/nạp model và chạy backend:
+
+```powershell
+powershell -File tool/create_smoke_audio.ps1
+.venv/Scripts/python.exe tool/check_models.py
+flutter build web --release --no-wasm-dry-run
+python -m http.server 8910 --bind 127.0.0.1 --directory build/web
+```
+
+Terminal khác:
+
+```powershell
+npm install --prefix .dart_tool/ui-review playwright
+node tool/verify_web.cjs
+```
+
+Script dùng Chrome ở đường dẫn Windows thông thường (hoặc biến CHROME_PATH). Nó tạo audio TTS tổng hợp cục bộ để kiểm tra model và thiết bị microphone giả của Chrome để kiểm tra toàn luồng. Giữ cả ca model nhận nhầm trong báo cáo. Không xem đây là bộ thử người thật và không commit audio từ người tham gia.

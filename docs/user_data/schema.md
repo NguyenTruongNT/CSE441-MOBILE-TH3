@@ -1,5 +1,7 @@
 # Thiết kế lưu trữ module User Data
 
+> Đây là schema JSON của phiên bản được kế thừa, hiện chỉ dùng cho dữ liệu import. CSDL đang chạy là [SQLite/Drift](sqlite-schema.md); không xem JSON/SharedPreferences là nơi lưu mới.
+
 ## 1. Mục tiêu
 
 Module User Data chịu trách nhiệm lưu trữ và truy xuất:

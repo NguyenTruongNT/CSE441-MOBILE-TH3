@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+
 import '../../domain/exercise_models.dart';
 
 /// Card showing pronunciation exercise summary, phonetic IPA text,
@@ -63,7 +64,10 @@ class ExerciseCard extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: primary.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
@@ -78,7 +82,10 @@ class ExerciseCard extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: difficultyColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
@@ -86,7 +93,11 @@ class ExerciseCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.stairs_rounded, size: 14, color: difficultyColor),
+                              Icon(
+                                Icons.stairs_rounded,
+                                size: 14,
+                                color: difficultyColor,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 exerciseDetail.difficulty,
@@ -122,7 +133,7 @@ class ExerciseCard extends StatelessWidget {
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontStyle: FontStyle.italic,
                   color: primary,
-                  fontFamily: 'monospace',
+                  fontFamily: 'NotoSans',
                 ),
               ),
               const SizedBox(height: 10),
@@ -131,7 +142,10 @@ class ExerciseCard extends StatelessWidget {
                 runSpacing: 4,
                 children: exerciseDetail.targetPhonemes.map((p) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(6),

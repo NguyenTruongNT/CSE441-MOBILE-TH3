@@ -19,17 +19,25 @@ Một ngày có ít nhất một phiên hoàn thành với thời lượng lớn
 
 Android có lịch nhắc do hệ điều hành quản lý. Chế độ tiết kiệm pin có thể làm nhắc trễ; buộc dừng ứng dụng có thể chặn thông báo. Trên web, cần giữ tab mở và cho phép thông báo; không có thông báo nền khi đã đóng trình duyệt.
 
+## Điều hướng desktop/mobile
+
+- Desktop: logo/tên ứng dụng ở đầu thanh bên. Bấm mũi tên để thu gọn thành icon hoặc mở rộng; mục đang chọn hiện thẻ gradient xanh–tím. Thu gọn không làm mất trạng thái trang.
+- Mobile: **Tiến độ**, nút micro **Luyện nói** nổi bật ở giữa, **Lịch sử**. Bấm avatar ở góc trên để vào **Tài khoản**.
+- Tiêu đề, nội dung và thao tác dùng font Be Vietnam Pro đi kèm ứng dụng. Trang có thể cuộn để xem đủ nội dung khi màn hình nhỏ hoặc cỡ chữ hệ thống lớn.
+
 ## Luyện phát âm
 
-1. Chọn **Luyện phát âm** ở thanh bên trên desktop hoặc thanh điều hướng dưới trên mobile.
+1. Chọn **Luyện nói** ở thanh bên trên desktop hoặc nút micro giữa thanh dưới trên mobile.
 2. Tìm/chọn một bài, đọc nội dung, IPA và gợi ý khẩu hình.
 3. Bấm **Nghe phát âm chuẩn** để nghe giọng TTS trên thiết bị/trình duyệt.
 4. Cấp quyền micro khi được hỏi. Bấm **Bắt đầu ghi âm**, đọc trọn câu trong môi trường yên tĩnh.
 5. Bấm **Dừng & Phân tích**, chờ backend xử lý. Mỗi bản ghi tối đa 60 giây.
-6. Xem điểm, âm chuẩn, âm nhận dạng và gợi ý. Bấm bài luyện cải thiện để luyện tiếp.
+6. Xem điểm, âm chuẩn, âm nhận dạng và gợi ý. Âm “Khớp mẫu” là nhãn mô hình khớp IPA; “Cần luyện” là khác biệt phát hiện; “Chưa đánh giá” nghĩa là chưa đủ chắc chắn. Bấm bài luyện cải thiện để luyện tiếp.
 7. Sang **Lịch sử** để xem phiên vừa lưu và chi tiết kết quả.
 
 Backend phải đang chạy và điện thoại phải truy cập được địa chỉ backend đã cấu hình. Transcript trực tiếp trên web chỉ là hỗ trợ khi trình duyệt có khả năng này; kết quả phân tích cần dựa vào audio được gửi. Nếu thiếu bằng chứng hoặc mất kết nối, ứng dụng báo lỗi và không tự sinh điểm thay thế.
+
+Khi rời trang trong lúc thu, micro dừng và bản ghi chưa phân tích bị hủy. Khi đã gửi phân tích, chờ kết quả trước khi chọn bài khác. Ghi âm im lặng, quá nhỏ hoặc quá ngắn sẽ yêu cầu ghi lại. Lần cài model đầu tiên: xem [cách chạy backend](../backend/pronunciation/README.md).
 
 Điểm so sánh âm vị là công cụ hỗ trợ luyện tập. Mô hình có thể nhận nhầm giọng, tiếng ồn hoặc biến thể phát âm; đối chiếu với người nghe trong bộ kiểm thử trước khi đưa ra kết luận về độ chính xác.
 
@@ -37,7 +45,7 @@ Backend phải đang chạy và điện thoại phải truy cập được đị
 
 1. Mở **Lịch sử**, chọn khoảng ngày nếu cần.
 2. Chọn phiên luyện để xem điểm, câu chuẩn, câu nhận dạng và phản hồi đã lưu.
-3. Chọn **Tài khoản → Đăng xuất**, hoặc nút đăng xuất trên thanh đầu trang.
+3. Chọn avatar **Tài khoản → Đăng xuất**; desktop có thêm nút **Đăng xuất** dưới sidebar.
 4. Chọn tài khoản khác ở màn hình vào ứng dụng. Lịch sử cũ vẫn được giữ; giao diện và trạng thái phiên trước được đóng.
 
 ## Khi gặp lỗi

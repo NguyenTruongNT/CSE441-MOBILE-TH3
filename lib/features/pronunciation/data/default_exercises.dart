@@ -208,8 +208,8 @@ class DefaultExercises {
     ExerciseDetail(
       exercise: const Exercise(
         id: 'ex-15-vowel-ae-vs-e',
-        referenceText: 'The bad man had a black cat',
-        referenceIpa: '/ðə bæd mæn hæd ə blæk kæt/',
+        referenceText: 'The bad man met a black cat',
+        referenceIpa: '/ðə bæd mæn met ə blæk kæt/',
         targetPhonemes: ['æ', 'e'],
         sampleAudioUri: null,
       ),

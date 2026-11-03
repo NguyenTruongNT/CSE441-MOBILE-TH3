@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../../app/shared/page_activity.dart';
+
 import '../../services/tts/speech_synthesizer.dart';
 import '../../services/tts/speech_synthesizer_factory.dart';
 
@@ -53,6 +55,14 @@ class _AudioSamplePlayerState extends State<AudioSamplePlayer> {
           ),
         );
       }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!PageActivity.isActive(context) && _isPlaying) {
+      unawaited(_ttsPlayer.stop());
     }
   }
 

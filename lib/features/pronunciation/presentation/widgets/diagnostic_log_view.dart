@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../domain/pronunciation_logger.dart';
 
 /// Live diagnostic log console displayed on the UI to monitor real-time function calls,
@@ -33,7 +34,9 @@ class _DiagnosticLogViewState extends State<DiagnosticLogView> {
     final text = _logs.map((e) => e.toString()).join('\n');
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã sao chép nhật ký hệ thống vào bộ nhớ tạm')),
+      const SnackBar(
+        content: Text('Đã sao chép nhật ký hệ thống vào bộ nhớ tạm'),
+      ),
     );
   }
 
@@ -66,7 +69,11 @@ class _DiagnosticLogViewState extends State<DiagnosticLogView> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  const Icon(Icons.terminal_rounded, size: 20, color: Color(0xFF89B4FA)),
+                  const Icon(
+                    Icons.terminal_rounded,
+                    size: 20,
+                    color: Color(0xFF89B4FA),
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Row(
@@ -83,14 +90,20 @@ class _DiagnosticLogViewState extends State<DiagnosticLogView> {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white10,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             '${_logs.length}',
-                            style: const TextStyle(color: Colors.white70, fontSize: 11),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                            ),
                           ),
                         ),
                       ],
@@ -98,18 +111,28 @@ class _DiagnosticLogViewState extends State<DiagnosticLogView> {
                   ),
                   if (_isExpanded) ...[
                     IconButton(
-                      icon: const Icon(Icons.copy_rounded, size: 16, color: Colors.white70),
+                      icon: const Icon(
+                        Icons.copy_rounded,
+                        size: 16,
+                        color: Colors.white70,
+                      ),
                       onPressed: _copyLogs,
                       tooltip: 'Sao chép log',
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.white70),
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        size: 16,
+                        color: Colors.white70,
+                      ),
                       onPressed: _clearLogs,
                       tooltip: 'Xóa log',
                     ),
                   ],
                   Icon(
-                    _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
                     color: Colors.white70,
                   ),
                 ],
@@ -135,8 +158,12 @@ class _DiagnosticLogViewState extends State<DiagnosticLogView> {
                       itemBuilder: (context, index) {
                         final log = _logs[index];
                         Color tagColor = const Color(0xFF89B4FA);
-                        if (log.level == LogLevel.warning) tagColor = const Color(0xFFF9E2AF);
-                        if (log.level == LogLevel.error) tagColor = const Color(0xFFF38BA8);
+                        if (log.level == LogLevel.warning) {
+                          tagColor = const Color(0xFFF9E2AF);
+                        }
+                        if (log.level == LogLevel.error) {
+                          tagColor = const Color(0xFFF38BA8);
+                        }
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2),
@@ -145,7 +172,10 @@ class _DiagnosticLogViewState extends State<DiagnosticLogView> {
                               children: [
                                 TextSpan(
                                   text: '[${log.formattedTime}] ',
-                                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                  style: const TextStyle(
+                                    color: Colors.white38,
+                                    fontSize: 11,
+                                  ),
                                 ),
                                 TextSpan(
                                   text: '[${log.tag}] ',
@@ -167,7 +197,10 @@ class _DiagnosticLogViewState extends State<DiagnosticLogView> {
                                 if (log.details != null)
                                   TextSpan(
                                     text: ' (${log.details})',
-                                    style: const TextStyle(color: Colors.white30, fontSize: 11),
+                                    style: const TextStyle(
+                                      color: Colors.white30,
+                                      fontSize: 11,
+                                    ),
                                   ),
                               ],
                             ),

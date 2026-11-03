@@ -1,5 +1,7 @@
 # Minh chứng nghiệm thu module User Data
 
+> Tài liệu bàn giao phiên bản JSON/Hồ sơ của Khanh, giữ để truy vết phần kế thừa. Các mô tả UI tạo hồ sơ, SharedPreferences và nghiệm thu cũ bên dưới không áp dụng cho bản tích hợp hiện hành. Xem [SQLite/tài khoản demo](sqlite-schema.md), [đối chiếu mới](../doi-chieu-th3.md) và [nghiệm thu cần thực hiện](../kiem-thu-nghien-thu.md).
+
 ## 1. Thông tin chung
 
 Học phần:

@@ -3,6 +3,9 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../app/shared/page_activity.dart';
+
 import 'package:th3_english_ai/core/contracts/models.dart';
 import 'package:th3_english_ai/core/contracts/ports.dart';
 
@@ -64,6 +67,8 @@ class _PronunciationPageState extends State<PronunciationPage> {
 
   bool _hasMicPermission = true;
   bool _isAnalyzing = false;
+  bool _starting = false;
+  bool _active = true;
   bool _stopping = false;
   String? _analysisStatusMessage;
   AppFailure? _currentError;
@@ -107,6 +112,17 @@ class _PronunciationPageState extends State<PronunciationPage> {
     _selectedExercise = _catalog.first;
 
     _initializeAsync();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _active = PageActivity.isActive(context);
+    if (!_active && !_stopping && (_recorder.isRecording || _starting)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_active) unawaited(_cancelRecording());
+      });
+    }
   }
 
   void _toggleRecorder(bool simulation) {
@@ -166,32 +182,47 @@ class _PronunciationPageState extends State<PronunciationPage> {
   }
 
   Future<void> _startRecording() async {
-    if (_isAnalyzing || _stopping || _recorder.isRecording) return;
-    _currentProfile = await _userRepo.getSelectedProfile();
-    if (!mounted) return;
-    if (_currentProfile == null) {
-      setState(
-        () => _currentError = const AppFailure(
-          AppFailureCode.storage,
-          'Hãy chọn tài khoản trước khi luyện.',
-        ),
-      );
+    if (!_active ||
+        _starting ||
+        _isAnalyzing ||
+        _stopping ||
+        _recorder.isRecording) {
       return;
     }
-    PronunciationLogger.info(
-      'UI',
-      'Bắt đầu thu âm bài: "${_selectedExercise.referenceText}" (Chế độ: ${_useSimulation ? "Mô phỏng" : "Micro thật"})',
-    );
-    setState(() {
-      _currentError = null;
-      _latestResult = null;
-      _isSaved = false;
-      _elapsedMilliseconds = 0;
-      _liveTranscript = '';
-    });
-
+    _starting = true;
     try {
+      _currentProfile = await _userRepo.getSelectedProfile();
+      if (!mounted || !_active) {
+        _starting = false;
+        return;
+      }
+      if (_currentProfile == null) {
+        _starting = false;
+        setState(
+          () => _currentError = const AppFailure(
+            AppFailureCode.storage,
+            'Hãy chọn tài khoản trước khi luyện.',
+          ),
+        );
+        return;
+      }
+      PronunciationLogger.info(
+        'UI',
+        'Bắt đầu thu âm bài: "${_selectedExercise.referenceText}" (Chế độ: ${_useSimulation ? "Mô phỏng" : "Micro thật"})',
+      );
+      setState(() {
+        _currentError = null;
+        _latestResult = null;
+        _isSaved = false;
+        _elapsedMilliseconds = 0;
+        _liveTranscript = '';
+      });
+
       await _recorder.startRecording();
+      if (!mounted || !_active) {
+        await _recorder.cancelRecording();
+        return;
+      }
       _recordingStartTime = DateTime.now().toUtc();
 
       if (!_useSimulation) {
@@ -211,7 +242,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
         if (_elapsedMilliseconds >= 60000) unawaited(_stopAndAnalyze());
       });
 
-      setState(() {});
+      if (mounted) setState(() {});
     } on AppFailure catch (e) {
       PronunciationLogger.error(
         'MIC',
@@ -230,12 +261,17 @@ class _PronunciationPageState extends State<PronunciationPage> {
       setState(() {
         _currentError = AppFailure(AppFailureCode.unknown, e.toString());
       });
+    } finally {
+      _starting = false;
+      if (mounted) setState(() {});
     }
   }
 
   Future<void> _stopAndAnalyze() async {
     if (_stopping || _isAnalyzing || !_recorder.isRecording) return;
-    _stopping = true;
+    final exercise = _selectedExercise;
+    final profileId = _currentProfile?.id;
+    setState(() => _stopping = true);
     _recordingTimer?.cancel();
     final endTime = DateTime.now().toUtc();
     final startTime =
@@ -316,13 +352,13 @@ class _PronunciationPageState extends State<PronunciationPage> {
       final result = await _pronunciationService.analyze(
         sessionId: sessionId,
         audio: audio,
-        exercise: _selectedExercise.exercise,
+        exercise: exercise.exercise,
       );
 
       if (!mounted) return;
       final selected = await _userRepo.getSelectedProfile();
       if (!mounted) return;
-      if (selected?.id != _currentProfile?.id) {
+      if (selected?.id != profileId) {
         throw const AppFailure(
           AppFailureCode.storage,
           'Tài khoản đã thay đổi. Hãy ghi âm lại.',
@@ -331,8 +367,8 @@ class _PronunciationPageState extends State<PronunciationPage> {
 
       final session = PracticeSession(
         id: sessionId,
-        userId: _currentProfile?.id ?? 'user-default',
-        exerciseId: _selectedExercise.id,
+        userId: profileId!,
+        exerciseId: exercise.id,
         startedAt: startTime,
         endedAt: endTime,
         durationSeconds: activeDurationSec,
@@ -397,6 +433,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
   }
 
   void _selectExercise(ExerciseDetail ex) {
+    if (_starting || _stopping || _isAnalyzing) return;
     PronunciationLogger.info(
       'UI',
       'Người dùng chọn bài mới: "${ex.referenceText}" (ID: ${ex.id})',
@@ -642,7 +679,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontStyle: FontStyle.italic,
                   color: theme.colorScheme.primary,
-                  fontFamily: 'monospace',
+                  fontFamily: 'NotoSans',
                 ),
               ),
               const SizedBox(height: 16),
@@ -671,7 +708,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
                       child: Text(
                         '/$p/',
                         style: TextStyle(
-                          fontFamily: 'monospace',
+                          fontFamily: 'NotoSans',
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.onSecondaryContainer,
                           fontSize: 13,
@@ -710,6 +747,14 @@ class _PronunciationPageState extends State<PronunciationPage> {
           ),
         ),
         const SizedBox(height: 18),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            'Điểm thể hiện độ khớp âm vị được mô hình nhận dạng với mẫu IPA. Mô hình có thể nhận nhầm; hãy nghe lại và đối chiếu các âm được gợi ý.',
+            style: TextStyle(fontSize: 12, color: Color(0xFF69718D)),
+          ),
+        ),
+        const SizedBox(height: 12),
 
         // Live Waveform visualizer
         WaveformVisualizer(
@@ -723,12 +768,11 @@ class _PronunciationPageState extends State<PronunciationPage> {
           referenceText: _selectedExercise.referenceText,
           liveTranscript: _liveTranscript,
           isRecording: _recorder.isRecording,
-          finalRecognizedText: _latestResult?.recognizedText,
         ),
         const SizedBox(height: 12),
 
         // Recording Controller
-        if (!_isAnalyzing)
+        if (!_isAnalyzing && !_starting && !_stopping)
           RecordingControlBar(
             isRecording: _recorder.isRecording,
             elapsedMilliseconds: _elapsedMilliseconds,
@@ -741,7 +785,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
         const SizedBox(height: 20),
 
         // Analyzing State
-        if (_isAnalyzing) ...[
+        if (_isAnalyzing || _starting || _stopping) ...[
           Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
@@ -760,7 +804,7 @@ class _PronunciationPageState extends State<PronunciationPage> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Đang tính toán độ lệch âm học và đối chiếu với mẫu IPA',
+                  'Đang xử lý bản ghi và đối chiếu chuỗi âm vị với mẫu IPA',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -792,11 +836,13 @@ class _PronunciationPageState extends State<PronunciationPage> {
                       color: Color(0xFFDC2626),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      'Không thể chấm điểm bản ghi',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: const Color(0xFFDC2626),
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'Không thể chấm điểm bản ghi',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: const Color(0xFFDC2626),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

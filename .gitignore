@@ -53,3 +53,10 @@ app.*.map.json
 .env.*
 !.env.example
 !.env.*.example
+
+# Local Python environment, downloaded models and consented evaluation audio.
+/.venv/
+/backend/pronunciation/.models/
+/backend/pronunciation/.runtime/
+/evaluation-audio/
+**/__pycache__/

@@ -108,9 +108,9 @@ void main() {
   testWidgets('yêu cầu chọn hồ sơ khi chưa chọn', (WidgetTester tester) async {
     await pumpHistoryPage(tester);
 
-    expect(find.text('Chưa chọn hồ sơ'), findsOneWidget);
+    expect(find.text('Chưa chọn tài khoản'), findsOneWidget);
 
-    expect(find.textContaining('Hãy tạo hoặc chọn một hồ sơ'), findsOneWidget);
+    expect(find.textContaining('Hãy chọn tài khoản'), findsOneWidget);
   });
 
   testWidgets('hiển thị trạng thái lịch sử rỗng', (WidgetTester tester) async {

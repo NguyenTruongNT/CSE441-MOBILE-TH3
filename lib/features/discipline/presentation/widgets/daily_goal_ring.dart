@@ -288,24 +288,24 @@ class DailyGoalRing extends StatelessWidget {
     final ratio = minutes / goal;
     if (ratio >= 1.0) {
       return const _StageInfo(
-        label: 'Vượt chỉ tiêu 🎉',
+        label: 'Đạt mục tiêu',
         color: Color(0xFF1B8A5A),
       );
     }
     if (ratio >= 0.75) {
       return const _StageInfo(
-        label: 'Về đích 🎯',
+        label: 'Về đích',
         color: Color(0xFF00897B),
       );
     }
     if (ratio >= 0.4) {
       return const _StageInfo(
-        label: 'Tăng tốc ⚡',
+        label: 'Tăng tốc',
         color: Color(0xFFF57C00),
       );
     }
     return const _StageInfo(
-      label: 'Khởi động 🌱',
+      label: 'Khởi động',
       color: Color(0xFF757575),
     );
   }

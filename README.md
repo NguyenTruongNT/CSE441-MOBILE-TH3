@@ -1,79 +1,78 @@
 # TH3 — English AI · Nhóm 12
 
-Ứng dụng Flutter học tiếng Anh, theo dõi kỷ luật luyện tập và phân tích phát âm. CSE441 · 65KTPM · Nhóm 12.
+Ứng dụng Flutter học tiếng Anh, theo dõi kỷ luật và phân tích phát âm bằng mô hình mã nguồn mở. CSE441 · 65KTPM · Nhóm 12.
 
-**Đang bổ sung theo rà soát ngày 03/11/2026. Chưa đủ điều kiện đánh dấu hoàn thành 7/7 mục.** Tài khoản demo, SQLite, tiến độ và giao diện đã được bổ sung. Mô hình AI cụ thể đang chờ người dùng chốt; backend heuristic cũ bị chặn trả điểm vì chưa phân tích âm vị thật. Chưa có kết quả thử nhiều giọng hoặc nghiệm thu thông báo/micro trên Android thật.
+Đã triển khai tài khoản demo, SQLite/Drift, mục tiêu/streak/thống kê/nhắc học, thu âm Android/web, nhận dạng văn bản và âm vị thật trên backend CPU. Giao diện dùng Be Vietnam Pro đóng gói, nền sáng và điểm nhấn xanh–tím; sidebar desktop thu gọn được, mobile có nút micro giữa thanh dưới.
 
-## Bắt đầu
+**Chưa công bố hoàn thành nghiệm thu 7/7:** còn bộ thử 4 người × 10 câu và micro/thông báo trên Android thật. Mô hình có thể nhận nhầm; điểm là độ khớp chuỗi âm vị, chưa được hiệu chuẩn bởi chuyên gia. Xem [đối chiếu checklist và thành viên](docs/doi-chieu-th3.md).
 
-Cần Flutter/Dart thỏa `sdk: ^3.13.2`, Android SDK cho bản Android, Chrome cho web.
+## Chạy lần đầu trên Windows
+
+Cần Flutter/Dart thỏa `sdk: ^3.13.2`, Python 3.11+ 64-bit, Chrome; Android SDK nếu chạy Android. Đã chạy mô hình CPU trên máy RAM 16 GB. Lần cài đầu cần Internet và vài GB trống cho thư viện/model; không đưa model vào Git.
+
+Từ thư mục gốc dự án:
 
 ```powershell
 flutter pub get
+powershell -ExecutionPolicy Bypass -File backend/pronunciation/setup_backend.ps1
+.\run_backend.bat
+```
+
+Chờ backend báo khởi động xong. Mở terminal thứ hai:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8080/health
 flutter run -d chrome --web-port 7357
 ```
 
-Chọn một tài khoản **Học viên 1–4** để vào. Không có thao tác tạo hồ sơ trong luồng chính. Tài khoản cũ đã lưu được import sang SQLite và vẫn có thể chọn. Chế độ demo không có xác thực mật khẩu; dữ liệu được lưu riêng theo tài khoản trên từng thiết bị, không đồng bộ giữa các máy.
+Health cần có `assessmentReady: true`. Chọn **Học viên 1–4 → Luyện nói → Nghe mẫu → Bắt đầu ghi âm → Dừng & Phân tích → Lịch sử**. Backend tải hai model ở revision đã khóa; những lần sau dùng cache tại `backend/pronunciation/.models/`. Hướng dẫn chi tiết: [backend](backend/pronunciation/README.md), [thao tác ứng dụng](docs/huong-dan-su-dung.md).
 
-- [Hướng dẫn thao tác trong ứng dụng](docs/huong-dan-su-dung.md)
-- [Đối chiếu 7 mục và nhiệm vụ từng thành viên](docs/doi-chieu-th3.md)
-- [Bộ thử người thật và thiết bị](docs/kiem-thu-nghien-thu.md)
-- [Biểu mẫu 40 phiên, chưa có số liệu điền trước](docs/pronunciation/evaluation-results.csv)
-- [Schema SQLite và chuyển dữ liệu](docs/user_data/sqlite-schema.md)
+## Android và địa chỉ API
 
-## Backend phát âm
-
-Người dùng đã chọn mô hình mã nguồn mở, chấp nhận tải model/tài nguyên máy. Đang chờ chốt đề xuất Wav2Vec2Phoneme trước khi tích hợp. Không dùng transcript giống câu chuẩn để kết luận âm vị đúng, không tự sinh điểm khi backend lỗi.
-
-Backend cũ có thể mở bằng lệnh sau để kiểm tra health/API lỗi, nhưng **chưa trả kết quả chấm điểm**:
-
-```powershell
-dart run backend/pronunciation/bin/server.dart
-```
-
-Cấu hình endpoint Flutter qua `PRONUNCIATION_API_URL` sau khi backend mới sẵn sàng:
-
-```powershell
-flutter run -d chrome --web-port 7357 --dart-define=PRONUNCIATION_API_URL=http://127.0.0.1:8080/api/pronounce/analyze
-```
-
-Android emulator dùng mặc định `http://10.0.2.2:8080/api/pronounce/analyze`. Điện thoại Android nối USB có thể dùng:
+Emulator dùng mặc định `http://10.0.2.2:8080/api/pronounce/analyze`. Điện thoại nối USB:
 
 ```powershell
 adb reverse tcp:8080 tcp:8080
 flutter run -d <device-id> --dart-define=PRONUNCIATION_API_URL=http://127.0.0.1:8080/api/pronounce/analyze
 ```
 
-Nếu chạy qua mạng, dùng endpoint HTTPS mà điện thoại truy cập được. Web truy cập từ máy khác cần HTTPS để dùng micro. Không đặt API key bí mật vào Flutter.
+Địa chỉ backend khác cấu hình qua `PRONUNCIATION_API_URL`. Khi đi qua mạng dùng HTTPS; localhost trên điện thoại là chính điện thoại. Web cần localhost hoặc HTTPS để dùng micro. Backend mặc định chỉ lắng nghe localhost; đây là backend demo cục bộ, chưa phải dịch vụ công khai có xác thực.
 
 ## Dữ liệu và thông báo
 
-SQLite/Drift có các bảng `users`, `settings`, `sessions`, `results`, `phoneme_feedback`, `app_state`; ghi phiên/kết quả trong cùng giao dịch. Bản JSON cũ được import một lần và giữ nguyên bản gốc. Đăng xuất xóa lựa chọn tài khoản, không xóa lịch sử; khi mở lại ứng dụng cần chọn tài khoản.
+SQLite có bảng `users`, `settings`, `sessions`, `results`, `phoneme_feedback`, `app_state`; ghi phiên/kết quả trong cùng giao dịch. Dữ liệu JSON cũ được import một lần, giữ bản gốc. [Schema và chuyển đổi](docs/user_data/sqlite-schema.md).
 
-Android sử dụng recorder PCM/WAV 16kHz và TTS nền tảng; web sử dụng MediaRecorder và TTS trình duyệt. Cần kiểm tra audio thật trên từng thiết bị.
+Tài khoản demo không có mật khẩu. Mỗi tài khoản có dữ liệu riêng trên thiết bị, không đồng bộ giữa các máy. Đăng xuất giữ lịch sử; mở lại cần chọn tài khoản. Web dùng cùng origin/cổng để mở lại đúng CSDL. Máy chủ web phải phục vụ `sqlite3.wasm` với MIME `application/wasm`.
 
-Thông báo dùng adapter thật mặc định. Android đặt lịch lặp với OS; web chỉ nhắc khi tab đang mở. Quyền thông báo, pin và trạng thái ứng dụng ảnh hưởng giờ nhận; cần nghiệm thu trên máy thật.
+Android ghi PCM16 WAV 16 kHz, web dùng MediaRecorder; backend chuyển audio sang mono 16 kHz rồi chạy hai mô hình độc lập. Không dùng transcript do client gửi để sinh điểm. Không có fallback điểm mô phỏng trong bản mặc định.
 
-Web đóng gói `web/sqlite3.wasm` và `web/drift_worker.dart.js` từ release Drift 2.35.3. Máy chủ phải phục vụ WASM với MIME `application/wasm`. Dùng cùng origin/cổng để giữ đúng CSDL; không nghiệm thu lưu bền vững trong tab ẩn danh.
+Android dùng thông báo theo lịch hệ điều hành; web chỉ nhắc khi tab đang mở. Cần kiểm tra quyền, pin, giờ nhận và khởi động lại trên thiết bị thật.
 
 ## Kiểm tra và build
 
 ```powershell
 flutter analyze
 flutter test
-flutter build web --release
+.venv/Scripts/python.exe -m unittest discover -s backend/pronunciation/tests -v
+flutter build web --release --no-wasm-dry-run
 flutter build apk --release
 ```
 
-Test/build không thay thế kiểm thử giọng thật, micro và thông báo. APK tại `build/app/outputs/flutter-apk/app-release.apk`; web tại `build/web/`. Chỉ dùng bản build mới nhất sau khi kiểm tra thay đổi.
+APK: `build/app/outputs/flutter-apk/app-release.apk`; web: `build/web/`. SQLite dùng WASM; bản Flutter web này build JavaScript.
 
-## Thành viên và phạm vi kế thừa
+- [Quy trình nghiệm thu và 10 câu cho 4 người](docs/kiem-thu-nghien-thu.md)
+- [CSV 40 phiên để điền sau khi đo](docs/pronunciation/evaluation-results.csv)
+- [API và thuật toán điểm thực tế](docs/pronunciation/api-and-scoring.md)
+- [Báo cáo model, bao gồm ca nhận nhầm](docs/pronunciation/evaluation.md)
+- [Ảnh giao diện và kết quả kiểm tra trình duyệt](screenshots/final/)
 
-| Thành viên | Phạm vi |
+## Kế thừa và bổ sung
+
+| Thành viên | Phần được kế thừa |
 |---|---|
-| Nguyễn Văn Trường | Điều phối, hợp đồng, khung ứng dụng, review/merge và tích hợp |
-| Vũ Tuấn Khanh | Người dùng, lưu trữ, lịch sử và dữ liệu |
-| Vũ Hải Đăng | Bài luyện, thu âm, nhận dạng, phân tích phát âm và phản hồi |
-| Lý Đình Sơn | Mục tiêu, streak, thống kê và nhắc học |
+| Nguyễn Văn Trường | Điều phối, hợp đồng dữ liệu, khung app, review và tích hợp |
+| Vũ Tuấn Khanh | Model/repository người dùng, dữ liệu và lịch sử |
+| Vũ Hải Đăng | 16 bài, màn luyện, recorder/STT/TTS web, phản hồi và gợi ý bài |
+| Lý Đình Sơn | Streak, mục tiêu, thống kê, adapter nhắc học |
 
-Đợt bổ sung hiện tại kế thừa module của từng thành viên và ghi rõ phần sửa thêm, việc chờ nghiệm thu trong [bảng đối chiếu](docs/doi-chieu-th3.md). Không sử dụng số liệu chưa xác minh trong tài liệu đánh giá cũ làm minh chứng nộp bài.
+Phần sửa thêm trong đợt tích hợp được ghi riêng ở [bảng đối chiếu](docs/doi-chieu-th3.md). Giữ bộ test/module cũ để bảo toàn hợp đồng; màn tạo hồ sơ cũ không nằm trong luồng ứng dụng chính. Font Be Vietnam Pro có [giấy phép OFL](assets/fonts/OFL.txt); font dự phòng/IPA có giấy phép [Roboto](assets/fonts/Roboto-OFL.txt) và [Noto Sans](assets/fonts/NotoSans-OFL.txt). Hai model của Meta có giấy phép Apache 2.0 theo model card được dẫn trong tài liệu backend.

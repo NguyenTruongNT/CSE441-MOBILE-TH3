@@ -1,0 +1,90 @@
+{
+  "syntheticAudioOnly": true,
+  "realHumanEvaluation": false,
+  "cases": [
+    {
+      "case": "reference",
+      "syntheticText": "I think this method is great",
+      "audioSha256": "5f58569dab0295038dfb3201378d5769b7362e9b1da51c1a387378044bce28d0",
+      "referenceText": "I think this method is great",
+      "recognizedText": "I THINK THIS METHOD IS GREAT",
+      "overallScore": 100.0,
+      "recognizedPhonemes": "aɪ θ ɪ ŋ k ð ɪ s m ɛ θ ə d ɪ z ɡ r eɪ t",
+      "comparison": {
+        "distance": 0,
+        "referenceCount": 19,
+        "observedCount": 19,
+        "method": "normalized-phoneme-edit-similarity-v1"
+      },
+      "modelVersion": "phoneme:ae45363bf341;asr:22aad52d435e;comparison:v1",
+      "modelRevisions": {
+        "phoneme": {
+          "id": "facebook/wav2vec2-lv-60-espeak-cv-ft",
+          "revision": "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4"
+        },
+        "asr": {
+          "id": "facebook/wav2vec2-base-960h",
+          "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+        }
+      },
+      "processingSeconds": 2.562,
+      "analyzedAt": "2026-11-03T10:20:27.438114+00:00"
+    },
+    {
+      "case": "substitution",
+      "syntheticText": "I sink this method is great",
+      "audioSha256": "db4e17eb955c4db5683c956c38e641f94c769d53e886328aa316d3e561a5533b",
+      "referenceText": "I think this method is great",
+      "recognizedText": "I THINK THIS METHOD IS GREAT",
+      "overallScore": 100.0,
+      "recognizedPhonemes": "aɪ θ ɪ ŋ k ð ɪ s m ɛ θ ə d ɪ z ɡ r eɪ t",
+      "comparison": {
+        "distance": 0,
+        "referenceCount": 19,
+        "observedCount": 19,
+        "method": "normalized-phoneme-edit-similarity-v1"
+      },
+      "modelVersion": "phoneme:ae45363bf341;asr:22aad52d435e;comparison:v1",
+      "modelRevisions": {
+        "phoneme": {
+          "id": "facebook/wav2vec2-lv-60-espeak-cv-ft",
+          "revision": "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4"
+        },
+        "asr": {
+          "id": "facebook/wav2vec2-base-960h",
+          "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+        }
+      },
+      "processingSeconds": 0.487,
+      "analyzedAt": "2026-11-03T10:21:33.446824+00:00"
+    },
+    {
+      "case": "different",
+      "syntheticText": "We go home slowly in the cold snow",
+      "audioSha256": "57e9cd999a77e0210cafba31fe5a824393de807ed9b96e79d0ebaa99c90130df",
+      "referenceText": "I think this method is great",
+      "recognizedText": "WE GO HOME SLOWLY IN THE COLD SNOW",
+      "overallScore": 8.7,
+      "recognizedPhonemes": "w iː ɡ oʊ h oʊ m s l oʊ l i ɪ n ð ə k oʊ l d s n oʊ",
+      "comparison": {
+        "distance": 21,
+        "referenceCount": 19,
+        "observedCount": 23,
+        "method": "normalized-phoneme-edit-similarity-v1"
+      },
+      "modelVersion": "phoneme:ae45363bf341;asr:22aad52d435e;comparison:v1",
+      "modelRevisions": {
+        "phoneme": {
+          "id": "facebook/wav2vec2-lv-60-espeak-cv-ft",
+          "revision": "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4"
+        },
+        "asr": {
+          "id": "facebook/wav2vec2-base-960h",
+          "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+        }
+      },
+      "processingSeconds": 0.573,
+      "analyzedAt": "2026-11-03T10:21:34.068437+00:00"
+    }
+  ]
+}
