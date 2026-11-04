@@ -239,7 +239,10 @@ class _PhonemeFeedbackCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  statusLabel,
+                  feedback.isInsertion &&
+                          feedback.status == PhonemeStatus.needsPractice
+                      ? 'Âm thừa'
+                      : statusLabel,
                   style: TextStyle(color: color, fontWeight: FontWeight.w700),
                 ),
               ],
@@ -251,7 +254,9 @@ class _PhonemeFeedbackCard extends StatelessWidget {
               children: [
                 _SmallInformation(
                   label: 'IPA chuẩn',
-                  value: feedback.expectedIpa,
+                  value: feedback.isInsertion
+                      ? 'Không có âm tương ứng trong mẫu'
+                      : feedback.expectedIpa,
                 ),
                 _SmallInformation(
                   label: 'IPA nhận dạng',

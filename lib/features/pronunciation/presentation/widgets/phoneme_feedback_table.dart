@@ -73,7 +73,7 @@ class _PhonemeCard extends StatelessWidget {
       case PhonemeStatus.needsPractice:
         statusColor = const Color(0xFFD97706);
         statusIcon = Icons.warning_amber_rounded;
-        statusLabel = 'Cần luyện';
+        statusLabel = feedback.isInsertion ? 'Âm thừa' : 'Cần luyện';
         break;
       case PhonemeStatus.notAssessed:
         statusColor = Colors.grey;
@@ -122,7 +122,9 @@ class _PhonemeCard extends StatelessWidget {
               const SizedBox(width: 10),
               // Expected IPA
               Text(
-                '/${feedback.expectedIpa}/',
+                feedback.isInsertion
+                    ? 'Âm nhận thêm: /${feedback.recognizedIpa ?? "?"}/'
+                    : '/${feedback.expectedIpa}/',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -130,7 +132,8 @@ class _PhonemeCard extends StatelessWidget {
                   color: theme.colorScheme.primary,
                 ),
               ),
-              if (feedback.recognizedIpa != null &&
+              if (!feedback.isInsertion &&
+                  feedback.recognizedIpa != null &&
                   feedback.recognizedIpa != feedback.expectedIpa) ...[
                 const SizedBox(width: 8),
                 const Icon(

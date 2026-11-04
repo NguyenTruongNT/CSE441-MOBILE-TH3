@@ -91,6 +91,9 @@ class PhonemeFeedback {
   final int? startMilliseconds;
   final int? endMilliseconds;
   final String suggestion;
+
+  /// The alignment found an observed sound absent from the reference.
+  bool get isInsertion => expectedIpa.trim() == '∅';
 }
 
 class PronunciationResult {

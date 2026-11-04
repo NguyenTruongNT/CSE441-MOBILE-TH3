@@ -1,5 +1,7 @@
 import 'package:th3_english_ai/core/contracts/models.dart';
+
 import '../domain/exercise_models.dart';
+import '../domain/ipa_symbols.dart';
 
 /// Pre-seeded pronunciation exercises covering major phonetic difficulties
 /// encountered by Vietnamese English learners.
@@ -17,9 +19,9 @@ class DefaultExercises {
       ),
       category: 'Cặp âm dễ nhầm',
       difficulty: 'Trung bình',
-      description: 'Luyện âm /θ/ vô thanh (think, method) và /ð/ hữu thanh (this).',
-      vietnameseTip:
-          'Để đầu lưỡi giữa hai hàm răng, đẩy luồng hơi nhẹ qua kẽ răng. Không thụt lưỡi vào trong để tránh nhầm thành /s/ hay /t/.',
+      description:
+          'Luyện âm /θ/ vô thanh (think, method) và /ð/ hữu thanh (this).',
+      vietnameseTip: 'Để đầu lưỡi giữa hai hàm răng, đẩy luồng hơi nhẹ qua kẽ răng. Không thụt lưỡi vào trong để tránh nhầm thành /s/ hay /t/.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -32,8 +34,7 @@ class DefaultExercises {
       category: 'Phụ âm khó',
       difficulty: 'Trung bình',
       description: 'Luyện âm /ð/ hữu thanh trong chuỗi câu liên tục.',
-      vietnameseTip:
-          'Đầu lưỡi chạm nhẹ mép răng cửa trên, rung dây thanh quản khi phát âm /ð/.',
+      vietnameseTip: 'Đầu lưỡi chạm nhẹ mép răng cửa trên, rung dây thanh quản khi phát âm /ð/.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -45,9 +46,9 @@ class DefaultExercises {
       ),
       category: 'Cặp âm dễ nhầm',
       difficulty: 'Cơ bản',
-      description: 'Phân biệt phụ âm /s/ (răng khép) và /ʃ/ (chu môi cong lưỡi).',
-      vietnameseTip:
-          'Với /ʃ/ chu môi nhẹ và đưa lưỡi lùi sau vòm miệng; với /s/ khóe môi mở nhẹ, đẩy hơi qua khe hẹp răng cửa.',
+      description:
+          'Phân biệt phụ âm /s/ (răng khép) và /ʃ/ (chu môi cong lưỡi).',
+      vietnameseTip: 'Với /ʃ/ chu môi nhẹ và đưa lưỡi lùi sau vòm miệng; với /s/ khóe môi mở nhẹ, đẩy hơi qua khe hẹp răng cửa.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -59,9 +60,9 @@ class DefaultExercises {
       ),
       category: 'Phụ âm tắc xát',
       difficulty: 'Nâng cao',
-      description: 'Phân biệt âm /tʃ/ vô thanh và /dʒ/ hữu thanh ở đầu và cuối từ.',
-      vietnameseTip:
-          'Chặn hơi bằng đầu lưỡi tại nướu răng trên rồi bật mạnh ra đồng thời chu môi. Rung thanh quản với /dʒ/, không rung với /tʃ/.',
+      description:
+          'Phân biệt âm /tʃ/ vô thanh và /dʒ/ hữu thanh ở đầu và cuối từ.',
+      vietnameseTip: 'Chặn hơi bằng đầu lưỡi tại nướu răng trên rồi bật mạnh ra đồng thời chu môi. Rung thanh quản với /dʒ/, không rung với /tʃ/.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -73,10 +74,8 @@ class DefaultExercises {
       ),
       category: 'Nguyên âm ngắn và dài',
       difficulty: 'Cơ bản',
-      description:
-          'Phân biệt nguyên âm dài /iː/ (cười mở mép) và ngắn /ɪ/ (thả lỏng cơ môi).',
-      vietnameseTip:
-          'Âm /iː/ căng khóe môi sang hai bên; âm /ɪ/ thả lỏng hàm và phát âm nhanh, dứt khoát.',
+      description: 'Phân biệt nguyên âm dài /iː/ (cười mở mép) và ngắn /ɪ/ (thả lỏng cơ môi).',
+      vietnameseTip: 'Âm /iː/ căng khóe môi sang hai bên; âm /ɪ/ thả lỏng hàm và phát âm nhanh, dứt khoát.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -88,10 +87,8 @@ class DefaultExercises {
       ),
       category: 'Cụm phụ âm đuôi',
       difficulty: 'Nâng cao',
-      description:
-          'Luyện nhả đủ các âm đuôi phức /skt/, /ks/, /st/ mà người Việt hay bỏ quên.',
-      vietnameseTip:
-          'Không bỏ âm cuối. Trong "asked" bật rõ /s/ rồi /t/; trong "six" bật /k/ rồi xì /s/.',
+      description: 'Luyện nhả đủ các âm đuôi phức /skt/, /ks/, /st/ mà người Việt hay bỏ quên.',
+      vietnameseTip: 'Không bỏ âm cuối. Trong "asked" bật rõ /s/ rồi /t/; trong "six" bật /k/ rồi xì /s/.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -104,8 +101,7 @@ class DefaultExercises {
       category: 'Cặp âm dễ nhầm',
       difficulty: 'Trung bình',
       description: 'Phân biệt âm cuộn lưỡi /r/ và âm nâng đầu lưỡi /l/.',
-      vietnameseTip:
-          'Với /l/ đầu lưỡi chạm vào nướu răng cửa trên; với /r/ lưỡi cong lùi vào sâu khoang miệng và không chạm vòm trên.',
+      vietnameseTip: 'Với /l/ đầu lưỡi chạm vào nướu răng cửa trên; với /r/ lưỡi cong lùi vào sâu khoang miệng và không chạm vòm trên.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -118,8 +114,7 @@ class DefaultExercises {
       category: 'Nguyên âm đôi',
       difficulty: 'Trung bình',
       description: 'Luyện nguyên âm đôi /əʊ/ và /eɪ/ với độ lướt âm mượt mà.',
-      vietnameseTip:
-          'Khởi đầu từ âm /ə/ lướt nhẹ sang /ʊ/, môi từ từ thu tròn lại ở cuối âm.',
+      vietnameseTip: 'Khởi đầu từ âm /ə/ lướt nhẹ sang /ʊ/, môi từ từ thu tròn lại ở cuối âm.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -132,8 +127,7 @@ class DefaultExercises {
       category: 'Âm mũi và âm vòm',
       difficulty: 'Trung bình',
       description: 'Luyện âm mũi /ŋ/ trong "young, song" và cụm âm /ŋk/ trong "thinking".',
-      vietnameseTip:
-          'Nâng cuống lưỡi chạm ngạc mềm cho hơi thoát qua mũi. Với /ŋk/, sau khi ngắt hơi ở mũi phải bật dứt khoát âm /k/ ở đuôi từ.',
+      vietnameseTip: 'Nâng cuống lưỡi chạm ngạc mềm cho hơi thoát qua mũi. Với /ŋk/, sau khi ngắt hơi ở mũi phải bật dứt khoát âm /k/ ở đuôi từ.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -145,9 +139,9 @@ class DefaultExercises {
       ),
       category: 'Phụ âm mũi',
       difficulty: 'Cơ bản',
-      description: 'Luyện phụ âm môi /m/ và phụ âm răng /n/ rõ nét ở đầu và cuối từ.',
-      vietnameseTip:
-          'Khép chặt hai môi lại để luồng hơi rung qua khoang mũi. Khi đọc các từ có đuôi /m/ cần ngậm chặt miệng để giữ trọn vẹn âm.',
+      description:
+          'Luyện phụ âm môi /m/ và phụ âm răng /n/ rõ nét ở đầu và cuối từ.',
+      vietnameseTip: 'Khép chặt hai môi lại để luồng hơi rung qua khoang mũi. Khi đọc các từ có đuôi /m/ cần ngậm chặt miệng để giữ trọn vẹn âm.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -160,8 +154,7 @@ class DefaultExercises {
       category: 'Phụ âm răng xát',
       difficulty: 'Nâng cao',
       description: 'Chuyên sâu luyện âm /θ/ vô thanh đứng đầu các từ nối tiếp.',
-      vietnameseTip:
-          'Đầu lưỡi thò nhẹ giữa hai hàm răng, thổi luồng hơi êm qua khe răng, không phát âm thành /s/ hay /t/.',
+      vietnameseTip: 'Đầu lưỡi thò nhẹ giữa hai hàm răng, thổi luồng hơi êm qua khe răng, không phát âm thành /s/ hay /t/.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -174,8 +167,7 @@ class DefaultExercises {
       category: 'Cặp âm dễ nhầm',
       difficulty: 'Trung bình',
       description: 'Phân biệt răng chạm môi /v/ và tròn môi /w/.',
-      vietnameseTip:
-          'Với /v/, răng cửa trên chạm nhẹ môi dưới và rung thanh quản. Với /w/, chu tròn hai môi rồi mở nhanh ra, răng không chạm môi.',
+      vietnameseTip: 'Với /v/, răng cửa trên chạm nhẹ môi dưới và rung thanh quản. Với /w/, chu tròn hai môi rồi mở nhanh ra, răng không chạm môi.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -187,9 +179,9 @@ class DefaultExercises {
       ),
       category: 'Phụ âm bật hơi',
       difficulty: 'Cơ bản',
-      description: 'Phân biệt âm bật hơi không rung /p/ và âm rung thanh quản /b/.',
-      vietnameseTip:
-          'Với /p/, mím môi nén hơi rồi bật mạnh (có gió thổi vào lòng bàn tay). Với /b/, rung thanh quản ngay khi mở môi, không thổi gió.',
+      description:
+          'Phân biệt âm bật hơi không rung /p/ và âm rung thanh quản /b/.',
+      vietnameseTip: 'Với /p/, mím môi nén hơi rồi bật mạnh (có gió thổi vào lòng bàn tay). Với /b/, rung thanh quản ngay khi mở môi, không thổi gió.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -201,9 +193,9 @@ class DefaultExercises {
       ),
       category: 'Nguyên âm ngắn và dài',
       difficulty: 'Trung bình',
-      description: 'Phân biệt nguyên âm tròn môi kéo dài /uː/ và nguyên âm ngắn /ʊ/.',
-      vietnameseTip:
-          'Với /uː/, chu tròn môi sâu về trước và ngân dài. Với /ʊ/, thả lỏng nhẹ môi và hàm, phát âm ngắn dứt khoát.',
+      description:
+          'Phân biệt nguyên âm tròn môi kéo dài /uː/ và nguyên âm ngắn /ʊ/.',
+      vietnameseTip: 'Với /uː/, chu tròn môi sâu về trước và ngân dài. Với /ʊ/, thả lỏng nhẹ môi và hàm, phát âm ngắn dứt khoát.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -216,8 +208,7 @@ class DefaultExercises {
       category: 'Nguyên âm đơn',
       difficulty: 'Trung bình',
       description: 'Luyện nguyên âm bẹt /æ/ mở rộng khẩu hình theo chiều dọc.',
-      vietnameseTip:
-          'Hạ thấp hàm dưới mở to miệng theo chiều dọc, đè phẳng cuống lưỡi xuống, phát âm âm lai giữa /a/ và /e/.',
+      vietnameseTip: 'Hạ thấp hàm dưới mở to miệng theo chiều dọc, đè phẳng cuống lưỡi xuống, phát âm âm lai giữa /a/ và /e/.',
     ),
     ExerciseDetail(
       exercise: const Exercise(
@@ -230,8 +221,7 @@ class DefaultExercises {
       category: 'Phụ âm xát và tắc xát',
       difficulty: 'Nâng cao',
       description: 'Phân biệt âm xát răng /z/ và âm tắc xát vòm /dʒ/.',
-      vietnameseTip:
-          'Với /z/, khép hai răng và rung mạnh thanh quản. Với /dʒ/, chu môi và khép đầu lưỡi sau chân răng rồi bật ra kết hợp rung thanh quản.',
+      vietnameseTip: 'Với /z/, khép hai răng và rung mạnh thanh quản. Với /dʒ/, chu môi và khép đầu lưỡi sau chân răng rồi bật ra kết hợp rung thanh quản.',
     ),
   ];
 
@@ -242,45 +232,36 @@ class DefaultExercises {
   }) {
     final recommendations = <ImprovementRecommendation>[];
     final seenPhonemes = <String>{};
-    final usedExerciseIds = <String>{
-      ?currentExerciseId,
-    };
+    final usedExerciseIds = <String>{};
 
     for (final feedback in weakPhonemes) {
       if (feedback.status != PhonemeStatus.needsPractice) continue;
-      final target = feedback.expectedIpa;
-      if (seenPhonemes.contains(target)) continue;
-      seenPhonemes.add(target);
+      // An insertion is an extra sound, not a reference phoneme to train.
+      if (feedback.isInsertion) continue;
+      final target = feedback.expectedIpa.trim();
+      final key = IpaSymbols.tokenize(target).join(' ');
+      if (key.isEmpty || !seenPhonemes.add(key)) continue;
 
-      // 1. Find an exercise that specifically trains this exact phoneme
+      // Prefer a dedicated drill, then a sentence containing the same IPA
+      // units. Repeating the current lesson is better than an unrelated one.
       ExerciseDetail? match;
+      var bestRank = 3;
       for (final ex in catalog) {
-        if (!usedExerciseIds.contains(ex.id) &&
-            ex.targetPhonemes.any((p) => p == target || p.contains(target) || target.contains(p))) {
+        if (usedExerciseIds.contains(ex.id) ||
+            !IpaSymbols.containsSequence(ex.referenceIpa, target)) {
+          continue;
+        }
+        final dedicated = ex.targetPhonemes.any(
+          (phoneme) => IpaSymbols.containsSequence(phoneme, target),
+        );
+        final rank = ex.id == currentExerciseId ? 2 : (dedicated ? 0 : 1);
+        if (rank < bestRank) {
           match = ex;
-          break;
+          bestRank = rank;
         }
       }
-
-      // 2. If no exact match among unused exercises, find any exercise containing the target
-      if (match == null) {
-        for (final ex in catalog) {
-          if (ex.id != currentExerciseId &&
-              ex.targetPhonemes.any((p) => p == target || p.contains(target) || target.contains(p))) {
-            match = ex;
-            break;
-          }
-        }
-      }
-
-      // 3. Fallback: choose the next unused exercise in the catalog
-      match ??= catalog.firstWhere(
-        (ex) => !usedExerciseIds.contains(ex.id),
-        orElse: () => catalog.firstWhere(
-          (ex) => ex.id != currentExerciseId,
-          orElse: () => catalog.first,
-        ),
-      );
+      // Keep the phoneme's own guidance visible when no relevant drill exists.
+      if (match == null) continue;
 
       usedExerciseIds.add(match.id);
 
