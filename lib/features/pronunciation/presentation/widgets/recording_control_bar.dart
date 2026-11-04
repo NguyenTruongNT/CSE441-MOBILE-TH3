@@ -74,8 +74,10 @@ class RecordingControlBar extends StatelessWidget {
           width: isRecording ? 1.5 : 1,
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 12,
         children: [
           if (isRecording) ...[
             // Cancel button
@@ -84,7 +86,7 @@ class RecordingControlBar extends StatelessWidget {
               icon: const Icon(Icons.close_rounded),
               tooltip: 'Hủy ghi âm',
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 8),
             // Timer & recording indicator
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -100,7 +102,7 @@ class RecordingControlBar extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 8),
             // Finish recording button
             FilledButton.icon(
               onPressed: onStopRecording,
@@ -108,7 +110,10 @@ class RecordingControlBar extends StatelessWidget {
               label: const Text('Dừng & Phân tích'),
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
             ),
           ] else ...[
@@ -118,7 +123,10 @@ class RecordingControlBar extends StatelessWidget {
               icon: const Icon(Icons.mic_rounded, size: 24),
               label: const Text('Bắt đầu ghi âm'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),

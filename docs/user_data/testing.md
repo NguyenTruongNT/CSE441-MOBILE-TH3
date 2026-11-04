@@ -1,5 +1,7 @@
 # Kiểm thử module User Data
 
+> Tài liệu kiểm thử module JSON được kế thừa; phần Hồ sơ tạo/sửa không còn nằm trong luồng app chính. Bộ test cũ vẫn giữ để kiểm tra import và hợp đồng. Trạng thái tích hợp/SQLite mới ở [bảng đối chiếu](../doi-chieu-th3.md).
+
 ## 1. Mục tiêu
 
 Bộ kiểm thử xác minh:

@@ -614,8 +614,8 @@ class PhonemeScoringEngine {
       referenceText: exercise.referenceText,
       recognizedText: recognizedText,
       overallScore: finalScore,
-      provider: actualTranscript.isNotEmpty ? 'live-speech-gop-aligner' : 'acoustic-gop-aligner',
-      modelVersion: 'v2.1.0-realtime-speech',
+      provider: 'simulation-only',
+      modelVersion: 'unverified-heuristic-v1',
       analyzedAt: DateTime.now().toUtc(),
       phonemes: phonemes,
     );

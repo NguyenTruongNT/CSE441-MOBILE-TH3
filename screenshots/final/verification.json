@@ -1,0 +1,24 @@
+{
+  "syntheticAudioOnly": true,
+  "realHumanEvaluation": false,
+  "verified": [
+    "catalog before practice",
+    "lesson selection",
+    "back preserves search",
+    "model API",
+    "microphone capture",
+    "SQLite save",
+    "history after reload",
+    "account isolation",
+    "desktop sidebar toggle",
+    "mobile centered practice navigation"
+  ],
+  "assessment": {
+    "score": 79.2,
+    "transcript": "I THINK THIS METHOD IS GREAT I THINK",
+    "phones": 24,
+    "processingSeconds": 6.941,
+    "modelVersion": "phoneme:ae45363bf341;asr:22aad52d435e;comparison:v1"
+  },
+  "pageErrors": []
+}

@@ -198,7 +198,7 @@ class SettingsReminderCard extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         primaryColor.withValues(alpha: 0.08),
-                        const Color(0xFFF1F5F4),
+                        const Color(0xFFF4F3FC),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -305,7 +305,7 @@ class SettingsReminderCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     const Text(
-                      'English AI · Giờ học mỗi ngày 🔥',
+                      'English AI · Giờ học mỗi ngày',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -400,13 +400,13 @@ class SettingsReminderCard extends StatelessWidget {
       case 5:
         return '⚡ Nhanh gọn';
       case 10:
-        return '🎯 Tiêu chuẩn';
+        return 'Tiêu chuẩn';
       case 15:
-        return '🔥 Khuyên dùng';
+        return 'Khuyên dùng';
       case 20:
         return '💪 Chuyên sâu';
       case 30:
-        return '🏆 Bứt phá';
+        return 'Bứt phá';
       default:
         return '';
     }

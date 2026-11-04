@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:th3_english_ai/core/contracts/models.dart';
 import 'package:th3_english_ai/core/contracts/ports.dart';
+
 import '../domain/audio_validator.dart';
-import '../domain/phoneme_scoring_engine.dart';
 import 'http/http_client.dart';
 
 /// Real API service communicating with the pronunciation backend proxy
@@ -14,21 +16,28 @@ class RemotePronunciationService implements PronunciationService {
     this.apiKey,
     HttpTransport? transport,
     AudioValidator? validator,
-    this.timeout = const Duration(seconds: 12),
-    this.enableLocalFallbackWhenUnreachable = true,
-    PhonemeScoringEngine? fallbackEngine,
-  })  : endpoint = endpoint ?? Uri.parse('http://127.0.0.1:8080/api/pronounce/analyze'),
-        _transport = transport ?? getHttpTransport(),
-        _validator = validator ?? const AudioValidator(),
-        _fallbackEngine = fallbackEngine ?? const PhonemeScoringEngine();
+    this.timeout = const Duration(seconds: 120),
+  }) : endpoint =
+           endpoint ??
+           Uri.parse(
+             const String.fromEnvironment(
+                       'PRONUNCIATION_API_URL',
+                       defaultValue: '',
+                     ) !=
+                     ''
+                 ? const String.fromEnvironment('PRONUNCIATION_API_URL')
+                 : (!kIsWeb && defaultTargetPlatform == TargetPlatform.android
+                       ? 'http://10.0.2.2:8080/api/pronounce/analyze'
+                       : 'http://127.0.0.1:8080/api/pronounce/analyze'),
+           ),
+       _transport = transport ?? getHttpTransport(),
+       _validator = validator ?? const AudioValidator();
 
   final Uri endpoint;
   final String? apiKey;
   final HttpTransport _transport;
   final AudioValidator _validator;
   final Duration timeout;
-  final bool enableLocalFallbackWhenUnreachable;
-  final PhonemeScoringEngine _fallbackEngine;
   String? clientTranscript;
 
   @override
@@ -52,9 +61,7 @@ class RemotePronunciationService implements PronunciationService {
       'clientTranscript': clientTranscript ?? '',
     };
 
-    final headers = <String, String>{
-      'Accept': 'application/json',
-    };
+    final headers = <String, String>{'Accept': 'application/json'};
     if (apiKey != null && apiKey!.isNotEmpty) {
       headers['Authorization'] = 'Bearer $apiKey';
     }
@@ -77,23 +84,16 @@ class RemotePronunciationService implements PronunciationService {
     } on TimeoutException {
       throw const AppFailure(
         AppFailureCode.timeout,
-        'Yêu cầu phân tích phát âm vượt quá thời gian phản hồi (12s). Vui lòng thử lại.',
+        'Phân tích mất quá nhiều thời gian. Kiểm tra backend rồi thử lại.',
       );
     } on AppFailure {
       rethrow;
-    } catch (e) {
-      if (enableLocalFallbackWhenUnreachable) {
-        // Fall back to high-fidelity on-device acoustic analysis engine
-        return _fallbackEngine.evaluate(
-          sessionId: sessionId,
-          audio: audio,
-          exercise: exercise,
-          recognizedTranscriptOverride: clientTranscript,
-        );
-      }
+    } catch (_) {
       throw AppFailure(
         AppFailureCode.network,
-        'Không thể kết nối đến máy chủ AI ($endpoint): $e',
+        'Không kết nối được máy chủ AI. Hãy khởi động máy chủ chấm phát âm '
+        'và giữ máy chủ chạy trong lúc luyện, sau đó thử lại.\n'
+        'Địa chỉ kết nối: $endpoint',
       );
     }
   }
@@ -132,6 +132,16 @@ class RemotePronunciationService implements PronunciationService {
     String sessionId,
     Exercise exercise,
   ) {
+    if (json['sessionId'] != sessionId ||
+        json['recognizedText'] is! String ||
+        (json['recognizedText'] as String).trim().isEmpty ||
+        json['phonemes'] is! List ||
+        (json['phonemes'] as List).isEmpty) {
+      throw const AppFailure(
+        AppFailureCode.insufficientEvidence,
+        'Backend chưa cung cấp đủ kết quả nhận dạng và âm vị.',
+      );
+    }
     final overall = (json['overallScore'] as num).toDouble();
     final rawPhonemes = (json['phonemes'] as List?) ?? [];
 
@@ -160,7 +170,7 @@ class RemotePronunciationService implements PronunciationService {
       id: json['id'] as String? ?? 'res-$sessionId',
       sessionId: sessionId,
       referenceText: json['referenceText'] as String? ?? exercise.referenceText,
-      recognizedText: json['recognizedText'] as String? ?? exercise.referenceText,
+      recognizedText: json['recognizedText'] as String,
       overallScore: overall,
       provider: json['provider'] as String? ?? 'remote-ai-proxy',
       modelVersion: json['modelVersion'] as String? ?? 'v1.0.0',
@@ -171,4 +181,3 @@ class RemotePronunciationService implements PronunciationService {
     );
   }
 }
-

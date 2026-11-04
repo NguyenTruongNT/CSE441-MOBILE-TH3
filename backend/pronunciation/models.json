@@ -1,0 +1,10 @@
+﻿{
+    "phoneme":  {
+                    "id":  "facebook/wav2vec2-lv-60-espeak-cv-ft",
+                    "revision":  "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4"
+                },
+    "asr":  {
+                "id":  "facebook/wav2vec2-base-960h",
+                "revision":  "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+            }
+}

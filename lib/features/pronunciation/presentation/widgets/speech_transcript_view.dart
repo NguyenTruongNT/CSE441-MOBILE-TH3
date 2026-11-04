@@ -43,7 +43,7 @@ class SpeechTranscriptView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Âm thanh thu được thời gian thực (Speech-to-Text):',
+                    'Bản nháp nhận dạng trực tiếp (nếu thiết bị hỗ trợ):',
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: primary,
@@ -55,8 +55,12 @@ class SpeechTranscriptView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      fontStyle: liveTranscript.isEmpty ? FontStyle.italic : FontStyle.normal,
-                      color: liveTranscript.isEmpty ? Colors.black54 : Colors.black87,
+                      fontStyle: liveTranscript.isEmpty
+                          ? FontStyle.italic
+                          : FontStyle.normal,
+                      color: liveTranscript.isEmpty
+                          ? Colors.black54
+                          : Colors.black87,
                     ),
                   ),
                 ],
@@ -98,7 +102,7 @@ class SpeechTranscriptView extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Âm thanh thu được từ giọng bạn (Speech-to-Text)',
+                  'Nội dung nhận dạng từ bản ghi',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -113,7 +117,7 @@ class SpeechTranscriptView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'Web Speech API',
+                  'Speech-to-Text',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -136,7 +140,7 @@ class SpeechTranscriptView extends StatelessWidget {
           const Divider(height: 1),
           const SizedBox(height: 12),
           Text(
-            'So sánh từng từ đã phát âm:',
+            'Đối chiếu văn bản theo vị trí từ (không dùng để tính điểm âm vị):',
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.bold,
@@ -152,7 +156,8 @@ class SpeechTranscriptView extends StatelessWidget {
                   ? userWords[i].replaceAll(RegExp(r'[^\w]'), '')
                   : null;
 
-              final isMatch = userWord != null &&
+              final isMatch =
+                  userWord != null &&
                   userWord.toLowerCase() == refWord.toLowerCase();
 
               final badgeColor = isMatch
@@ -160,7 +165,10 @@ class SpeechTranscriptView extends StatelessWidget {
                   : (userWord != null ? const Color(0xFFD97706) : Colors.grey);
 
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: badgeColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),

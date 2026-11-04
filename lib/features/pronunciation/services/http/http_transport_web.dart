@@ -1,5 +1,8 @@
-// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
-import 'dart:html' as html;
+import 'dart:async';
+import 'dart:js_interop';
+
+import 'package:web/web.dart' as web;
+
 import 'http_transport.dart';
 
 class PlatformHttpTransport implements HttpTransport {
@@ -10,21 +13,34 @@ class PlatformHttpTransport implements HttpTransport {
     required Uri uri,
     required Map<String, String> headers,
     required String jsonBody,
-    Duration timeout = const Duration(seconds: 12),
-  }) async {
-    final req = await html.HttpRequest.request(
-      uri.toString(),
-      method: 'POST',
-      sendData: jsonBody,
-      requestHeaders: {
-        'Content-Type': 'application/json',
-        ...headers,
+    Duration timeout = const Duration(seconds: 120),
+  }) {
+    final controller = web.AbortController();
+    final requestHeaders = web.Headers()
+      ..set('Content-Type', 'application/json');
+    headers.forEach((name, value) => requestHeaders.set(name, value));
+    return (() async {
+      final response = await web.window
+          .fetch(
+            uri.toString().toJS,
+            web.RequestInit(
+              method: 'POST',
+              headers: requestHeaders,
+              body: jsonBody.toJS,
+              signal: controller.signal,
+            ),
+          )
+          .toDart;
+      return HttpResponseData(
+        statusCode: response.status,
+        body: (await response.text().toDart).toDart,
+      );
+    })().timeout(
+      timeout,
+      onTimeout: () {
+        controller.abort();
+        throw TimeoutException('Backend request timed out', timeout);
       },
-    ).timeout(timeout);
-
-    return HttpResponseData(
-      statusCode: req.status ?? 0,
-      body: req.responseText ?? '',
     );
   }
 }

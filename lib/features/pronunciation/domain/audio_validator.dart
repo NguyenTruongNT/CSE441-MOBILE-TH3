@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
+
 import 'package:th3_english_ai/core/contracts/models.dart';
 import 'package:th3_english_ai/core/contracts/ports.dart';
 
@@ -55,6 +56,32 @@ class AudioValidator {
       throw AppFailure(
         AppFailureCode.invalidAudio,
         'Định dạng âm thanh "$mime" không được hỗ trợ. Cần WAV, WebM hoặc AAC.',
+      );
+    }
+
+    if (audio.bytes.length > 8 * 1024 * 1024) {
+      throw const AppFailure(
+        AppFailureCode.invalidAudio,
+        'Bản ghi vượt quá dung lượng cho phép (8 MB).',
+      );
+    }
+    if (mime.contains('webm') ||
+        mime.contains('ogg') ||
+        mime.contains('mp4') ||
+        mime.contains('aac') ||
+        mime.contains('m4a')) {
+      if (audio.bytes.length < 128) {
+        throw const AppFailure(
+          AppFailureCode.invalidAudio,
+          'Bản ghi bị thiếu dữ liệu.',
+        );
+      }
+      // Encoded bytes are not PCM. Actual duration/energy must be measured
+      // after decoding on the backend, never inferred from compressed bytes.
+      return const AudioValidationResult(
+        isValid: true,
+        rmsEnergy: 0,
+        durationEstimateSeconds: 0,
       );
     }
 
@@ -151,4 +178,3 @@ class AudioValidator {
     return (bytes.length / 32000.0).clamp(0.1, 120.0);
   }
 }
-

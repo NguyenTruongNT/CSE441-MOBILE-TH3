@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:th3_english_ai/app/app.dart';
 import 'package:th3_english_ai/app/app_shell.dart';
+import 'package:th3_english_ai/app/app_navigation.dart';
 import 'package:th3_english_ai/app/shared/app_states.dart';
 
 void main() {
@@ -14,25 +15,17 @@ void main() {
       await tester.pumpWidget(const EnglishLearningApp());
 
       final navigation = find.byType(
-        width >= 800 ? NavigationRail : NavigationBar,
+        width >= 800 ? LearningSidebar : LearningBottomBar,
       );
       expect(navigation, findsOneWidget);
-      final icons = [
-        Icons.insights_outlined,
-        Icons.mic_none_rounded,
-        Icons.history_rounded,
-        Icons.person_outline_rounded,
-      ];
       final headlines = [
         'Mỗi ngày một bước tiến.',
         'Tự tin hơn qua từng âm.',
         'Nhìn lại để tiến xa hơn.',
         'Hành trình của riêng bạn.',
       ];
-      for (var index = 0; index < icons.length; index++) {
-        await tester.tap(
-          find.descendant(of: navigation, matching: find.byIcon(icons[index])),
-        );
+      for (var index = 0; index < navigationKeys.length; index++) {
+        await tester.tap(find.byKey(navigationKeys[index]));
         await tester.pumpAndSettle();
         expect(find.text(headlines[index]), findsOneWidget);
         expect(find.textContaining('Chờ tích hợp module'), findsOneWidget);
@@ -73,29 +66,66 @@ void main() {
     );
     await tester.tap(find.text('Count: 0'));
     await tester.pump();
-    final navigation = find.byType(NavigationRail);
     for (final entry in {
-      Icons.mic_none_rounded: 'Injected pronunciation',
-      Icons.history_rounded: 'Injected history',
-      Icons.person_outline_rounded: 'Injected profile',
+      1: 'Injected pronunciation',
+      2: 'Injected history',
+      3: 'Injected profile',
     }.entries) {
-      await tester.tap(
-        find.descendant(of: navigation, matching: find.byIcon(entry.key)),
-      );
+      await tester.tap(find.byKey(navigationKeys[entry.key]));
       await tester.pumpAndSettle();
       expect(find.text(entry.value), findsOneWidget);
     }
-    await tester.tap(
-      find.descendant(
-        of: navigation,
-        matching: find.byIcon(Icons.insights_outlined),
-      ),
-    );
+    await tester.tap(find.byKey(navigationKeys[0]));
     await tester.pumpAndSettle();
     expect(find.text('Count: 1'), findsOneWidget);
     expect(find.textContaining('Chờ tích hợp module'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('modules initialize on first visit and remain mounted', (
+    tester,
+  ) async {
+    var initializes = 0;
+    await tester.pumpWidget(
+      EnglishLearningApp(
+        pages: AppPages(
+          progress: (_) => const Text('Progress ready'),
+          pronunciation: (_) =>
+              _InitializationProbe(onInitialize: () => initializes++),
+        ),
+      ),
+    );
+    expect(initializes, 0);
+    await tester.tap(find.byKey(navigationKeys[1]));
+    await tester.pumpAndSettle();
+    expect(initializes, 1);
+    await tester.tap(find.byKey(navigationKeys[0]));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(navigationKeys[1]));
+    await tester.pumpAndSettle();
+    expect(initializes, 1);
+  });
+
+  testWidgets(
+    'sidebar collapses and expands without resetting the selected page',
+    (tester) async {
+      tester.view.physicalSize = const Size(1366, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(const EnglishLearningApp());
+      await tester.tap(find.byKey(navigationKeys[1]));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byKey(const ValueKey('sidebar-toggle')));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(tester.takeException(), isNull);
+        await tester.pumpAndSettle();
+        expect(find.text('Tự tin hơn qua từng âm.'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
 
   testWidgets('Shared error state invokes retry', (tester) async {
     var retries = 0;
@@ -113,6 +143,24 @@ void main() {
     await tester.tap(find.text('Thử lại'));
     expect(retries, 1);
   });
+}
+
+class _InitializationProbe extends StatefulWidget {
+  const _InitializationProbe({required this.onInitialize});
+  final VoidCallback onInitialize;
+  @override
+  State<_InitializationProbe> createState() => _InitializationProbeState();
+}
+
+class _InitializationProbeState extends State<_InitializationProbe> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onInitialize();
+  }
+
+  @override
+  Widget build(BuildContext context) => const Text('Practice ready');
 }
 
 class _CounterPage extends StatefulWidget {

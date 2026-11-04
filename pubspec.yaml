@@ -16,6 +16,11 @@ dependencies:
   flutter_local_notifications: ^22.3.3
   timezone: ^0.11.2
   shared_preferences: ^2.5.6
+  drift: ^2.35.3
+  drift_flutter: ^0.3.1
+  record: ^7.1.2
+  flutter_tts: ^4.2.5
+  web: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +29,20 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: BeVietnamPro
+      fonts:
+        - asset: assets/fonts/BeVietnamPro-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/BeVietnamPro-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/BeVietnamPro-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BeVietnamPro-Bold.ttf
+          weight: 700
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto.ttf
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans.ttf

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/shared/app_states.dart';
 import '../../../core/contracts/contracts.dart';
+import '../../../core/learning_time.dart';
 import 'practice_result_detail_page.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -31,11 +32,35 @@ class _HistoryPageState extends State<HistoryPage> {
   UserProfile? _selectedProfile;
   List<_HistoryEntry> _entries = const <_HistoryEntry>[];
   DateTimeRange? _selectedDateRange;
+  int _loadRevision = 0;
 
   @override
   void initState() {
     super.initState();
     unawaited(_loadHistory());
+    for (final repository in [
+      widget.userRepository,
+      widget.learningRepository,
+    ]) {
+      if (repository is Listenable) {
+        (repository).addListener(_onDataChanged);
+      }
+    }
+  }
+
+  void _onDataChanged() => unawaited(_loadHistory(showLoading: false));
+
+  @override
+  void dispose() {
+    for (final repository in [
+      widget.userRepository,
+      widget.learningRepository,
+    ]) {
+      if (repository is Listenable) {
+        (repository).removeListener(_onDataChanged);
+      }
+    }
+    super.dispose();
   }
 
   DateTime get _nowUtc {
@@ -46,6 +71,7 @@ class _HistoryPageState extends State<HistoryPage> {
     if (!mounted) {
       return;
     }
+    final revision = ++_loadRevision;
 
     if (showLoading) {
       setState(() {
@@ -59,7 +85,7 @@ class _HistoryPageState extends State<HistoryPage> {
           .getSelectedProfile();
 
       if (selectedProfile == null) {
-        if (!mounted) {
+        if (!mounted || revision != _loadRevision) {
           return;
         }
 
@@ -80,17 +106,13 @@ class _HistoryPageState extends State<HistoryPage> {
         fromUtc = DateTime.utc(1);
         toUtc = _nowUtc.add(const Duration(days: 1));
       } else {
-        fromUtc = DateTime(
-          _selectedDateRange!.start.year,
-          _selectedDateRange!.start.month,
-          _selectedDateRange!.start.day,
-        ).toUtc();
-
-        toUtc = DateTime(
-          _selectedDateRange!.end.year,
-          _selectedDateRange!.end.month,
-          _selectedDateRange!.end.day,
-        ).add(const Duration(days: 1)).toUtc();
+        final range = profileDateRangeUtc(
+          _selectedDateRange!.start,
+          _selectedDateRange!.end,
+          selectedProfile.timeZone,
+        );
+        fromUtc = range.fromUtc;
+        toUtc = range.toUtc;
       }
 
       final List<PracticeSession> sessions = await widget.learningRepository
@@ -109,7 +131,7 @@ class _HistoryPageState extends State<HistoryPage> {
         entries.add(_HistoryEntry(session: session, result: result));
       }
 
-      if (!mounted) {
+      if (!mounted || revision != _loadRevision) {
         return;
       }
 
@@ -120,7 +142,7 @@ class _HistoryPageState extends State<HistoryPage> {
         _errorMessage = null;
       });
     } catch (error) {
-      if (!mounted) {
+      if (!mounted || revision != _loadRevision) {
         return;
       }
 
@@ -132,7 +154,10 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Future<void> _chooseDateRange() async {
-    final DateTime now = _nowUtc.toLocal();
+    final DateTime now = profileTime(
+      _nowUtc,
+      _selectedProfile?.timeZone ?? 'Asia/Ho_Chi_Minh',
+    );
 
     final DateTimeRange? range = await showDateRangePicker(
       context: context,
@@ -194,6 +219,7 @@ class _HistoryPageState extends State<HistoryPage> {
           return PracticeResultDetailPage(
             session: entry.session,
             result: result,
+            timeZone: _selectedProfile!.timeZone,
           );
         },
       ),
@@ -217,8 +243,8 @@ class _HistoryPageState extends State<HistoryPage> {
 
     if (_selectedProfile == null) {
       return const AppMessageState(
-        title: 'Chưa chọn hồ sơ',
-        message: 'Hãy tạo hoặc chọn một hồ sơ trước khi xem lịch sử luyện tập.',
+        title: 'Chưa chọn tài khoản',
+        message: 'Hãy chọn tài khoản tại màn hình đăng nhập để xem lịch sử luyện tập.',
         icon: Icons.person_off_outlined,
       );
     }
@@ -282,8 +308,8 @@ class _HistoryPageState extends State<HistoryPage> {
         Text(
           _selectedDateRange == null
               ? 'Đang hiển thị toàn bộ lịch sử.'
-              : 'Từ ${_formatDate(_selectedDateRange!.start)} '
-                    'đến ${_formatDate(_selectedDateRange!.end)}.',
+              : 'Từ ${formatCalendarDate(_selectedDateRange!.start)} '
+                    'đến ${formatCalendarDate(_selectedDateRange!.end)}.',
         ),
       ],
     );
@@ -424,29 +450,22 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Widget _buildHistoryList(BuildContext context, {required bool isWide}) {
     if (isWide) {
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-
-          // Tăng từ 210 lên 230 để tránh tràn chiều cao
-          // ở màn hình Desktop.
-          mainAxisExtent: 230,
+      return LayoutBuilder(
+        builder: (context, constraints) => Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [
+            for (final entry in _entries)
+              SizedBox(
+                width: (constraints.maxWidth - 16) / 2,
+                child: _HistoryCard(
+                  entry: entry,
+                  timeZone: _selectedProfile!.timeZone,
+                  onOpen: () => unawaited(_openDetails(entry)),
+                ),
+              ),
+          ],
         ),
-        itemCount: _entries.length,
-        itemBuilder: (BuildContext context, int index) {
-          final _HistoryEntry entry = _entries[index];
-
-          return _HistoryCard(
-            entry: entry,
-            onOpen: () {
-              unawaited(_openDetails(entry));
-            },
-          );
-        },
       );
     }
 
@@ -462,6 +481,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
         return _HistoryCard(
           entry: entry,
+          timeZone: _selectedProfile!.timeZone,
           onOpen: () {
             unawaited(_openDetails(entry));
           },
@@ -479,10 +499,15 @@ class _HistoryEntry {
 }
 
 class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.entry, required this.onOpen});
+  const _HistoryCard({
+    required this.entry,
+    required this.onOpen,
+    required this.timeZone,
+  });
 
   final _HistoryEntry entry;
   final VoidCallback onOpen;
+  final String timeZone;
 
   @override
   Widget build(BuildContext context) {
@@ -510,8 +535,8 @@ class _HistoryCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    entry.session.exerciseId,
-                    maxLines: 1,
+                    entry.result?.referenceText ?? entry.session.exerciseId,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
@@ -528,8 +553,12 @@ class _HistoryCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (entry.result != null) ...[
+              const SizedBox(height: 6),
+              Text(entry.session.exerciseId, style: theme.textTheme.labelSmall),
+            ],
             const SizedBox(height: 14),
-            Text(_formatDateTime(entry.session.startedAt)),
+            Text(formatProfileDateTime(entry.session.startedAt, timeZone)),
             const SizedBox(height: 6),
             Text(
               'Thời lượng: '
@@ -631,32 +660,6 @@ class _SummaryCard extends StatelessWidget {
     case PracticeStatus.analysisFailed:
       return (Icons.error_outline_rounded, 'Phân tích lỗi', scheme.error);
   }
-}
-
-String _formatDate(DateTime value) {
-  final DateTime local = value.toLocal();
-
-  String twoDigits(int number) {
-    return number.toString().padLeft(2, '0');
-  }
-
-  return '${twoDigits(local.day)}/'
-      '${twoDigits(local.month)}/'
-      '${local.year}';
-}
-
-String _formatDateTime(DateTime value) {
-  final DateTime local = value.toLocal();
-
-  String twoDigits(int number) {
-    return number.toString().padLeft(2, '0');
-  }
-
-  return '${twoDigits(local.day)}/'
-      '${twoDigits(local.month)}/'
-      '${local.year} '
-      '${twoDigits(local.hour)}:'
-      '${twoDigits(local.minute)}';
 }
 
 String _formatDuration(int totalSeconds) {

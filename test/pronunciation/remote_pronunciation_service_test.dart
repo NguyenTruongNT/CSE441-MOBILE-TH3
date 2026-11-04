@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:th3_english_ai/core/contracts/models.dart';
 import 'package:th3_english_ai/core/contracts/ports.dart';
@@ -28,10 +29,7 @@ class MockHttpTransport implements HttpTransport {
     if (throwException != null) {
       throw throwException!;
     }
-    return HttpResponseData(
-      statusCode: responseStatusCode,
-      body: responseBody,
-    );
+    return HttpResponseData(statusCode: responseStatusCode, body: responseBody);
   }
 }
 
@@ -58,8 +56,8 @@ void main() {
           'startMilliseconds': 100,
           'endMilliseconds': 250,
           'suggestion': 'Phát âm tốt âm /θ/.',
-        }
-      ]
+        },
+      ],
     });
 
     final transport = MockHttpTransport(
@@ -67,10 +65,7 @@ void main() {
       responseBody: mockJson,
     );
 
-    final service = RemotePronunciationService(
-      transport: transport,
-      enableLocalFallbackWhenUnreachable: false,
-    );
+    final service = RemotePronunciationService(transport: transport);
 
     final result = await service.analyze(
       sessionId: 'sess-123',
@@ -87,13 +82,13 @@ void main() {
   test('RemotePronunciationService maps 400 error to invalidAudio', () async {
     final transport = MockHttpTransport(
       responseStatusCode: 400,
-      responseBody: jsonEncode({'message': 'Audio corrupted', 'code': 'invalidAudio'}),
+      responseBody: jsonEncode({
+        'message': 'Audio corrupted',
+        'code': 'invalidAudio',
+      }),
     );
 
-    final service = RemotePronunciationService(
-      transport: transport,
-      enableLocalFallbackWhenUnreachable: false,
-    );
+    final service = RemotePronunciationService(transport: transport);
 
     expect(
       () => service.analyze(
@@ -102,29 +97,45 @@ void main() {
         exercise: exercise,
       ),
       throwsA(
-        isA<AppFailure>().having((e) => e.code, 'code', AppFailureCode.invalidAudio),
+        isA<AppFailure>().having(
+          (e) => e.code,
+          'code',
+          AppFailureCode.invalidAudio,
+        ),
       ),
     );
   });
 
-  test('RemotePronunciationService falls back to local engine when server is unreachable', () async {
-    final transport = MockHttpTransport(
-      throwException: const FormatException('Connection refused'),
-    );
+  test(
+    'unreachable backend fails without manufacturing a score or transcript',
+    () async {
+      final transport = MockHttpTransport(
+        throwException: const FormatException('Connection refused'),
+      );
 
-    final service = RemotePronunciationService(
-      transport: transport,
-      enableLocalFallbackWhenUnreachable: true,
-    );
+      final service = RemotePronunciationService(transport: transport);
 
-    final result = await service.analyze(
-      sessionId: 'sess-fallback',
-      audio: validAudio,
-      exercise: exercise,
-    );
-
-    expect(result.sessionId, 'sess-fallback');
-    expect(result.overallScore, inInclusiveRange(0.0, 100.0));
-  });
+      await expectLater(
+        service.analyze(
+          sessionId: 'sess-fallback',
+          audio: validAudio,
+          exercise: exercise,
+        ),
+        throwsA(
+          isA<AppFailure>()
+              .having((e) => e.code, 'code', AppFailureCode.network)
+              .having(
+                (e) => e.message,
+                'actionable message',
+                contains('khởi động máy chủ'),
+              )
+              .having(
+                (e) => e.message,
+                'raw exception is hidden',
+                isNot(contains('FormatException')),
+              ),
+        ),
+      );
+    },
+  );
 }
-

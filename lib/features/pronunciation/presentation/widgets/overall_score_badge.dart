@@ -4,11 +4,7 @@ import 'package:flutter/material.dart';
 /// Accessible score display with both color and clear non-color semantic cues
 /// (distinct icons, descriptive text ratings, and progress metrics).
 class OverallScoreBadge extends StatelessWidget {
-  const OverallScoreBadge({
-    super.key,
-    required this.score,
-    this.size = 130,
-  });
+  const OverallScoreBadge({super.key, required this.score, this.size = 130});
 
   final double score;
   final double size;
@@ -28,13 +24,13 @@ class OverallScoreBadge extends StatelessWidget {
       backgroundColor = const Color(0xFFE8F5E9);
       statusIcon = Icons.check_circle_rounded;
       statusLabel = 'Rất tốt';
-      description = 'Phát âm tự nhiên và chuẩn xác';
+      description = 'Chuỗi âm vị gần với mẫu chuẩn';
     } else if (score >= 60.0) {
       ringColor = const Color(0xFFD97706);
       backgroundColor = const Color(0xFFFEF3C7);
       statusIcon = Icons.warning_amber_rounded;
       statusLabel = 'Khá';
-      description = 'Dễ hiểu, cần hoàn thiện một số âm vị';
+      description = 'Một số âm vị còn khác với mẫu chuẩn';
     } else {
       ringColor = const Color(0xFFDC2626);
       backgroundColor = const Color(0xFFFEE2E2);
@@ -44,7 +40,8 @@ class OverallScoreBadge extends StatelessWidget {
     }
 
     return Semantics(
-      label: 'Điểm tổng thể: ${score.toInt()} trên 100. Đánh giá: $statusLabel.',
+      label:
+          'Điểm tổng thể: ${score.toInt()} trên 100. Đánh giá: $statusLabel.',
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -104,11 +101,13 @@ class OverallScoreBadge extends StatelessWidget {
                     children: [
                       Icon(statusIcon, color: ringColor, size: 22),
                       const SizedBox(width: 6),
-                      Text(
-                        statusLabel,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: ringColor,
+                      Expanded(
+                        child: Text(
+                          statusLabel,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: ringColor,
+                          ),
                         ),
                       ),
                     ],
@@ -124,10 +123,6 @@ class OverallScoreBadge extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     children: [
-                      _CueChip(
-                        icon: Icons.speed_rounded,
-                        label: 'GOP: ${(score * 0.95).toStringAsFixed(0)}%',
-                      ),
                       const _CueChip(
                         icon: Icons.graphic_eq_rounded,
                         label: 'Độ khớp âm vị',
@@ -163,9 +158,11 @@ class _CueChip extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: Colors.black54),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),

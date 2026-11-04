@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/contracts/contracts.dart';
+import '../../../core/learning_time.dart';
 
 class PracticeResultDetailPage extends StatelessWidget {
   const PracticeResultDetailPage({
     super.key,
     required this.session,
     required this.result,
+    this.timeZone = 'Asia/Ho_Chi_Minh',
   });
 
   final PracticeSession session;
   final PronunciationResult result;
+  final String timeZone;
 
   @override
   Widget build(BuildContext context) {
@@ -141,12 +144,12 @@ class PracticeResultDetailPage extends StatelessWidget {
             _InformationItem(
               icon: Icons.calendar_today_outlined,
               label: 'Thời gian luyện',
-              value: _formatDateTime(session.startedAt),
+              value: formatProfileDateTime(session.startedAt, timeZone),
             ),
             _InformationItem(
               icon: Icons.analytics_outlined,
               label: 'Thời gian phân tích',
-              value: _formatDateTime(result.analyzedAt),
+              value: formatProfileDateTime(result.analyzedAt, timeZone),
             ),
             _InformationItem(
               icon: Icons.fingerprint_rounded,
@@ -236,7 +239,10 @@ class _PhonemeFeedbackCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  statusLabel,
+                  feedback.isInsertion &&
+                          feedback.status == PhonemeStatus.needsPractice
+                      ? 'Âm thừa'
+                      : statusLabel,
                   style: TextStyle(color: color, fontWeight: FontWeight.w700),
                 ),
               ],
@@ -248,7 +254,9 @@ class _PhonemeFeedbackCard extends StatelessWidget {
               children: [
                 _SmallInformation(
                   label: 'IPA chuẩn',
-                  value: feedback.expectedIpa,
+                  value: feedback.isInsertion
+                      ? 'Không có âm tương ứng trong mẫu'
+                      : feedback.expectedIpa,
                 ),
                 _SmallInformation(
                   label: 'IPA nhận dạng',
@@ -368,18 +376,4 @@ String _scoreDescription(double score) {
   }
 
   return 'Nên nghe lại âm mẫu và luyện từng từ chậm hơn.';
-}
-
-String _formatDateTime(DateTime value) {
-  final DateTime local = value.toLocal();
-
-  String twoDigits(int number) {
-    return number.toString().padLeft(2, '0');
-  }
-
-  return '${twoDigits(local.day)}/'
-      '${twoDigits(local.month)}/'
-      '${local.year} '
-      '${twoDigits(local.hour)}:'
-      '${twoDigits(local.minute)}';
 }

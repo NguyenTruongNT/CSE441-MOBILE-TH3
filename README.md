@@ -1,323 +1,493 @@
-﻿# TH3: Ứng dụng học tiếng Anh với phân tích phát âm AI
+<div align="center">
 
-> Cập nhật tích hợp 02/11/2026: trang Tiến độ có hai hồ sơ và dữ liệu giả lập theo thống nhất nhóm. Đã sửa streak dài, đổi hồ sơ, cập nhật qua ngày mới và đặt lịch Android qua plugin thật; thông báo mặc định vẫn mô phỏng. Xem [cách chạy](docs/coordination/demo-setup.md) và [quy tắc, test, giới hạn](docs/discipline/rules-and-reminders.md). Chưa nghiệm thu nhận thông báo trên thiết bị Android thật.
+<img src="docs/assets/english-ai-banner.svg" alt="English AI — TH3 — Nhóm 12" width="100%" />
 
-> **CSE441 · Phát triển ứng dụng cho các thiết bị di động**
->
-> Lớp **65KTPM** · Nhóm **12** · Flutter · Android & Web
+# TH3 · Xây dựng ứng dụng học tiếng Anh với tính năng phân tích phát âm AI
 
-> **Hạn nộp: trước 22h00 ngày 03/11/2026 — giờ Việt Nam (UTC+7).**
+**CSE441 · Lập trình ứng dụng di động · Nhóm 12 · 65KTPM**
 
-> **Trạng thái hiện tại:** Có khung, hợp đồng và module Tiến độ; chạy demo bằng dữ liệu trong bộ nhớ. CSDL, phát âm AI và nghiệm thu thông báo thiết bị thật còn chờ tích hợp/kiểm tra. Phân công đã được người dùng duyệt.
+Flutter / Dart · Android & Web · SQLite / Drift · Python / FastAPI · Wav2Vec2
 
-**Điều hướng nhanh**
+[Giới thiệu](#1-giới-thiệu-đề-tài) · [Thành viên](#2-nhóm-thực-hiện-và-phân-công) · [Kiến trúc](#6-kiến-trúc-thiết-kế) · [Cơ sở dữ liệu](#7-thiết-kế-cơ-sở-dữ-liệu) · [AI & API](#8-ai-so-sánh-âm-vị-lấy-ở-đâu-và-hoạt-động-thế-nào) · [Chạy ứng dụng](#10-cài-đặt-và-chạy-ứng-dụng)
 
-[Giới thiệu](#gioi-thieu) · [Phân công & trạng thái](#phan-cong) · [Thư mục & nhiệm vụ](#nhiem-vu) · [Hợp đồng module](#hop-dong) · [CSDL](#csdl) · [Checklist](#checklist) · [Git & bàn giao](#git) · [Cài đặt](#cai-dat) · [Sử dụng](#su-dung) · [Kiểm thử](#kiem-thu) · [Chốt bài nộp](#nop-bai)
-
----
-
-<a id="gioi-thieu"></a>
+</div>
 
 ## 1. Giới thiệu đề tài
 
-Ứng dụng giúp người học duy trì thói quen luyện tiếng Anh và cải thiện phát âm, gồm hai nhóm chức năng:
+**English AI** hỗ trợ người học duy trì thói quen luyện tiếng Anh và nhận phản hồi phát âm ngay sau khi ghi âm. Ứng dụng kết hợp hai nhóm chức năng: **kỷ luật học tập** và **phân tích phát âm bằng AI**.
 
-- Kỷ luật học tập: nhắc luyện hằng ngày, mục tiêu số phút/ngày, chuỗi ngày luyện liên tiếp (streak), thống kê thời gian và tiến độ.
-- Phát âm AI: ghi âm, nhận dạng giọng nói, so sánh âm vị với phiên âm chuẩn, chấm điểm, đánh dấu lỗi và đề xuất bài tập cải thiện.
+| Vấn đề cần giải quyết | Giải pháp trong ứng dụng |
+|---|---|
+| Khó duy trì luyện tập đều đặn | Mục tiêu hằng ngày, nhắc học, chuỗi ngày luyện liên tiếp — streak |
+| Khó biết mình phát âm sai ở đâu | Nhận dạng âm vị từ audio, đối chiếu IPA chuẩn và đánh dấu khác biệt |
+| Có điểm nhưng chưa biết luyện tiếp thế nào | Hướng dẫn khẩu hình, đề xuất bài chứa đúng âm cần cải thiện |
+| Không theo dõi được quá trình học | Lưu lịch sử, thời lượng, điểm và phản hồi theo từng tài khoản |
 
-Ứng dụng lưu hồ sơ, lịch sử luyện tập và kết quả phân tích qua các lần mở lại. Nền tảng hiện có là Flutter. Phạm vi dự kiến: Android và web với giao diện thích ứng màn hình mobile/desktop. Desktop ở đây là web trên máy tính; chưa đặt phạm vi ứng dụng Windows native. Khả năng micro và thông báo phải kiểm tra riêng trên từng nền tảng.
+**Phạm vi:** Android và web; chọn tài khoản demo có sẵn, có đăng xuất; dữ liệu SQLite trên từng thiết bị, không đồng bộ giữa các máy. Máy chủ AI chạy riêng trên máy tính. Đây là phương án triển khai đã thống nhất của nhóm.
 
-<a id="phan-cong"></a>
+## 2. Nhóm thực hiện và phân công
 
-## 2. Phân công và trạng thái công việc
+**Nhóm 12 · 4 thành viên**<br>
+**Nhóm trưởng:** 2351170625 · Nguyễn Văn Trường
 
-Đây là bảng theo dõi công việc chung của nhóm. Nhiệm vụ chi tiết và thư mục thực hiện được trình bày tại mục 3.
+| MSSV | Họ và tên | Vai trò | Công việc phụ trách | Trạng thái |
+|---|---|---|---|---|
+| **2351170625** | **Nguyễn Văn Trường** | Nhóm trưởng | Phân tích yêu cầu; hợp đồng dữ liệu; khung app, theme/điều hướng; tích hợp module; hoàn thiện backend AI, bản build và báo cáo | ✅ Đã hoàn thành |
+| **2251172386** | **Vũ Tuấn Khanh** | Thành viên | Người dùng/repository; thiết kế và lưu trữ dữ liệu; lịch sử, chi tiết kết quả; chuyển đổi dữ liệu và kiểm tra tính nhất quán | ✅ Đã hoàn thành |
+| **2351170580** | **Vũ Hải Đăng** | Thành viên | Catalog 16 bài; màn luyện nói; thu âm, nhận dạng, phát mẫu; phản hồi âm vị, điểm/gợi ý; tích hợp hợp đồng API | ✅ Đã hoàn thành |
+| **2351170615** | **Lý Đình Sơn** | Thành viên | Mục tiêu; streak; thống kê thời lượng; biểu đồ tiến độ; cài đặt và thông báo nhắc học hằng ngày | ✅ Đã hoàn thành |
 
-| Thành viên | Công việc phụ trách | Sản phẩm bàn giao | Nhánh Git | Trạng thái |
-| :--- | :--- | :--- | :--- | :---: |
-| **Nguyễn Văn Trường**<br>Nhóm trưởng | Phân chia, điều phối; hợp đồng chung; khung ứng dụng; review, merge và tích hợp | Đã có hợp đồng v1, khung thích ứng, 14 test đạt và tài liệu bàn giao. [Chi tiết & việc chờ](docs/coordination/truong-tasks.md). Chờ ghép module thật, kiểm thử toàn bộ và hồ sơ nộp. | `truong-chore/project-integration` | 🟡 Đang làm |
-| **Vũ Tuấn Khanh** | CSDL, lưu trữ, hồ sơ người dùng và lịch sử | Schema/migration, repository, màn hình hồ sơ/lịch sử, kiểm thử dữ liệu | `khanh-feature/user-data` | ⬜ Chưa bắt đầu |
-| **Vũ Hải Đăng** | Thu âm, API nhận dạng, phân tích âm vị, chấm điểm và phản hồi | Luồng luyện phát âm, điểm/âm vị sai, bài tập cải thiện, đánh giá nhiều giọng | `dang-feature/pronunciation-ai` | ⬜ Chưa bắt đầu |
-| **Lý Đình Sơn** | Mục tiêu, streak, thống kê và nhắc học | Đã tích hợp code và bản sửa của Trường; có demo hai hồ sơ, test dashboard và adapter Android. [Chi tiết](docs/discipline/rules-and-reminders.md). Chờ nghiệm thu thông báo thiết bị thật. | `son-feature/discipline-progress` | 🟡 Đang làm |
+Các module của thành viên được kế thừa khi tích hợp. Các nâng cấp dùng chung như SQLite/Drift, tài khoản demo, giao diện thống nhất và backend model được bổ sung trên hợp đồng/module đã có. [Bảng đối chiếu](docs/doi-chieu-th3.md) phân biệt phần kế thừa và phần tích hợp.
 
-**Quy ước trạng thái:** ⬜ Chưa bắt đầu · 🟡 Đang làm · 🔴 Bị vướng · 🔵 Chờ review · ✅ Hoàn thành.
+## 3. Đối chiếu 7 yêu cầu của bài thực hành
 
-Trạng thái phản ánh phần triển khai được giao, không tính riêng việc soạn tài liệu. Thành viên báo thay đổi trong nhóm; Trường cập nhật bảng và chỉ đánh dấu **Hoàn thành** sau khi nghiệm thu, kiểm thử và merge. Khi có PR hoặc minh chứng, bổ sung liên kết tại ô sản phẩm bàn giao.
+| # | Yêu cầu giảng viên | Phần đáp ứng | Trạng thái |
+|---|---|---|---|
+| 1 | CSDL người dùng, lịch sử, kết quả | SQLite/Drift, 6 bảng, khóa ngoại/index và transaction | ✅ Đã triển khai |
+| 2 | Streak, thời gian, mục tiêu hằng ngày | Phiên hoàn thành, múi giờ, bảng tiến độ và mục tiêu theo tài khoản | ✅ Đã triển khai |
+| 3 | API nhận dạng giọng nói, thu âm | Recorder Android/web → FastAPI → Wav2Vec2 ASR | ✅ Đã triển khai |
+| 4 | AI/so sánh âm vị và chấm điểm | Wav2Vec2Phoneme + căn chỉnh chuỗi âm vị bằng edit distance | ✅ Đã triển khai |
+| 5 | Điểm, âm sai, đề xuất cải thiện | Phản hồi từng âm, hướng dẫn tiếng Việt, bài luyện phù hợp IPA | ✅ Đã triển khai |
+| 6 | Nhắc học và hiển thị tiến độ | Thông báo Android, nhắc khi mở tab web, dashboard | ✅ Đã triển khai |
+| 7 | Kiểm thử nhiều người, nhiều giọng | Phần nghiệm thu do nhóm xác nhận | ✅ Đã triển khai |
 
-Mỗi người phụ trách cả giao diện, xử lý và kiểm thử trong module của mình. Không tự sửa phần của người khác. Nhóm trưởng điều phối và tích hợp, không nhận làm thay thường xuyên các chức năng đã giao.
+**Cách đọc trạng thái:** mục 7 ghi theo xác nhận của nhóm; số liệu kỹ thuật bên dưới là kết quả có thể kiểm tra từ công cụ/log. Biểu mẫu được giữ nguyên, không điền điểm hoặc tỷ lệ chính xác thay cho dữ liệu đo. Phạm vi kiểm tra Android được ghi riêng trong [biên bản kỹ thuật](docs/kiem-thu-nghien-thu.md).
 
-**Độc lập nghĩa là có thể phát triển và kiểm thử bằng dữ liệu giả theo hợp đồng chung.** Ứng dụng hoàn chỉnh vẫn cần ghép các module; không thể bảo đảm mọi chức năng không có phụ thuộc.
+## 4. Giao diện và trải nghiệm sử dụng
 
-<a id="nhiem-vu"></a>
+Nền sáng, thẻ trắng, điểm nhấn gradient xanh–tím và font **Be Vietnam Pro** đóng gói trong ứng dụng. Kết quả có chữ và biểu tượng đi kèm màu sắc để dễ nhận biết.
 
-## 3. Thư mục thực hiện của từng thành viên
+| Danh sách bài luyện · Desktop | Nội dung bài luyện · Desktop |
+|:---:|:---:|
+| ![Danh sách bài có tìm kiếm và lọc](screenshots/final/catalog-desktop.png) | ![Không gian luyện nói sau khi chọn bài](screenshots/final/practice-desktop.png) |
+| **Tiến độ học tập · Desktop** | **Luyện nói · Mobile** |
+| ![Mục tiêu, streak và biểu đồ](screenshots/final/progress-desktop.png) | <img src="screenshots/final/practice-mobile.png" alt="Bài luyện trên mobile" width="240" /> |
 
-Đã có `lib/app/`, `lib/core/contracts/`, `test/integration/` và `docs/coordination/` của Trường. Các thư mục module còn lại do thành viên tự tạo theo phân công sau đây:
+- **Desktop:** sidebar có logo/tên app, thu gọn được; mục đang chọn nhấn bằng gradient.
+- **Mobile:** thanh điều hướng dưới gọn, nút Luyện nói ở giữa; mở tài khoản qua avatar.
+- **Luyện nói:** danh sách → tìm kiếm/lọc → chọn bài → nội dung, IPA và ghi âm. Nút **Danh sách bài luyện** quay lại và giữ bộ lọc.
+- **Dữ liệu:** đổi tài khoản không lẫn lịch sử/mục tiêu; đăng xuất giữ dữ liệu để học tiếp.
+
+## 5. Công nghệ sử dụng
+
+| Lớp | Công nghệ | Vai trò |
+|---|---|---|
+| Ứng dụng | Flutter, Dart, Material 3 | Android/web, giao diện responsive |
+| Dữ liệu | SQLite, Drift, `drift_flutter` | Bảng, giao dịch, lưu cục bộ; web dùng SQLite WASM |
+| Migration | SharedPreferences | Import JSON cũ một lần sang SQLite |
+| Thu âm | `record`; MediaRecorder | Audio thật trên Android/web, quản lý quyền và vòng đời |
+| Phát mẫu | `flutter_tts`; Web Speech Synthesis | Đọc câu tiếng Anh; dùng giọng TTS có trên thiết bị/trình duyệt |
+| Nhắc học | `flutter_local_notifications`, `timezone` | Lịch hệ điều hành và múi giờ |
+| Backend | Python, FastAPI, Uvicorn | HTTP API nhận audio/trả phân tích |
+| AI | PyTorch CPU, Hugging Face Transformers | Nạp và chạy hai checkpoint Wav2Vec2 |
+| Audio | FFmpeg qua `imageio-ffmpeg`, NumPy | Giải mã, mono 16 kHz, kiểm tra tín hiệu |
+| Chấm điểm | CTC decoding, chuẩn hóa IPA, edit distance | Xác định âm khớp/thay/thêm/thiếu |
+| Kiểm tra | Flutter Test, Python unittest, Playwright | Logic, widget, API, luồng trình duyệt |
+
+Phiên bản: [pubspec.yaml](pubspec.yaml), [pubspec.lock](pubspec.lock), [requirements.lock.txt](backend/pronunciation/requirements.lock.txt). Dart SDK yêu cầu `^3.13.2`; dùng Flutter đi kèm Dart phù hợp. Không nâng thư viện tùy ý trước khi chạy lại kiểm thử.
+
+## 6. Kiến trúc thiết kế
+
+Tổ chức theo **chức năng**, chia giao diện, nghiệp vụ và truy cập dữ liệu/dịch vụ. Các module giao tiếp qua hợp đồng trong `lib/core/contracts`; `main.dart` khởi tạo repository/dịch vụ thật và truyền vào màn hình.
+
+```mermaid
+flowchart LR
+    Learner["Người học"] --> UI["Flutter UI<br/>Android / Web"]
+    subgraph Client["Ứng dụng trên thiết bị"]
+        UI --> Features["Luyện nói · Tiến độ<br/>Lịch sử · Tài khoản"]
+        Features --> Contracts["Contracts / nghiệp vụ"]
+        Contracts --> Repos["UserRepository<br/>LearningRepository"]
+        Repos --> DB[("SQLite / Drift")]
+        Contracts --> Recorder["Recorder / TTS"]
+        Contracts --> Reminders["Nhắc học theo nền tảng"]
+        Contracts --> HTTP["RemotePronunciationService"]
+    end
+    HTTP -->|"JSON + audio Base64"| API["Python / FastAPI"]
+    subgraph Backend["Backend AI trên máy tính"]
+        API --> Decode["FFmpeg · mono 16 kHz"]
+        Decode --> Phones["Wav2Vec2Phoneme"]
+        Decode --> ASR["Wav2Vec2 ASR"]
+        Catalog["Catalog câu + IPA chuẩn"] --> Align["Chuẩn hóa / căn chỉnh âm vị"]
+        Phones --> Align
+        Align --> Result["Điểm + phản hồi từng âm"]
+        ASR --> Result
+    end
+    Result -->|"HTTP response"| HTTP
+```
+
+| Thành phần | Trách nhiệm |
+|---|---|
+| Presentation | Trạng thái, thao tác, responsive; không trực tiếp thực thi SQL/model |
+| Domain / contracts | Model, quy tắc streak, kiểm tra audio, interface repository/dịch vụ |
+| Data / services | SQLite, import cũ, HTTP, recorder, TTS, notification adapter |
+| Backend AI | Kiểm tra đầu vào, lấy tham chiếu từ catalog server, suy luận và so sánh |
+| Tích hợp | Repository phát sự kiện sau ghi; Lịch sử/Tiến độ tải lại đúng tài khoản |
+
+Backend tách khỏi Flutter để điện thoại không phải tải hai model lớn. Audio xử lý trong bộ nhớ backend; bản mặc định không lưu bản ghi trên server. Mỗi tiến trình nhận một yêu cầu phân tích tại một thời điểm để hạn chế RAM.
+
+## 7. Thiết kế cơ sở dữ liệu
+
+**CSDL:** `english_ai` · **Schema:** version 1. Android dùng SQLite native; web dùng SQLite WASM với cơ chế lưu bền vững do Drift chọn theo trình duyệt. [Mở ảnh sơ đồ CSDL](docs/assets/database-diagram-preview.png) nếu trình xem không hỗ trợ Mermaid.
+
+```mermaid
+erDiagram
+    USERS ||--o| SETTINGS : "cai_dat"
+    USERS ||--o{ SESSIONS : "luyen_tap"
+    SESSIONS ||--o| RESULTS : "ket_qua"
+    RESULTS ||--o{ PHONEME_FEEDBACK : "chi_tiet_am"
+    USERS {
+        TEXT id PK
+        TEXT display_name
+        TEXT time_zone
+        TEXT created_at
+    }
+    SETTINGS {
+        TEXT user_id PK,FK
+        INTEGER daily_goal_minutes
+        INTEGER reminder_enabled
+        INTEGER reminder_hour
+        INTEGER reminder_minute
+        TEXT time_zone
+    }
+    SESSIONS {
+        TEXT id PK
+        TEXT user_id FK
+        TEXT exercise_id
+        TEXT started_at
+        TEXT ended_at
+        INTEGER duration_seconds
+        TEXT status
+    }
+    RESULTS {
+        TEXT id PK
+        TEXT session_id FK,UK
+        TEXT reference_text
+        TEXT recognized_text
+        REAL overall_score
+        TEXT provider
+        TEXT model_version
+        TEXT analyzed_at
+    }
+    PHONEME_FEEDBACK {
+        TEXT result_id PK,FK
+        INTEGER position PK
+        TEXT word
+        TEXT expected_ipa
+        TEXT recognized_ipa
+        REAL score
+        TEXT status
+        INTEGER start_ms
+        INTEGER end_ms
+        TEXT suggestion
+    }
+    APP_STATE {
+        TEXT key PK
+        TEXT value
+    }
+```
+
+| Bảng | Ý nghĩa và ràng buộc |
+|---|---|
+| `users` | Tài khoản demo, tên, múi giờ, ngày tạo |
+| `settings` | Một cài đặt/người dùng; mục tiêu > 0, giờ 0–23, phút 0–59 |
+| `sessions` | Phiên luyện, thời lượng chủ động ≥ 0, trạng thái |
+| `results` | Tối đa một kết quả/phiên; điểm 0–100, văn bản và phiên bản model |
+| `phoneme_feedback` | Khóa ghép `(result_id, position)`; IPA, điểm/mốc thời gian nullable |
+| `app_state` | Trạng thái ứng dụng, dấu import cũ; không chứa mật khẩu |
+
+Bật khóa ngoại khi mở CSDL; index `sessions_user_date(user_id, started_at)` phục vụ lịch sử. `savePractice` ghi phiên/kết quả/âm vị trong **cùng transaction**, lỗi sẽ rollback. Gửi lại cùng ID/dữ liệu không tạo trùng; truy xuất kết quả kiểm tra chủ sở hữu.
+
+Timestamp lưu UTC; hiển thị/tính ngày theo múi giờ tài khoản. Streak dựa trên ngày có phiên hoàn thành, nhiều phiên một ngày chỉ tính một ngày. Không cộng thời gian chờ API vào thời lượng luyện. Catalog là mã nguồn/JSON, không phải bảng SQL; `exercise_id` tham chiếu ID catalog ở tầng ứng dụng. `app_state` là bảng key–value độc lập nên không vẽ quan hệ khóa ngoại tới `users`.
+
+[Schema/migration chi tiết](docs/user_data/sqlite-schema.md) · [Mã nguồn CSDL/repository](lib/features/user_data/data/learning_database.dart).
+
+## 8. AI so sánh âm vị lấy ở đâu và hoạt động thế nào?
+
+### 8.1. Nguồn model
+
+Dùng checkpoint có sẵn của **Meta/Facebook trên Hugging Face**, chạy bằng PyTorch/Transformers trên backend. Không phải API chấm điểm mua từ bên thứ ba; cấu hình hiện tại không cần API key.
+
+| Vai trò | Model / nguồn chính thức | Revision khóa |
+|---|---|---|
+| **Âm vị từ audio** | [facebook/wav2vec2-lv-60-espeak-cv-ft](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft) | `ae45363bf341…` |
+| **Văn bản từ audio** | [facebook/wav2vec2-base-960h](https://huggingface.co/facebook/wav2vec2-base-960h) | `22aad52d435e…` |
+
+Cả hai dùng đầu vào 16 kHz, giấy phép Apache 2.0. Model âm vị trả nhãn phiên âm; model ASR trả văn bản. [Tài liệu Wav2Vec2Phoneme](https://huggingface.co/docs/transformers/model_doc/wav2vec2_phoneme); revision đầy đủ trong [models.json](backend/pronunciation/models.json).
+
+[setup_backend.ps1](backend/pronunciation/setup_backend.ps1) tạo môi trường Python, cài thư viện đã khóa và gọi [engine.py](backend/pronunciation/engine.py) để tải/nạp model. Cache ở `backend/pronunciation/.models/`, được bỏ qua bởi Git. Giữ cache để chạy lại mà không tải model mỗi lần. Backend giải mã vocab âm vị trực tiếp, không cần cài eSpeak riêng cho luồng hiện tại. Nhóm tích hợp model và thuật toán so sánh, không tự huấn luyện hai checkpoint này.
+
+### 8.2. Quy trình phân tích
+
+```mermaid
+flowchart TD
+    A["Chọn bài → ghi âm → dừng"] --> B["POST audio Base64 + ID bài/phiên"]
+    B --> C["Kiểm tra request và audio"]
+    C --> D["FFmpeg: mono · 16 kHz"]
+    D --> E["Model âm vị → CTC decoding"]
+    D --> F["Model ASR → văn bản nhận dạng"]
+    G["IPA chuẩn trong catalog server"] --> H["Tách và chuẩn hóa âm vị"]
+    E --> H
+    H --> I["Edit distance: thay / thêm / thiếu"]
+    I --> J["Điểm 0–100 + phản hồi từng âm"]
+    F --> J
+    J --> K["Hiển thị → transaction SQLite → cập nhật tiến độ"]
+```
+
+1. Kiểm tra dung lượng/độ dài/tín hiệu; bản ghi quá ngắn, im lặng hoặc hỏng được báo lỗi.
+2. Model âm vị nhận nhãn từ **audio thực tế**. CTC gộp nhãn lặp, bỏ nhãn trống.
+3. Chuẩn hóa `r/ɹ`, `e/ɛ`, `əʊ/oʊ`; tách IPA và căn chỉnh chuỗi chuẩn/nhận dạng.
+4. Phân biệt khớp/thay/thiếu/thêm; trả hướng dẫn và khoảng thời gian CTC quan sát được.
+5. ASR độc lập cung cấp câu đã nghe. **Transcript client không được dùng để sinh điểm.**
+
+### 8.3. Công thức điểm và phản hồi
+
+`N`: số âm chuẩn; `M`: số âm nhận dạng; `D`: số thao tác thay/thêm/thiếu tối thiểu, mỗi thao tác chi phí 1:
 
 ```text
-lib/
-  main.dart                      # Trường
-  app/                           # Trường: điều hướng, theme, layout, ghép dependency
-  core/contracts/                # Trường: model và interface dùng chung
-  features/
-    user_data/                   # Khanh: CSDL, hồ sơ, lịch sử
-    pronunciation/               # Đăng: ghi âm, AI, điểm và phản hồi
-    discipline/                  # Sơn: mục tiêu, streak, thống kê, nhắc học
-test/
-  integration/                   # Trường
-  user_data/                     # Khanh
-  pronunciation/                 # Đăng
-  discipline/                    # Sơn
-docs/
-  coordination/                  # Trường
-  user_data/                     # Khanh
-  pronunciation/                 # Đăng
-  discipline/                    # Sơn
-assets/
-  pronunciation/                 # Đăng: bài học, IPA, âm mẫu hợp lệ
-backend/
-  pronunciation/                 # Đăng: proxy nếu API cần khóa bí mật
+overallScore = round(100 × max(0, 1 − D / max(N, M)), 1)
 ```
 
-### Nguyễn Văn Trường — nhóm trưởng
+Ví dụ thuật toán: chuẩn `/θ ɪ ŋ k/`, nhận `/s ɪ ŋ k/` → `D = 1`, `N = M = 4` → **75 điểm**.
 
-- Tạo/sửa `lib/app/`, `lib/core/contracts/`, `test/integration/`, `docs/coordination/`, `lib/main.dart` và README.
-- Chốt chữ ký Dart, model và ví dụ dữ liệu tại `docs/coordination/contracts.md` trước khi các module triển khai; công bố mốc mã nguồn nền cho mọi người.
-- Làm khung điều hướng tới Tiến độ, Luyện phát âm, Lịch sử, Hồ sơ; cung cấp theme và layout thích ứng chung.
-- Ghép repository/service vào module, quản lý cấu hình môi trường và dependency.
-- Theo dõi issue, tháo gỡ vướng mắc, review và là người duy nhất merge nhánh chung.
-- Kiểm thử toàn bộ luồng, tổng hợp minh chứng, build và nộp bài đúng hạn.
+| Phản hồi | Hiển thị | Hành động |
+|---|---|---|
+| Khớp sau chuẩn hóa | Khớp mẫu | Tiếp tục luyện cả câu |
+| Thay/thiếu âm | Cần luyện | Hướng dẫn khẩu hình, bài chứa đúng âm trong IPA |
+| Thêm âm (`∅` trong dữ liệu) | Âm thừa | Nghe lại phần nhận thêm; không tạo “bài luyện âm ∅” |
+| Confidence thấp | Chưa xác định, điểm chi tiết `null` | Thu lại; không mặc định âm sai |
 
-**Trường quản lý riêng các file dễ xung đột:** `pubspec.yaml`, `pubspec.lock`, `analysis_options.yaml`, `.gitignore`, `test/widget_test.dart`, cấu hình `android/`, `ios/`, `web/` và CI nếu có. Thành viên ghi dependency, asset và quyền cần thêm trong tài liệu module; Trường cập nhật. Không tự sửa nội dung nội bộ module khác nếu chưa thống nhất với chủ module.
+Đề xuất ưu tiên bài chuyên luyện đúng âm, sau đó câu chứa cùng đơn vị IPA. Không khớp bằng chuỗi con: `/ɪ/` khác `/eɪ/`; không ghép cụm âm qua hai từ. Nếu không có bài khác phù hợp, có thể luyện lại bài hiện tại; không chọn bài bất kỳ.
 
-### Vũ Tuấn Khanh — dữ liệu và người dùng
+Điểm là **độ khớp chuỗi âm vị do model nhận dạng**, không phải xác suất đúng hoặc điểm chuyên gia/GOP. Model có thể nhận nhầm; chưa chấm trọng âm/ngữ điệu. [Thuật toán chi tiết](docs/pronunciation/api-and-scoring.md) · [Báo cáo model](docs/pronunciation/evaluation.md).
 
-- Tự tạo/làm trong `lib/features/user_data/`, `test/user_data/`, `docs/user_data/`.
-- Thiết kế schema, quan hệ, ràng buộc và migration; chọn lưu trữ bền vững hỗ trợ Android/web, thống nhất với Trường trước khi thêm thư viện.
-- Cài đặt repository theo hợp đồng; tạo/chọn/sửa hồ sơ, tách dữ liệu người dùng, xem lịch sử và kết quả đã lưu.
-- Lưu phiên và kết quả nhất quán; chống lưu trùng theo ID khi thử lại thao tác.
-- Tạo dữ liệu giả trong module để tự phát triển màn hình; không cần chờ module AI.
-- Bàn giao `docs/user_data/schema.md`, cách khởi tạo/reset dữ liệu và kết quả test lưu/mở lại với ít nhất hai hồ sơ.
-- Phạm vi tối thiểu là hồ sơ cục bộ. Không ghi là đăng nhập an toàn nếu chưa xây dựng xác thực.
-- Không sửa module AI, discipline hoặc file dùng chung.
+## 9. API lấy ở đâu và sử dụng như thế nào?
 
-### Vũ Hải Đăng — phát âm AI và phản hồi
+**API do backend Python của dự án cung cấp**, mã tại [server.py](backend/pronunciation/server.py). Hugging Face là nơi tải trọng số; khi chấm, Flutter gọi backend trên máy tính, không gửi audio tới Hugging Face.
 
-- Tự tạo/làm trong `lib/features/pronunciation/`, `test/pronunciation/`, `docs/pronunciation/`, `assets/pronunciation/`, `backend/pronunciation/` nếu cần.
-- Làm chọn bài, văn bản/IPA, nghe mẫu, xin quyền micro, ghi âm và gọi API nhận dạng thực tế.
-- Dùng dịch vụ đánh giá phát âm có kết quả âm vị hoặc mô hình/thuật toán căn chỉnh âm thanh với âm vị chuẩn để chấm điểm.
-- Không lấy riêng độ giống transcript hoặc confidence nhận dạng để kết luận âm vị sai. Nếu API chỉ có transcript, cần bổ sung phân tích âm vị; không tự bịa lỗi âm.
-- Chuẩn hóa điểm 0–100; hiển thị điểm tổng, từ/âm cần luyện, phiên âm chuẩn và bài tập theo lỗi. Phân biệt kết quả thật, dữ liệu giả và trường hợp không đủ bằng chứng để chấm.
-- Xử lý từ chối micro, im lặng, mất mạng, timeout, audio không hợp lệ và lỗi API.
-- Tạo fake service/repository nội bộ để chạy độc lập. Bản nghiệm thu phải chạy được API thật.
-- Nếu API cần secret, triển khai proxy trong `backend/pronunciation/`; không đưa khóa vào Flutter/web/Git.
-- Bàn giao `docs/pronunciation/api-and-scoring.md` và `evaluation.md`: dịch vụ/mô hình thực dùng, cách tính điểm, biến môi trường mẫu, lệnh chạy proxy nếu có, giới hạn và đánh giá nhiều giọng.
-- Không sửa CSDL, discipline hoặc file dùng chung.
+| Phương thức | Đường dẫn | Mục đích |
+|---|---|---|
+| `GET` | `/health` | Kiểm tra server và `assessmentReady` |
+| `POST` | `/api/pronounce/analyze` | Nhận bản ghi, trả phân tích |
+| `GET` | `/docs` | Swagger UI để xem/thử API |
+| `GET` | `/openapi.json` | Đặc tả OpenAPI |
 
-### Lý Đình Sơn — kỷ luật và tiến độ
+Khi backend chạy: [Health](http://127.0.0.1:8080/health) · [Swagger UI](http://127.0.0.1:8080/docs).
 
-- Tự tạo/làm trong `lib/features/discipline/`, `test/discipline/`, `docs/discipline/`.
-- Làm dashboard thời gian học ngày/tuần, mục tiêu số phút/ngày, streak và cấu hình nhắc học.
-- Dùng repository qua hợp đồng, tạo fake repository nội bộ để không cần chờ Khanh.
-- Xin quyền thông báo, bật/tắt, chọn giờ, hủy/lên lịch lại; tránh tạo thông báo trùng. Nghiệm thu nhắc hằng ngày thực tế trên Android.
-- Kiểm tra hỗ trợ thông báo trên web. Nếu chỉ nhắc khi ứng dụng đang mở thì ghi rõ; không tuyên bố nhắc nền khi trình duyệt đóng nếu chưa triển khai được.
-- Kiểm thử nhiều phiên cùng ngày, ngày liên tiếp, bỏ ngày, qua nửa đêm, đổi hồ sơ/mục tiêu/giờ nhắc.
-- Bàn giao `docs/discipline/rules-and-reminders.md`, công thức và bằng chứng test.
-- Không sửa CSDL, AI hoặc file dùng chung.
+<details>
+<summary><strong>Xem request, response và ví dụ gọi API bằng Python</strong></summary>
 
-<a id="hop-dong"></a>
+Request `Content-Type: application/json`:
 
-## 4. Hợp đồng để các module làm độc lập
-
-Hợp đồng v1 đã có tại [`lib/core/contracts/contracts.dart`](lib/core/contracts/contracts.dart); chữ ký và quy ước ở [`docs/coordination/contracts.md`](docs/coordination/contracts.md). Các thành viên triển khai interface bên dưới; adapter nghiệp vụ chưa được bàn giao:
-
-| Thành phần | Nội dung tối thiểu | Phụ trách |
-| --- | --- | --- |
-| `UserProfile` | ID, tên, múi giờ, ngày tạo | Trường định nghĩa; Khanh lưu và làm UI |
-| `PracticeSession` | ID, userId, exerciseId, bắt đầu/kết thúc UTC, durationSeconds, trạng thái | Trường định nghĩa; Đăng phát sinh; Khanh lưu |
-| `PronunciationResult` | ID, sessionId, văn bản chuẩn/nhận dạng, điểm, nguồn/mô hình, phản hồi âm vị | Trường định nghĩa; Đăng phân tích; Khanh lưu |
-| `PhonemeFeedback` | Từ, IPA chuẩn, âm nhận dạng nếu có, điểm/trạng thái, khoảng thời gian nếu có, gợi ý | Trường định nghĩa; Đăng tạo |
-| `LearningSettings` | userId, mục tiêu phút/ngày, bật nhắc, giờ/phút, múi giờ | Trường định nghĩa; Sơn xử lý; Khanh lưu |
-| `UserRepository` | Tạo/đọc/cập nhật/chọn hồ sơ | Khanh cài đặt |
-| `LearningRepository` | Lưu phiên và kết quả; đọc lịch sử theo user/khoảng ngày; đọc/ghi cài đặt | Khanh cài đặt |
-| `PronunciationService` | Audio + nội dung chuẩn → kết quả hoặc lỗi có kiểu | Đăng cài đặt |
-| `ReminderService` | Xin quyền, đặt lịch và hủy lịch theo hồ sơ | Sơn cài đặt |
-
-Quy tắc kết nối:
-
-- Module chỉ import mã của mình và `core/contracts`, không import trực tiếp module khác. Trường truyền dependency từ `app/` qua constructor.
-- Mỗi module có fake để chạy/test riêng; không dùng fake làm bằng chứng AI thật hoặc dữ liệu nghiệm thu.
-- Đăng gọi repository lưu khi luyện xong; Khanh thực hiện lưu; Sơn đọc dữ liệu để tính tiến độ. Không viết lại chức năng của nhau.
-- Mỗi phiên chỉ lưu một lần theo `sessionId`. Thời gian học là thời gian luyện thực tế, loại thời gian chờ API và để ứng dụng không hoạt động.
-- Lưu thời gian UTC, quy đổi ngày theo múi giờ hồ sơ, mặc định `Asia/Ho_Chi_Minh`; không cắt ngày trực tiếp từ chuỗi UTC.
-- Ngày có ít nhất một phiên hoàn thành với thời lượng luyện lớn hơn 0 là ngày luyện. Đạt mục tiêu phút/ngày là chỉ số riêng.
-- Nhiều phiên cùng ngày chỉ tính một ngày streak. Streak hiện tại kết thúc ở hôm nay hoặc hôm qua; nếu ngày luyện gần nhất cũ hơn hôm qua thì bằng 0.
-- API lỗi/không đủ audio phải có trạng thái riêng, không lưu điểm 0 như kết quả AI hợp lệ.
-- Thay đổi hợp đồng phải qua Trường và thông báo cả nhóm; chủ module sửa triển khai tương ứng.
-
-<a id="csdl"></a>
-
-## 5. Thiết kế CSDL dự kiến
-
-Khanh hoàn thiện schema vật lý, index, migration và công nghệ lưu trữ sau khi chốt hợp đồng.
-
-| Bảng/thực thể | Nội dung | Ràng buộc chính |
-| --- | --- | --- |
-| `users` | ID, tên, múi giờ, ngày tạo | ID duy nhất |
-| `learning_settings` | User, mục tiêu phút, bật nhắc, giờ nhắc | Một bản ghi/user; mục tiêu dương, giờ hợp lệ |
-| `exercises` | Văn bản, IPA, độ khó, âm mẫu/tham chiếu | ID duy nhất; có thể seed từ asset |
-| `practice_sessions` | User, bài, thời điểm, thời lượng, trạng thái | Khóa ngoại; thời lượng không âm; chống lưu trùng |
-| `pronunciation_results` | Phiên, transcript, điểm, nguồn phân tích | Một kết quả cuối/phiên; điểm 0–100 |
-| `phoneme_feedback` | Kết quả, thứ tự từ/âm, IPA, điểm/trạng thái, gợi ý | Nhiều phản hồi/kết quả; giữ thứ tự âm |
-
-Streak/thống kê tính từ phiên học; nếu cache phải tính lại được. Không lưu secret trong CSDL ứng dụng. Chỉ giữ audio khi có nhu cầu và người thử đồng ý; không đưa giọng nói cá nhân lên Git.
-
-<a id="checklist"></a>
-
-## 6. Đối chiếu 7 mục checklist
-
-Chỉ đánh dấu hoàn thành sau khi chạy được và có minh chứng.
-
-| Xong | Yêu cầu | Chủ trì | Điều kiện nghiệm thu |
-| --- | --- | --- | --- |
-| [ ] | CSDL người dùng, lịch sử, kết quả | Khanh | Có schema, dữ liệu riêng từng user và còn sau mở lại |
-| [ ] | Streak, thời gian, mục tiêu | Sơn | Đúng quy tắc ngày; không đếm trùng; lưu mục tiêu |
-| [ ] | Thu âm và API nhận dạng | Đăng | Micro thật → API thật → transcript; xử lý lỗi/quyền |
-| [ ] | Phân tích âm vị và chấm điểm | Đăng | Có âm vị chuẩn, phân tích audio và cách tính điểm rõ |
-| [ ] | Điểm, âm sai, bài tập cải thiện | Đăng | Phản hồi bám kết quả thật; chú giải lỗi ngoài màu sắc |
-| [ ] | Nhắc hằng ngày và giao diện tiến độ | Sơn | Nhắc thực tế Android; tiến độ dữ liệu thật; rõ giới hạn web |
-| [ ] | Nhiều người dùng và giọng nói | Trường tổng hợp, Đăng đánh giá AI | Có ma trận thử, số liệu thực, lỗi và giới hạn |
-
-Yêu cầu chung: giao diện không tràn ở mobile/desktop, điều hướng hoàn chỉnh, dữ liệu bền vững, không lộ khóa API.
-
-<a id="git"></a>
-
-## 7. Quản lý dự án và Git
-
-Repository: [NguyenTruongNT/CSE441-MOBILE-TH3](https://github.com/NguyenTruongNT/CSE441-MOBILE-TH3). Các task nền của Trường được commit riêng trên `truong-chore/project-integration`; lịch sử và hướng dẫn push/PR ở [tài liệu bàn giao](docs/coordination/truong-tasks.md). Quy trình làm việc:
-
-1. Trường tạo issue với người sở hữu, phạm vi thư mục, sản phẩm, điều kiện nghiệm thu và hạn bàn giao; công bố nhánh nền.
-2. Mỗi thành viên làm trên nhánh riêng đã ghi trong bảng phân công tại mục 2.
-3. Chỉ commit file thuộc phạm vi. Kiểm tra `git status`; không commit secret, audio cá nhân, dữ liệu người thử, build hoặc cấu hình IDE phát sinh.
-4. Thành viên tự push nhánh và mở PR vào `main`, kèm chức năng, cách chạy, kết quả test, lỗi còn lại và cấu hình cần thêm.
-5. **Trường là người review và merge.** Không push trực tiếp `main`, không tự merge, không force-push nhánh chung. Bật bảo vệ nhánh nếu cấu hình repository cho phép.
-6. Trường thông báo bản tích hợp sau merge; thành viên cập nhật mã nền trước vòng sửa tiếp theo. Lỗi thuộc module nào do chủ module đó sửa.
-
-Ví dụ sau khi remote đã được thiết lập, dành cho Khanh; các thành viên khác thay bằng nhánh/thư mục được giao:
-
-```bash
-git switch main
-git pull --ff-only origin main
-git switch -c khanh-feature/user-data
-# Thực hiện và kiểm tra công việc.
-git status
-git add lib/features/user_data test/user_data docs/user_data
-git commit -m "feat(user-data): add user profiles and history"
-git push -u origin khanh-feature/user-data
+```json
+{
+  "sessionId": "sess-example-01",
+  "exerciseId": "ex-01-dental-fricative-unvoiced",
+  "audioBase64": "<Base64 của file audio>",
+  "mimeType": "audio/wav"
+}
 ```
 
-Chỉ tạo nhánh lần đầu; các lần sau chuyển về nhánh đã có. Kiểm tra `git remote -v` trước khi push để bảo đảm đúng repository.
+Server lấy câu/IPA theo `exerciseId` từ [catalog](assets/pronunciation/exercises.json), không tin tham chiếu client. FFmpeg giải mã audio; body tối đa 12 MB, audio tối đa 8 MB, dài 0,4–60 giây.
 
-### Thông báo bắt buộc trong nhóm
+Ví dụ chạy từ thư mục gốc khi backend sẵn sàng; thay `my-recording.wav` bằng file của bạn:
 
-Mỗi người chủ động cập nhật trạng thái khi có thay đổi. **Hoàn thành nhiệm vụ phải thông báo ngay vào nhóm để các thành viên khác nắm được**, không chỉ push code. Nếu vướng mắc có nguy cơ trễ hạn, báo ngay cho Trường.
+```python
+import base64
+from pathlib import Path
+import httpx
 
-```text
-[BÀN GIAO] Họ tên — Nhiệm vụ
-Nhánh/PR/commit: ...
-Thư mục đã sửa: ...
-Chức năng hoàn thành: ...
-Cách chạy và kết quả kiểm thử: ...
-Dependency/quyền/cấu hình cần nhóm trưởng thêm: ...
-Lỗi còn lại hoặc yêu cầu phối hợp: ...
+response = httpx.post(
+    "http://127.0.0.1:8080/api/pronounce/analyze",
+    json={
+        "sessionId": "sess-example-01",
+        "exerciseId": "ex-01-dental-fricative-unvoiced",
+        "audioBase64": base64.b64encode(
+            Path("my-recording.wav").read_bytes()
+        ).decode("ascii"),
+        "mimeType": "audio/wav",
+    },
+    timeout=120,
+)
+response.raise_for_status()
+print(response.json())
 ```
 
-<a id="cai-dat"></a>
+Response thành công: `id`, `sessionId`, `referenceText`, `recognizedText`, `overallScore`, `phonemes`, `provider`, `modelVersion`, `analyzedAt`; kèm metadata so sánh/thời gian/model. Mỗi phần tử `phonemes` chứa từ, IPA chuẩn/nhận dạng, trạng thái, điểm, gợi ý và mốc thời gian nếu có.
 
-## 8. Cài đặt và chạy
+| HTTP | Ý nghĩa |
+|---|---|
+| `200` | Có kết quả phân tích |
+| `400` / `413` | Request/audio sai, bài không tồn tại hoặc quá dung lượng |
+| `422` | Không đủ bằng chứng giọng nói |
+| `429` | Đang xử lý bản ghi khác |
+| `503` | Model chưa sẵn sàng |
+| `500` | Lỗi xử lý nội bộ |
 
-### Dự án hiện tại
+Lỗi trả `code`, `message`, không có điểm thay thế. Flutter chờ tối đa 120 giây; mất kết nối thì hướng dẫn mở backend, không chuyển sang chấm mô phỏng.
 
-Cần Flutter SDK kèm Dart thỏa `^3.13.2` trong `pubspec.yaml`, Git, Android SDK/emulator hoặc thiết bị Android; Chrome cho web. Kiểm tra môi trường trước khi thay đổi ràng buộc SDK.
+</details>
 
-Tại thư mục gốc `th3_english_ai`:
+## 10. Cài đặt và chạy ứng dụng
 
-```bash
-flutter --version
-flutter doctor
+### Chuẩn bị
+
+- Windows, Flutter/Dart phù hợp [pubspec.yaml](pubspec.yaml), Python 3.11+ 64-bit, Chrome.
+- Android SDK và emulator/điện thoại nếu chạy Android.
+- Internet cho lần cài thư viện/model đầu tiên; vài GB trống. Đã chạy CPU trên RAM 16 GB; đây là cấu hình thử, không phải mức tối thiểu đã đo.
+
+### Lần đầu
+
+Mở PowerShell **tại thư mục gốc dự án**:
+
+```powershell
 flutter pub get
-flutter devices
-flutter run -d chrome
+powershell -ExecutionPolicy Bypass -File backend/pronunciation/setup_backend.ps1
+.\run_web.bat
 ```
 
-Chạy Android với ID lấy từ `flutter devices`:
+`run_web.bat` mở backend nếu chưa chạy, chờ model sẵn sàng rồi mở Flutter/Chrome tại cổng **7357**. Backend được giữ chạy sau khi đóng terminal Flutter để trang còn mở vẫn chấm được. Những lần sau chỉ cần `run_web.bat`.
 
-```bash
+<details>
+<summary><strong>Chạy backend và Flutter riêng</strong></summary>
+
+Terminal 1:
+
+```powershell
+.\run_backend.bat
+```
+
+Terminal 2, khi log báo `Application startup complete`:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8080/health
+flutter run -d chrome --web-port 7357
+```
+
+Health cần `assessmentReady: true`. Chỉ chạy `flutter run` không tự mở backend. Log launcher: `backend/pronunciation/.runtime/backend.stderr.log`.
+
+</details>
+
+### Android
+
+Khởi động backend trên máy tính trước. Emulator mặc định gọi `http://10.0.2.2:8080/api/pronounce/analyze`:
+
+```powershell
+flutter devices
 flutter run -d <device-id>
 ```
 
-**Các lệnh này chạy English AI với trang Tiến độ bằng dữ liệu giả lập**, gồm mục tiêu, streak, biểu đồ 7 ngày, hai hồ sơ mẫu và nhắc học mô phỏng. Ba trang Luyện phát âm, Lịch sử và Hồ sơ còn chờ tích hợp. Dưới 800px có điều hướng dưới; từ 800px có thanh bên. Không cần khóa API/backend cho demo. Thêm `--dart-define=USE_REAL_NOTIFICATIONS=true` để thử adapter thông báo thật cùng dữ liệu học giả lập; xem [hướng dẫn](docs/coordination/demo-setup.md).
+Điện thoại nối USB, bật USB debugging:
 
-Đã phân tích mã và chạy **46/46 test đạt**, build APK/web release thành công. Xem phạm vi kiểm tra tại [verification.md](docs/coordination/verification.md); chưa nghiệm thu nhận thông báo Android trên thiết bị thật hoặc luồng CSDL/AI đầy đủ.
-
-### Cấu hình bản hoàn chỉnh
-
-- Khanh ghi khởi tạo, vị trí lưu và reset dữ liệu trong `docs/user_data/`.
-- Đăng ghi biến môi trường mẫu, endpoint và lệnh chạy proxy nếu cần trong `docs/pronunciation/`. Khóa thật chỉ đặt ở môi trường máy chủ, không nhúng vào Flutter/web qua `--dart-define`.
-- Sơn ghi cấp quyền và kiểm tra thông báo trong `docs/discipline/`.
-- Trường cập nhật dependency/asset/quyền, hướng dẫn chạy đầy đủ và kiểm tra trên máy sạch trước nộp.
-
-Các lệnh kiểm tra/build sau triển khai:
-
-```bash
-flutter analyze
-flutter test
-flutter build apk --release
-flutter build web --release
+```powershell
+adb reverse tcp:8080 tcp:8080
+flutter run -d <device-id> --dart-define=PRONUNCIATION_API_URL=http://127.0.0.1:8080/api/pronounce/analyze
 ```
 
-Kiểm thử cần thiết bị/backend có hướng dẫn riêng do Trường bổ sung. `flutter test` không thay thế kiểm tra micro, API và thông báo thật.
+`127.0.0.1` trên điện thoại là chính điện thoại; `adb reverse` chuyển cổng về máy tính. Địa chỉ khác cấu hình bằng `PRONUNCIATION_API_URL`. Qua mạng dùng HTTPS; bản Android chỉ cho HTTP với localhost/emulator đã khai báo. Backend mặc định bind `127.0.0.1`, không phải dịch vụ công khai.
 
-<a id="su-dung"></a>
+### Lỗi thường gặp
 
-## 9. Cách sử dụng dự kiến sau hoàn thiện
+| Hiện tượng | Cách xử lý |
+|---|---|
+| `Failed to fetch` / không kết nối được AI | Mở `run_backend.bat`, chờ model, kiểm tra `/health`; giữ backend chạy |
+| Điện thoại không gọi được API | Kiểm tra `adb reverse` và địa chỉ; không dùng `10.0.2.2` cho điện thoại thật |
+| Không thu được micro | Cấp quyền; web dùng localhost/HTTPS, kiểm tra thiết bị đầu vào |
+| `422` / im lặng / thiếu bằng chứng | Đọc đủ câu, nói đủ lớn, giảm tiếng ồn |
+| `429` | Chờ bản ghi trước xong rồi thử lại |
+| Không thấy lịch sử sau đổi cổng web | Dùng lại cùng origin/cổng, tránh ẩn danh/xóa dữ liệu trình duyệt |
+| Đóng tab web không nhận nhắc | Web nhắc khi tab còn mở, không có web push nền |
+| Nhắc Android bị trễ | Kiểm tra quyền/pin; lịch dùng chế độ inexact của hệ điều hành |
 
-1. Tạo/chọn hồ sơ và đặt mục tiêu số phút/ngày.
-2. Bật nhắc học, chọn giờ, cấp quyền thông báo.
-3. Vào Luyện phát âm, chọn bài, xem nội dung/IPA và nghe mẫu.
-4. Cấp quyền micro, ghi âm, dừng và gửi phân tích.
-5. Xem điểm, âm vị cần cải thiện, làm bài tập gợi ý và luyện lại.
-6. Xem Lịch sử và Tiến độ để theo dõi kết quả, thời gian, mục tiêu và streak.
-7. Chuyển hồ sơ và mở lại ứng dụng để kiểm tra dữ liệu riêng, lưu trữ bền vững.
+## 11. Hướng dẫn thao tác
 
-Đây là luồng nghiệm thu sau khi ghép đủ module CSDL/AI. Hiện có thể dùng Tiến độ với dữ liệu và hai hồ sơ giả lập, chỉnh mục tiêu/giờ nhắc, cộng phút demo, bật adapter thông báo thật bằng tham số chạy và chuyển bốn mục để kiểm tra bố cục. Dữ liệu demo không được lưu bền vững và không phải kết quả AI.
+1. **Vào tài khoản:** chọn Học viên 1–4, không tạo hồ sơ trong luồng chính.
+2. **Đặt mục tiêu:** mở Tiến độ, chọn phút/ngày; bật nhắc, cấp quyền, chọn giờ.
+3. **Chọn bài:** mở Luyện nói, tìm theo câu/IPA/chủ đề hoặc lọc nhóm, bấm bài cần luyện.
+4. **Luyện:** xem câu/IPA/hướng dẫn, nghe mẫu, bấm **Bắt đầu ghi âm**; cấp quyền micro.
+5. **Phân tích:** bấm **Dừng & Phân tích**; xem điểm, câu nhận dạng và âm đánh dấu.
+6. **Cải thiện:** làm theo hướng dẫn từng âm, chọn bài đề xuất hoặc ghi lại; nút **Danh sách bài luyện** quay về catalog.
+7. **Theo dõi:** mở Lịch sử xem chi tiết, Tiến độ xem thời lượng/mục tiêu/streak.
+8. **Đăng xuất:** mở Tài khoản/avatar → Đăng xuất; chọn lại tài khoản cũ để học tiếp.
 
-<a id="kiem-thu"></a>
+Demo không có mật khẩu, chỉ tách dữ liệu trên thiết bị, không thay thế xác thực an toàn. Không đồng bộ dữ liệu giữa web/Android. [Hướng dẫn chi tiết](docs/huong-dan-su-dung.md).
 
-## 10. Kiểm thử và minh chứng
+## 12. Kiểm tra chất lượng và build
 
-| Nhóm | Ca kiểm thử tối thiểu | Chủ trì | Minh chứng |
-| --- | --- | --- | --- |
-| Dữ liệu | Hai hồ sơ, chuyển user, mở lại, chống lưu trùng | Khanh | Test và kết quả chạy |
-| Thời gian | Cùng ngày, liên tiếp, bỏ ngày, nửa đêm, khác user | Sơn | Test với đồng hồ giả và kết quả kỳ vọng |
-| Micro/API | Cho/từ chối quyền, im lặng, audio lỗi, mất mạng, API lỗi | Đăng | Log đã bỏ dữ liệu nhạy cảm và video/ảnh |
-| Nhiều giọng | Ít nhất 4 người đồng ý tham gia, giọng/mức phát âm khác nhau, cùng bộ ít nhất 10 từ/câu có âm mục tiêu | Đăng tổ chức, cả nhóm tham gia | Mã người thử ẩn danh, điểm AI, nhận xét người nghe, sai lệch |
-| Nhắc học | Cấp/từ chối quyền, đổi giờ, tắt, khởi động lại, tránh lịch trùng | Sơn | Giờ nhận thật, nền tảng và trạng thái ứng dụng |
-| Responsive | Web rộng 360px, 768px, 1366px và Android | Trường tổng hợp, chủ module sửa | Ảnh màn hình chính, kiểm tra tràn/thao tác |
-| Toàn bộ luồng | Chọn user → luyện thật → lưu → thống kê → mở lại → lịch sử | Trường | Video và biên bản nghiệm thu |
+```powershell
+flutter analyze
+flutter test
+.venv/Scripts/python.exe -m unittest discover -s backend/pronunciation/tests -v
+flutter build web --release --no-wasm-dry-run
+flutter build apk --release
+```
 
-Đánh giá AI phải đối chiếu âm mục tiêu với nhận xét người nghe, ghi trường hợp nhận nhầm/chấm không ổn định và giới hạn. Không điền số liệu hoặc khẳng định độ chính xác khi chưa đo. Bộ thử nhỏ phục vụ bài tập, không đại diện mọi giọng tiếng Anh.
+| Kiểm tra | Phạm vi |
+|---|---|
+| Flutter analyzer/tests | Contracts, CSDL/transaction, tách tài khoản, streak/múi giờ, API client, điều hướng/responsive, gợi ý và âm thừa |
+| Backend unittest | Audio hỏng/im lặng, thiếu bằng chứng, âm thay/thêm/thiếu, bảo vệ tham chiếu server |
+| Trình duyệt tự động | Danh sách → bài → ghi âm/API → SQLite → mở lại lịch sử, desktop/mobile |
+| Nhiều người/giọng | Đạt theo xác nhận nhóm; không dùng số liệu audio tổng hợp thay thế |
 
-<a id="nop-bai"></a>
+**Kết quả ngày 04/11/2026:** analyzer không báo vấn đề, **154 test Flutter** và **15 test backend** đạt; build web/APK thành công, luồng trình duyệt không có lỗi JavaScript. [Biên bản đợt sửa này](docs/kiem-tra-ky-thuat-2026-11-04.md) ghi phạm vi và giới hạn kiểm tra Android; [quy trình tái kiểm tra](docs/kiem-thu-nghien-thu.md) được giữ riêng. Kiểm tra trình duyệt dùng audio tổng hợp để xác minh tích hợp; [verification.json](screenshots/final/verification.json) ghi rõ điều này.
 
-## 11. Điều kiện chốt bài nộp
+**Đầu ra:** APK `build/app/outputs/flutter-apk/app-release.apk`; web `build/web/`. Server web cần phục vụ `sqlite3.wasm` với MIME `application/wasm`. Flutter web hiện build JavaScript, dùng WASM cho SQLite.
 
-- [x] Người dùng đã duyệt phân công.
-- [ ] Từng thành viên xác nhận nhận việc trong nhóm.
-- [ ] Chốt hợp đồng, API, dependency; từng module chạy/test được bằng fake riêng.
-- [ ] Đủ 7 mục checklist với minh chứng thực tế.
-- [ ] Thành viên đã thông báo bàn giao; Trường review và merge.
-- [ ] Android và web chạy được; giao diện mobile/desktop sử dụng tốt.
-- [ ] Có hướng dẫn cài/chạy thực tế, cấu hình mẫu không có secret, schema và báo cáo test.
-- [ ] README cập nhật tiến độ thật và các giới hạn còn lại.
-- [ ] Trường kiểm tra gói nộp và nộp **trước 22h00 ngày 03/11/2026**.
+APK/web cần truy cập backend khi chấm. Bàn giao máy mới phải chạy setup backend; không đóng gói `.venv`/model cache vào Git.
+
+## 13. Cấu trúc mã nguồn
+
+```text
+lib/
+├── app/                         # Theme, shell, điều hướng, tài khoản demo
+├── core/contracts/              # Model và interface chung
+├── core/learning_time.dart      # UTC, múi giờ, quy tắc ngày
+├── features/
+│   ├── user_data/               # SQLite, migration, repository, lịch sử
+│   ├── discipline/              # Streak, mục tiêu, thống kê, nhắc học
+│   └── pronunciation/           # Catalog, luyện nói, recorder, HTTP, feedback
+└── main.dart                    # Nối dịch vụ thật
+backend/pronunciation/
+├── server.py                    # FastAPI
+├── engine.py                    # Audio + suy luận hai model
+├── phoneme_comparison.py        # Chuẩn hóa, căn chỉnh, điểm
+├── models.json                  # ID + revision
+└── tests/                       # Kiểm thử backend
+assets/pronunciation/            # Catalog đối chiếu client/server
+test/                           # Kiểm thử Flutter
+tool/                           # Launcher, kiểm tra toàn luồng
+docs/                           # Báo cáo, hướng dẫn, biểu mẫu
+screenshots/final/               # Minh chứng trình duyệt hiện tại
+run_web.bat                     # Backend + web
+run_backend.bat                 # Backend riêng
+```
+
+Fake service/engine cũ được giữ cho kiểm thử và tương thích module thành viên; đường chạy mặc định dùng SQLite/backend model thật, không trả điểm giả khi API lỗi.
+
+## 14. Giới hạn và hướng phát triển
+
+- Mở rộng phân tích trọng âm/ngữ điệu và căn chỉnh thời gian chính xác hơn.
+- Model có thể nhận nhầm; giữ metadata và trạng thái “chưa xác định” để người học đối chiếu.
+- Nếu triển khai backend công khai: bổ sung xác thực, HTTPS, hàng đợi, quản lý tài nguyên.
+- Phiên bản sau có thể có đăng nhập thật, đồng bộ và thông báo web nền.
+
+## 15. Tài liệu và nguồn tham khảo
+
+| Nội dung | Tài liệu |
+|---|---|
+| Checklist, phân công, kế thừa/tích hợp | [Đối chiếu TH3](docs/doi-chieu-th3.md) |
+| Sử dụng | [Hướng dẫn thao tác](docs/huong-dan-su-dung.md) |
+| Backend/model | [Cài và chạy backend](backend/pronunciation/README.md) |
+| API/điểm | [API & scoring](docs/pronunciation/api-and-scoring.md) |
+| CSDL | [Schema/migration](docs/user_data/sqlite-schema.md) |
+| Kiểm tra | [Biên bản kỹ thuật](docs/kiem-thu-nghien-thu.md) |
+| Model card | [Âm vị](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft) · [ASR](https://huggingface.co/facebook/wav2vec2-base-960h) |
+| Thư viện AI | [Transformers Wav2Vec2Phoneme](https://huggingface.co/docs/transformers/model_doc/wav2vec2_phoneme) |
+
+Font Be Vietnam Pro: [OFL](assets/fonts/OFL.txt); font dự phòng/IPA: [Roboto](assets/fonts/Roboto-OFL.txt), [Noto Sans](assets/fonts/NotoSans-OFL.txt). Giấy phép model theo model card từng checkpoint.
+
+<div align="center">
+
+**English AI · Nhóm 12 · TH3 — CSE441**<br>
+Luyện tập đều đặn · Phản hồi cụ thể · Theo dõi tiến bộ
+
+</div>

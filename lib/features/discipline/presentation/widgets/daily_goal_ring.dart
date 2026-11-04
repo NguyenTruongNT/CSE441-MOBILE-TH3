@@ -71,7 +71,7 @@ class DailyGoalRing extends StatelessWidget {
                       CircularProgressIndicator(
                         value: today.progressRatio,
                         strokeWidth: 9,
-                        backgroundColor: const Color(0xFFE2EBE8),
+                        backgroundColor: const Color(0xFFE8E5F7),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           isMet ? const Color(0xFF2E7D32) : primaryColor,
                         ),
@@ -199,7 +199,7 @@ class DailyGoalRing extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: isMet ? const Color(0xFFE8F5E9) : const Color(0xFFF1F5F4),
+                color: isMet ? const Color(0xFFE8F5E9) : const Color(0xFFF4F3FC),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -241,9 +241,9 @@ class DailyGoalRing extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAF9),
+          color: const Color(0xFFF8F8FD),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE5EDE9)),
+          border: Border.all(color: const Color(0xFFE6E4F2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,24 +288,24 @@ class DailyGoalRing extends StatelessWidget {
     final ratio = minutes / goal;
     if (ratio >= 1.0) {
       return const _StageInfo(
-        label: 'Vượt chỉ tiêu 🎉',
+        label: 'Đạt mục tiêu',
         color: Color(0xFF1B8A5A),
       );
     }
     if (ratio >= 0.75) {
       return const _StageInfo(
-        label: 'Về đích 🎯',
+        label: 'Về đích',
         color: Color(0xFF00897B),
       );
     }
     if (ratio >= 0.4) {
       return const _StageInfo(
-        label: 'Tăng tốc ⚡',
+        label: 'Tăng tốc',
         color: Color(0xFFF57C00),
       );
     }
     return const _StageInfo(
-      label: 'Khởi động 🌱',
+      label: 'Khởi động',
       color: Color(0xFF757575),
     );
   }
