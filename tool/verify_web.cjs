@@ -9,7 +9,7 @@ const assert = require('assert');
   const root = path.resolve(__dirname, '..');
   const fixture = path.join(root, 'backend/pronunciation/.runtime/reference-tts.wav');
   assert(fs.existsSync(fixture), 'Create the local TTS smoke fixture first.');
-  const output = path.join(root, 'screenshots/final');
+  const output = path.resolve(root, process.env.UI_REVIEW_OUTPUT || 'screenshots/final');
   fs.mkdirSync(output, {recursive:true});
   const browser = await chromium.launch({
     executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -49,6 +49,27 @@ const assert = require('assert');
     await page.getByRole('button',{name:'Mở rộng thanh bên'}).click();
     await page.waitForTimeout(350);
     await navigate('Luyện nói');
+    await snapshot('catalog-desktop');
+    const search=page.getByRole('textbox',{name:/Tìm bài luyện/});
+    await search.click();
+    await page.waitForTimeout(250);
+    await page.keyboard.type('ship',{delay:60});
+    await page.waitForTimeout(400);
+    const sheep=page.getByRole('button',{name:'Mở bài luyện: The sheep on the ship looks big and neat',exact:true});
+    await sheep.click();
+    await page.getByRole('button',{name:'Danh sách bài luyện',exact:true}).waitFor();
+    await search.waitFor({state:'hidden'});
+    await page.getByRole('button',{name:'Danh sách bài luyện',exact:true}).click();
+    await page.waitForTimeout(450);
+    await search.click();
+    await page.waitForTimeout(250);
+    assert.equal(await search.inputValue(),'ship','Back should retain the search.');
+    await search.click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.waitForTimeout(400);
+    await page.getByRole('button',{name:'Mở bài luyện: I think this method is great',exact:true}).click();
+    await page.waitForTimeout(450);
     await snapshot('practice-desktop');
     await page.getByRole('button',{name:'Bắt đầu ghi âm',exact:true}).click();
     await page.waitForTimeout(2900);
@@ -82,12 +103,14 @@ const assert = require('assert');
     await snapshot('second-account-empty');
     await page.setViewportSize({width:360,height:900});
     await openLogin(); await snapshot('login-mobile'); await choose(1);
-    await snapshot('progress-mobile'); await navigate('Luyện nói'); await snapshot('practice-mobile');
+    await snapshot('progress-mobile'); await navigate('Luyện nói'); await snapshot('catalog-mobile');
+    await page.getByRole('button',{name:'Mở bài luyện: I think this method is great',exact:true}).click();
+    await page.waitForTimeout(450); await snapshot('practice-mobile');
     const mic=await page.getByRole('button',{name:'Luyện nói',exact:true}).boundingBox();
     assert(Math.abs(mic.x+mic.width/2-180)<12, 'Mobile practice button is not centered.');
     assert.deepEqual(errors, [], 'Browser page errors occurred.');
     const report={syntheticAudioOnly:true, realHumanEvaluation:false,
-      verified:['model API','microphone capture','SQLite save','history after reload','account isolation','desktop sidebar toggle','mobile centered practice navigation'],
+      verified:['catalog before practice','lesson selection','back preserves search','model API','microphone capture','SQLite save','history after reload','account isolation','desktop sidebar toggle','mobile centered practice navigation'],
       assessment:{score:assessment.overallScore,transcript:assessment.recognizedText,phones:assessment.phonemes.length,
         processingSeconds:assessment.processingSeconds,modelVersion:assessment.modelVersion},pageErrors:errors};
     fs.writeFileSync(path.join(output,'verification.json'),JSON.stringify(report,null,2));

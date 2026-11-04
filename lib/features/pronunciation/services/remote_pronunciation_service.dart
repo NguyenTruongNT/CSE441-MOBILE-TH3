@@ -88,10 +88,12 @@ class RemotePronunciationService implements PronunciationService {
       );
     } on AppFailure {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw AppFailure(
         AppFailureCode.network,
-        'Không thể kết nối đến máy chủ AI ($endpoint): $e',
+        'Không kết nối được máy chủ AI. Hãy khởi động máy chủ chấm phát âm '
+        'và giữ máy chủ chạy trong lúc luyện, sau đó thử lại.\n'
+        'Địa chỉ kết nối: $endpoint',
       );
     }
   }

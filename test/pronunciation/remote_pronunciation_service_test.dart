@@ -122,11 +122,18 @@ void main() {
           exercise: exercise,
         ),
         throwsA(
-          isA<AppFailure>().having(
-            (e) => e.code,
-            'code',
-            AppFailureCode.network,
-          ),
+          isA<AppFailure>()
+              .having((e) => e.code, 'code', AppFailureCode.network)
+              .having(
+                (e) => e.message,
+                'actionable message',
+                contains('khởi động máy chủ'),
+              )
+              .having(
+                (e) => e.message,
+                'raw exception is hidden',
+                isNot(contains('FormatException')),
+              ),
         ),
       );
     },

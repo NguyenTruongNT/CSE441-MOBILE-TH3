@@ -1,167 +1,127 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 
 import '../../domain/exercise_models.dart';
 
-/// Card showing pronunciation exercise summary, phonetic IPA text,
-/// target phonemes, and difficulty indicator.
+/// A lesson preview that opens the dedicated practice screen.
 class ExerciseCard extends StatelessWidget {
   const ExerciseCard({
     super.key,
     required this.exerciseDetail,
-    required this.isSelected,
     required this.onTap,
   });
 
   final ExerciseDetail exerciseDetail;
-  final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
-
-    Color difficultyColor;
-    switch (exerciseDetail.difficulty) {
-      case 'Cơ bản':
-        difficultyColor = Colors.green;
-        break;
-      case 'Nâng cao':
-        difficultyColor = Colors.deepOrange;
-        break;
-      case 'Trung bình':
-      default:
-        difficultyColor = Colors.blue;
-        break;
-    }
-
-    return Card(
-      elevation: isSelected ? 2 : 0,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isSelected ? primary : theme.colorScheme.outlineVariant,
-          width: isSelected ? 2 : 1,
-        ),
-      ),
-      color: isSelected ? primary.withOpacity(0.06) : theme.colorScheme.surface,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primary.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            exerciseDetail.category,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: primary,
-                            ),
-                          ),
+    return Semantics(
+      button: true,
+      label: 'Mở bài luyện: ${exerciseDetail.referenceText}',
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Card(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          excludeFromSemantics: true,
+          child: Padding(
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.09),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        exerciseDetail.category,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: primary,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: difficultyColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.stairs_rounded,
-                                size: 14,
-                                color: difficultyColor,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                exerciseDetail.difficulty,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: difficultyColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  if (isSelected) ...[
-                    const SizedBox(width: 8),
-                    Icon(Icons.check_circle_rounded, color: primary, size: 20),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                exerciseDetail.referenceText,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                exerciseDetail.referenceIpa,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontStyle: FontStyle.italic,
-                  color: primary,
-                  fontFamily: 'NotoSans',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: exerciseDetail.targetPhonemes.map((p) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      '/$p/',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                    Text(
+                      exerciseDetail.difficulty,
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  exerciseDetail.referenceText,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  exerciseDetail.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final phone in exerciseDetail.targetPhonemes)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF4F3FB),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Text(
+                          '/$phone/',
+                          style: TextStyle(
+                            fontFamily: 'NotoSans',
+                            color: primary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const Divider(height: 32),
+                Row(
+                  children: [
+                    Icon(Icons.mic_none_rounded, size: 19, color: primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Bắt đầu luyện',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: primary,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_rounded, size: 20, color: primary),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
