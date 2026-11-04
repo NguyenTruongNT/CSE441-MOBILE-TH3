@@ -2,6 +2,8 @@
 
 ## Vào ứng dụng
 
+Trên máy Windows đã cài môi trường/model: mở `run_web.bat` ở thư mục gốc dự án. Script kiểm tra và khởi động backend, chờ model sẵn sàng rồi mở Chrome. Chỉ mở trang web hoặc chạy Flutter riêng sẽ không tự bật máy chủ AI. Nếu dùng `run_backend.bat` riêng, giữ cửa sổ đó mở trong suốt buổi luyện.
+
 1. Mở ứng dụng trên Android hoặc trình duyệt.
 2. Chọn **Học viên 1**, **Học viên 2**, **Học viên 3** hoặc **Học viên 4**. Tài khoản cục bộ từ phiên bản cũ được giữ lại nếu đã có dữ liệu.
 3. Ứng dụng mở trang **Tiến độ**. Mỗi tài khoản có mục tiêu, lịch sử và kết quả riêng.
@@ -28,12 +30,13 @@ Android có lịch nhắc do hệ điều hành quản lý. Chế độ tiết k
 ## Luyện phát âm
 
 1. Chọn **Luyện nói** ở thanh bên trên desktop hoặc nút micro giữa thanh dưới trên mobile.
-2. Tìm/chọn một bài, đọc nội dung, IPA và gợi ý khẩu hình.
-3. Bấm **Nghe phát âm chuẩn** để nghe giọng TTS trên thiết bị/trình duyệt.
-4. Cấp quyền micro khi được hỏi. Bấm **Bắt đầu ghi âm**, đọc trọn câu trong môi trường yên tĩnh.
-5. Bấm **Dừng & Phân tích**, chờ backend xử lý. Mỗi bản ghi tối đa 60 giây.
-6. Xem điểm, âm chuẩn, âm nhận dạng và gợi ý. Âm “Khớp mẫu” là nhãn mô hình khớp IPA; “Cần luyện” là khác biệt phát hiện; “Chưa đánh giá” nghĩa là chưa đủ chắc chắn. Bấm bài luyện cải thiện để luyện tiếp.
-7. Sang **Lịch sử** để xem phiên vừa lưu và chi tiết kết quả.
+2. Trang đầu là **Danh sách bài luyện**. Tìm theo câu/IPA hoặc lọc **Nhóm âm**, rồi bấm thẻ bài muốn luyện. Danh sách chưa hiển thị micro hay tự chọn sẵn bài.
+3. Màn luyện riêng hiển thị câu, IPA và gợi ý khẩu hình. Desktop đặt câu mẫu và ghi âm cạnh nhau; mobile xếp dọc. Nút **Danh sách bài luyện** ở trên quay lại và giữ bộ lọc/vị trí cuộn. Quay lại khi đang thu hoặc phân tích sẽ hủy lần luyện chưa hoàn tất.
+4. Bấm **Nghe phát âm chuẩn** để nghe giọng TTS trên thiết bị/trình duyệt.
+5. Cấp quyền micro khi được hỏi. Bấm **Bắt đầu ghi âm**, đọc trọn câu trong môi trường yên tĩnh.
+6. Bấm **Dừng & Phân tích**, chờ backend xử lý. Mỗi bản ghi tối đa 60 giây.
+7. Xem điểm, âm chuẩn, âm nhận dạng và gợi ý. “Khớp mẫu” là nhãn mô hình khớp IPA; “Cần luyện” là khác biệt phát hiện; “Chưa đánh giá” nghĩa là chưa đủ chắc chắn. “Âm thừa” là phần mô hình nhận thêm ngoài mẫu, không phải một âm tên `∅` cần luyện. Bài cải thiện được chọn theo đơn vị IPA thực sự có trong câu; nếu không có bài phù hợp, đọc hướng dẫn và luyện lại bài hiện tại.
+8. Sang **Lịch sử** để xem phiên vừa lưu và chi tiết kết quả.
 
 Backend phải đang chạy và điện thoại phải truy cập được địa chỉ backend đã cấu hình. Transcript trực tiếp trên web chỉ là hỗ trợ khi trình duyệt có khả năng này; kết quả phân tích cần dựa vào audio được gửi. Nếu thiếu bằng chứng hoặc mất kết nối, ứng dụng báo lỗi và không tự sinh điểm thay thế.
 
@@ -55,7 +58,7 @@ Khi rời trang trong lúc thu, micro dừng và bản ghi chưa phân tích b�
 | Không ghi âm được | Kiểm tra quyền micro trong cài đặt ứng dụng/trình duyệt; đóng ứng dụng khác đang chiếm micro |
 | Web không hiện quyền micro | Dùng localhost trên máy phát triển hoặc HTTPS khi truy cập từ máy khác |
 | Không nghe mẫu | Kiểm tra âm lượng, giọng tiếng Anh/TTS đã cài trên thiết bị; thử lại sau thao tác bấm của người dùng |
-| Không kết nối backend | Kiểm tra backend, địa chỉ API, cổng và cùng mạng; localhost trên điện thoại là chính điện thoại |
+| Không kết nối backend / Failed to fetch | Trên máy chạy dự án, mở `run_backend.bat`, chờ `Application startup complete`; kiểm tra `http://127.0.0.1:8080/health` có `assessmentReady: true`, rồi ghi âm lại. Máy chủ phải tiếp tục chạy. Điện thoại/máy khác cần địa chỉ API phù hợp, localhost là chính thiết bị đó |
 | Phân tích chậm | Đợi backend tải model hoàn tất; thử câu ngắn, không gửi nhiều yêu cầu cùng lúc |
 | Không nhận nhắc học | Kiểm tra quyền, giờ, múi giờ, chế độ tiết kiệm pin; web phải giữ tab mở |
 | Chưa thấy phiên mới | Mở lại Lịch sử hoặc kéo để tải lại; kiểm tra tài khoản đang dùng |

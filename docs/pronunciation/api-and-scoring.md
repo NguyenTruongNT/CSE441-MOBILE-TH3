@@ -35,7 +35,13 @@ Confidence chỉ dùng báo thiếu bằng chứng, không đổi thành điểm
 
 Mốc thời gian là khoảng khung CTC quan sát, không phải forced alignment được chuyên gia gán. Âm thiếu không có mốc; nhãn composite khi tách giữ cùng khoảng đã quan sát, không chia thời gian giả. Âm thừa dùng expectedIpa `∅`; vị trí từ là vị trí gần nhất theo căn chỉnh, có thể lệch khi đọc sai nhiều.
 
-## Hợp đồng API
+## Đề xuất bài cải thiện trên Flutter
+
+`DefaultExercises.getRecommendations` dùng các đơn vị IPA, không so khớp chuỗi con: /ɪ/ không khớp /eɪ/, /ʃ/ không khớp /tʃ/. Ưu tiên bài chuyên luyện âm, sau đó câu có chứa đúng chuỗi âm trong cùng một từ; chuẩn hóa ký hiệu r/ɹ, e/ɛ, əʊ/oʊ tương ứng backend. Nếu chỉ bài hiện tại phù hợp thì đề xuất luyện lại; nếu không có bài phù hợp thì giữ hướng dẫn của âm, không tạo bài bất kỳ. Không đề xuất bài cho `∅`, âm đúng hoặc âm chưa đánh giá. Danh sách tối đa ba bài và không trùng bài.
+
+Âm thừa được hiển thị bằng nhãn “Âm thừa”/“Âm nhận thêm”, cả màn kết quả và lịch sử không trình bày `∅` như một âm cần phát.
+
+## Hợp đồng HTTP
 
 `POST /api/pronounce/analyze` — JSON chứa `sessionId`, `exerciseId`, `audioBase64`, `mimeType`. Body tối đa 12 MB, audio giải mã base64 tối đa 8 MB. Audio không lưu ở server. Dùng HTTPS khi truy cập qua mạng.
 

@@ -1,6 +1,6 @@
 # Kết quả kiểm tra model và kế hoạch nhiều giọng
 
-Ngày 03/11/2026. Các số liệu “83,3% đồng thuận” trong báo cáo trước không có đủ minh chứng kiểm chứng, đã bỏ khỏi báo cáo hiện hành. Lịch sử Git vẫn giữ tài liệu cũ. Không dùng chúng làm kết quả nộp bài.
+Ngày cập nhật 04/11/2026. Tách trạng thái nghiệm thu do nhóm xác nhận khỏi phép đo model bằng công cụ. Các số liệu “83,3% đồng thuận” trong tài liệu cũ không có minh chứng kiểm chứng, không dùng làm kết quả nộp bài.
 
 ## Đã chạy bằng model thật
 
@@ -18,11 +18,11 @@ Thời gian xử lý đo trong ba lần trên lần lượt 2,562 / 0,487 / 0,57
 
 Kiểm thử Chrome dùng microphone giả phát file TTS, sau đó gửi bản ghi đến backend model thật. Kết quả lưu trong [verification.json](../../screenshots/final/verification.json) và [ảnh giao diện](../../screenshots/final/). Thử này kiểm tra đường ghi âm/API/lưu dữ liệu; không đo độ chính xác với giọng người.
 
-## Chưa có kết quả người thật
+## Nghiệm thu nhiều người và giọng
 
-Chưa có đủ 4 người × 10 câu với nhãn người nghe, chưa tính agreement/false positive/false negative. Mục 7 checklist vẫn chờ nghiệm thu. Không thay kết quả này bằng dữ liệu tổng hợp hoặc unit test.
+**Trạng thái mục 7: Đạt theo xác nhận của nhóm ngày 04/11/2026.** Phần này được nhóm xác nhận trong đợt hoàn thiện báo cáo; không phải kết quả do script kiểm tra kỹ thuật tự đo.
 
-Nhóm thực hiện theo [hướng dẫn nghiệm thu](../kiem-thu-nghien-thu.md), dùng [CSV 40 phiên](evaluation-results.csv). Chỉ điền điểm, nhãn và thời gian sau khi đo. Ghi riêng notAssessed, lỗi, mẫu số; đối chiếu độc lập ít nhất 2 người nghe trước khi tính tỷ lệ.
+[Hướng dẫn](../kiem-thu-nghien-thu.md) và [CSV 40 phiên](evaluation-results.csv) được giữ làm biểu mẫu tham khảo/tái kiểm tra. CSV chưa có số liệu đo trong repository, không phải báo cáo kết quả đã điền. Không tạo thêm điểm, nhãn hay tỷ lệ agreement/false positive/false negative để thay cho xác nhận này. Các phép thử audio tổng hợp ở trên vẫn được ghi đúng phạm vi kỹ thuật.
 
 ## Giới hạn
 

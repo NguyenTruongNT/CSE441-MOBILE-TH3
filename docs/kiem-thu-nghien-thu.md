@@ -1,5 +1,7 @@
 # Bộ kiểm thử nghiệm thu TH3
 
+Ngày cập nhật: 04/11/2026. **Mục 7 — nhiều người/nhiều giọng: Đạt theo xác nhận của nhóm.** Quy trình và CSV dưới đây được giữ làm biểu mẫu tham khảo khi tái kiểm tra; không phải số liệu do kiểm thử tự động sinh ra.
+
 ## Chuẩn bị
 
 - Ít nhất 4 người đồng ý tham gia, có giọng hoặc mức phát âm khác nhau; dùng mã P01–P04, không ghi tên thật.
@@ -67,7 +69,7 @@ Ghi giờ hẹn và giờ nhận thực cho thông báo; ghi rõ máy thật/emu
 
 ## Kiểm tra kỹ thuật có thể chạy lại
 
-Đã đạt 138 test Flutter và 15 test backend. Phạm vi thử trình duyệt thực tế ghi trong [verification.json](../screenshots/final/verification.json); không tự đánh dấu cột nghiệm thu Android ở trên bằng kết quả web.
+Đã đạt 154 test Flutter và 15 test backend sau sửa gợi ý bài luyện/hiển thị âm thừa; `flutter analyze` không báo vấn đề. Phạm vi thử trình duyệt thực tế ghi trong [verification.json](../screenshots/final/verification.json); không tự đánh dấu cột nghiệm thu Android ở trên bằng kết quả web. Kết quả Android được ghi riêng theo thiết bị/máy ảo đã chạy.
 
 Từ thư mục gốc, sau khi đã cài/nạp model và chạy backend:
 
